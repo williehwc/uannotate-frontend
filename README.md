@@ -1,21 +1,6 @@
-# SB Admin rewritten in Angular2 and Bootstrap 4
+# Phenotate Frontend
 
-Simple Dashboard Admin App built using Angular 2 and Bootstrap 4
-
-This project is a port of the famous Free Admin Bootstrap Theme [SB Admin v2.0](http://startbootstrap.com/template-overviews/sb-admin-2/) to Angular2 Theme.
-
-Powered by [StartAngular](http://startangular.com/) & [StrapUI](http://strapui.com/)
-
-<!--##[Demo](http://rawgit.com/start-angular/SB-Admin-BS4-Angular-2/master/dist/prod/index.html)-->
-
-`SB Admin BS 4 Angular2` provides the following features:
-
-- Ready to go, statically typed build system using gulp for working with TypeScript.
-- Production and development builds.
-- Development server with Livereload.
-- Following the best practices for your application’s structure.
-- Manager of your type definitions using [typings](https://github.com/typings/typings).
-- Basic Service Worker, which implements "Cache then network strategy".
+Based on: [Simple Dashboard Admin App built using Angular 2 and Bootstrap 4](https://github.com/start-angular/SB-Admin-BS4-Angular-2), a port of the famous Free Admin Bootstrap Theme [SB Admin v2.0](http://startbootstrap.com/template-overviews/sb-admin-2/) to Angular2 Theme.
 
 ## How to start
 
