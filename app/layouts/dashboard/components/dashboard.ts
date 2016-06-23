@@ -1,14 +1,17 @@
 import {Component, ViewEncapsulation} from '@angular/core';
 import { ROUTER_DIRECTIVES, Routes } from '@angular/router';
 
-import {HomeComponent} from '../../../pages/home/components/home';
-import {ChartComponent} from '../../../pages/charts/components/charts';
-import {GridComponent} from '../../../pages/grid/components/grid';
-import {FormComponent} from '../../../pages/forms/components/forms';
-import {TableComponent} from '../../../pages/tables/components/tables';
-import {BSElementComponent} from '../../../pages/bootstrap-element/components/bs_element';
-import {BlankPageComponent} from '../../../pages/blank-page/components/blank_page';
-import {NG2Component} from '../../../pages/component/components/component';
+import {HomeComponent} from '../../../pages/ua-home/components/ua-home';
+import {InProgressComponent} from '../../../pages/ua-in-progress/components/ua-in-progress';
+import {MyAnnotationsComponent} from '../../../pages/ua-my-annotations/components/ua-my-annotations';
+import {PhenositoryComponent} from '../../../pages/ua-phenository/components/ua-phenository';
+import {ClassStudentComponent} from '../../../pages/ua-class-student/components/ua-class-student';
+import {ClassProfComponent} from '../../../pages/ua-class-prof/components/ua-class-prof';
+import {JoinClassComponent} from '../../../pages/ua-join-class/components/ua-join-class';
+import {NewClassComponent} from '../../../pages/ua-new-class/components/ua-new-class';
+import {HelpStudentComponent} from '../../../pages/ua-help-student/components/ua-help-student';
+import {HelpProfComponent} from '../../../pages/ua-help-prof/components/ua-help-prof';
+import {AccountComponent} from '../../../pages/ua-account/components/ua-account';
 
 import {TopNavComponent} from '../../../shared/topnav/topnav';
 import {SidebarComponent} from '../../../shared/sidebar/sidebar';
@@ -18,18 +21,22 @@ import {SidebarComponent} from '../../../shared/sidebar/sidebar';
   selector: 'dashboard-cmp',
   templateUrl: 'dashboard.html',
   encapsulation: ViewEncapsulation.None,
-  directives: [ROUTER_DIRECTIVES, TopNavComponent, SidebarComponent]
+  directives: [[ROUTER_DIRECTIVES, TopNavComponent, SidebarComponent]]
 })
 
+//noinspection TypeScriptValidateTypes
 @Routes([
-    { path: '/home', component: HomeComponent },
-    { path: '/chart', component: ChartComponent },
-    { path: '/table', component: TableComponent },
-	{ path: '/forms', component: FormComponent },
-	{ path: '/element', component: BSElementComponent},
-	{ path: '/grid', component: GridComponent },
-	{ path: '/component', component: NG2Component },
-	{ path: '/blank-page', component: BlankPageComponent }
+  { path: '/home', component: HomeComponent},
+  { path: '/in-progress', component: InProgressComponent},
+  { path: '/my-annotations', component: MyAnnotationsComponent},
+  { path: '/phenository', component: PhenositoryComponent},
+  { path: '/class-student', component: ClassStudentComponent},
+  { path: '/class-prof', component: ClassProfComponent},
+  { path: '/join-class', component: JoinClassComponent},
+  { path: '/new-class', component: NewClassComponent},
+  { path: '/help-student', component: HelpStudentComponent},
+  { path: '/help-prof', component: HelpProfComponent},
+  { path: '/account', component: AccountComponent}
 ])
 
 export class DashboardComponent { }

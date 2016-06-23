@@ -1,6 +1,7 @@
 @import "../bootstrap/scss/bootstrap";
 
-$topnav-background-color: #222;
+$topnav-background-color: #009688;
+$sidebar-background-color: #424242;
 .user-avatar {
     border: 3px solid #FFF;
     -webkit-border-radius: 50%;
@@ -11,7 +12,7 @@ $topnav-background-color: #222;
     top: 0px;
     left: 5px;
     color: #FFF;
-    background: #222;
+    background: $topnav-background-color;
     font-size: 23px;
     z-index: 3;
     display: none;
@@ -32,7 +33,8 @@ $topnav-background-color: #222;
     .top-right-nav{
         .buy-now{
             a{
-                color:#999;
+                color:#fff;
+                opacity:.5;
             }
         }
         .dropdown-menu{
@@ -44,8 +46,8 @@ $topnav-background-color: #222;
                     .media-body{
                         .media-heading{
                             font-size: 14px;
-                            font-weight: bold;     
-                            margin-bottom : 0;  
+                            font-weight: bold;
+                            margin-bottom : 0;
                         }
                         p{
                             margin : 0;
@@ -54,7 +56,7 @@ $topnav-background-color: #222;
                             font-size : 13px;
                             margin-bottom: 0;
                         }
-                    }                    
+                    }
                 }
             }
             hr {
@@ -63,7 +65,7 @@ $topnav-background-color: #222;
             }
         }
     }
-    
+
 }
 a:hover{
     text-decoration: none;
@@ -79,7 +81,7 @@ a:hover{
     border: none;
     border-radius: 0;
     overflow-y: auto;
-    background-color: $topnav-background-color;
+    background-color: $sidebar-background-color;
     bottom: 0;
     overflow-x: hidden;
     padding-bottom: 40px;
@@ -90,18 +92,18 @@ a:hover{
             transition: all 0.2s ease-in-out;
     .list-group{
         a.list-group-item{
-            background: $topnav-background-color;
+            background: $sidebar-background-color;
             border: 0;
             border-radius: 0;
             color: #999;
             text-decoration: none;
         }
         a:hover{
-            background: darken($topnav-background-color, 5%);
+            background: darken($sidebar-background-color, 5%);
             color: #fff;
         }
         a.router-link-active{
-            background: darken($topnav-background-color, 5%);
+            background: darken($sidebar-background-color, 5%);
             color: #fff;
         }
     }
@@ -118,7 +120,7 @@ a:hover{
                 color : #999;
                 text-decoration : none;
                 font-weight:400;
-                background:$topnav-background-color;
+                background:$sidebar-background-color;
                 span{
                     position: relative;
                     display: block;
@@ -133,7 +135,7 @@ a:hover{
             }
         }
         .panel-title:hover{
-            background: darken($topnav-background-color, 5%);
+            background: darken($sidebar-background-color, 5%);
         }
         .panel-collapse{
             border-radious :0;
@@ -141,7 +143,7 @@ a:hover{
             .panel-body{
                 .list-group-item{
                     border-radius : 0;
-                    background-color: $topnav-background-color;
+                    background-color: $sidebar-background-color;
                     border: 0 solid transparent;
                     a{
                         color:#999;
@@ -151,7 +153,7 @@ a:hover{
                     }
                 }
                 .list-group-item:hover{
-                    background : darken($topnav-background-color, 5%);
+                    background : darken($sidebar-background-color, 5%);
                 }
             }
         }
@@ -194,10 +196,10 @@ a:hover{
             margin-right: 15px;
             padding-bottom: 5px;
             border-bottom: 1px dotted #999;
-        }   
+        }
     }
     .card-footer{
-        input{  
+        input{
             padding : 3px;
         }
     }
@@ -250,7 +252,7 @@ a:hover{
         display: inline-block;
         cursor: pointer;
     }
-    
+
     .show-name{
         display: block !important;
         z-index: 1;
@@ -297,7 +299,7 @@ a:hover{
 }
 
 .loader{
-    
+
 }
 .loader,
 .loader:before,
@@ -430,17 +432,17 @@ a:hover{
         input::-webkit-input-placeholder {
         color: rgba(255,255,255,0.6) !important;
         }
-         
+
         input:-moz-placeholder { /* Firefox 18- */
-        color: rgba(255,255,255,0.6) !important;  
+        color: rgba(255,255,255,0.6) !important;
         }
-         
+
         input::-moz-placeholder {  /* Firefox 19+ */
-        color: rgba(255,255,255,0.6) !important;  
+        color: rgba(255,255,255,0.6) !important;
         }
-         
-        input:-ms-input-placeholder {  
-        color: rgba(255,255,255,0.6) !important;  
+
+        input:-ms-input-placeholder {
+        color: rgba(255,255,255,0.6) !important;
         }
     }
     .form-content {

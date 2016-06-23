@@ -2,18 +2,21 @@ import { APP_BASE_HREF } from '@angular/common';
 import { enableProdMode, provide } from '@angular/core';
 import { bootstrap } from '@angular/platform-browser-dynamic';
 import { ROUTER_PROVIDERS } from '@angular/router';
+import {HTTP_PROVIDERS} from '@angular/http';
 
 import { AppComponent } from './base';
 
 if ('<%= ENV %>' === 'prod') { enableProdMode(); }
 
+//noinspection TypeScriptValidateTypes
 /**
  * Bootstraps the application and makes the ROUTER_PROVIDERS and the APP_BASE_HREF available to it.
  * @see https://angular.io/docs/ts/latest/api/platform-browser-dynamic/index/bootstrap-function.html
  */
 bootstrap(AppComponent, [
   ROUTER_PROVIDERS,
-  provide(APP_BASE_HREF, { useValue: '<%= APP_BASE %>' })
+  provide(APP_BASE_HREF, { useValue: '<%= APP_BASE %>' }),
+  HTTP_PROVIDERS
 ]);
 
 // In order to start the Service Worker located at "./worker.js"

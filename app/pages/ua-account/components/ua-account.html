@@ -1,0 +1,54 @@
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="row">
+        <div class="col-lg-12">
+            <h2 class="page-header">
+                Account
+            </h2>
+            <ol class="breadcrumb">
+                <li class="active">
+                    <i class="fa fa-info-circle"></i> Manage your account
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-lg-6">
+
+            <!-- Change Password -->
+            <h4>Change password</h4>
+            <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true" (close)="closeAlert(i)">
+              {{ alert?.msg }}
+            </alert>
+            <form role="form">
+                <fieldset class="form-group">
+                    <label>Old password</label>
+                    <input [(ngModel)]="password" class="form-control" type="password">
+                </fieldset>
+                <fieldset class="form-group">
+                    <label>New password</label>
+                    <input [(ngModel)]="newPassword" class="form-control" type="password">
+                </fieldset>
+                <fieldset class="form-group">
+                    <label>Retype new password</label>
+                    <input [(ngModel)]="confirmNewPassword" class="form-control" type="password">
+                </fieldset>
+                <button type="submit" class="btn btn-primary" (click)="changePassword()">Change</button>
+            </form>
+          <br />
+        </div>
+
+        <div class="col-lg-6">
+
+            <!-- Account type -->
+            <h4>Account type</h4>
+            <p>Your account type is <strong>{{levelString}}</strong>.</p>
+            <p *ngIf="upgradeAccount">To upgrade your account to professor/researcher, please email us.</p>
+        </div>
+
+    </div>
+
+</div>

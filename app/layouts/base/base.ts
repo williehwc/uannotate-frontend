@@ -13,6 +13,7 @@ import {DashboardComponent} from '../dashboard/components/dashboard';
     directives: [ROUTER_DIRECTIVES]
 })
 
+//noinspection TypeScriptValidateTypes
 @Routes([
     { path: '/', component: LoginComponent },
     { path: '/signup', component: SignupComponent },

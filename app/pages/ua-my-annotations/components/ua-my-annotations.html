@@ -1,0 +1,64 @@
+<div class="container-fluid">
+
+  <!-- Page Heading -->
+  <div class="row">
+    <div class="col-lg-12">
+      <h2 class="page-header">
+        My annotations
+      </h2>
+      <ol class="breadcrumb">
+        <li class="active">
+          <i class="fa fa-info-circle"></i> Prepare your disease annotations and publish them to the Phenository.
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card card-block">
+        <div class="table-responsive">
+          <table class="table table-hover table-sm">
+            <thead class="thead-inverse">
+            <tr>
+              <th>ID</th>
+              <th>Disease</th>
+              <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>100</td>
+              <td>Weill-Marchesani syndrome 1 (277600)</td>
+              <td>Published</td>
+            </tr>
+            <tr>
+              <td>132</td>
+              <td>Cole disease (615522)</td>
+              <td>Draft</td>
+            </tr>
+            <tr>
+              <td>235</td>
+              <td>Peeling skin syndrome 4 (607936)</td>
+              <td>Draft</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card card-block">
+        <h4>New annotation</h4>
+        <p>Enter disease name or ID:</p>
+        <form role="form">
+          <fieldset class="form-group">
+            <input class="form-control" [(ngModel)]="joinCode">
+          </fieldset>
+          <button type="submit" class="btn btn-primary" (click)="joinClass()">Next</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
