@@ -115,7 +115,8 @@ export class ChartComponent implements OnInit {
 
             tooltip: {
                 formatter: function () {
-                    return '<b>' + this.x + '</b><br/>' +
+                    //noinspection TypeScriptUnresolvedVariable
+                  return '<b>' + this.x + '</b><br/>' +
                         this.series.name + ': ' + this.y + '<br/>' +
                         'Total: ' + this.point.stackTotal;
                 }

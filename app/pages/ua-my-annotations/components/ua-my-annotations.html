@@ -50,12 +50,25 @@
     <div class="col-lg-4">
       <div class="card card-block">
         <h4>New annotation</h4>
+        <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true" (close)="closeAlert(i)">
+          {{ alert?.msg }}
+        </alert>
         <p>Enter disease name or ID:</p>
         <form role="form">
           <fieldset class="form-group">
-            <input class="form-control" [(ngModel)]="joinCode">
+            <div class="typeahead__container">
+              <div class="typeahead__field">
+                <span class="typeahead__query">
+                    <input class="js-typeahead" autocomplete="off" [(ngModel)]="typeAheadBox">
+                </span>
+              </div>
+            </div>
           </fieldset>
-          <button type="submit" class="btn btn-primary" (click)="joinClass()">Next</button>
+          <pre class="card card-block card-header" _ngcontent-pyb-9="" *ngIf="diseaseSelected">{{newAnnotationDisease}}</pre>
+          <button *ngIf="diseaseSelected" style="margin-bottom: 4px" type="submit" class="btn btn-primary" (click)="createAnnotation()">Create annotation</button>
+          <br *ngIf="diseaseSelected" />
+          <button *ngIf="diseaseSelected" type="submit" class="btn btn-info" (click)="lookUpDisease()">Look up</button>
+          <button *ngIf="diseaseSelected" type="submit" class="btn btn-danger" (click)="clearDisease()">Clear</button>
         </form>
       </div>
     </div>

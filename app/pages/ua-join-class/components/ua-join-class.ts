@@ -56,7 +56,7 @@ export class JoinClassComponent {
       'joinCode': this.joinCode
     });
     this.joinCode = null;
-    this._http.post(globals.backendURL + '/restricted/classes/join', body, globals.options)
+    this._http.post(globals.backendURL + '/restricted/classes/student/join', body, globals.options)
       .map(res => res.json())
       .subscribe(
         data => finishJoinClass(data),

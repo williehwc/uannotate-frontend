@@ -22,7 +22,9 @@ export class ProjectConfig extends SeedConfig {
       { src: 'font-awesome/css/font-awesome.css', inject: true},
       { src: 'jquery/dist/jquery.js', inject: 'libs' },
       { src: 'highcharts/highcharts.js', inject: 'libs' },
-      { src: 'highcharts/modules/exporting.js', inject: 'libs' }
+      { src: 'highcharts/modules/exporting.js', inject: 'libs' },
+      { src: 'jquery-typeahead/dist/jquery.typeahead.min.js', inject: 'libs' },
+      { src: 'jquery-typeahead/dist/jquery.typeahead.min.css', inject: true}
     ];
 
     const seedDependencies = this.NPM_DEPENDENCIES;

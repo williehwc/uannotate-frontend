@@ -15,7 +15,29 @@ import 'rxjs/Rx';
 export class NewClassComponent {
   name: string;
   alerts: Array<Object> = [];
-  constructor(private _http: Http) {}
+  constructor(private _http: Http) {
+    let scope = this;
+    let gotClasses = function (data: any) {
+      if (data.classes.length > 0) {
+        scope.alerts.push({
+          type: 'info',
+          msg: 'The last class you added is ' + data.classes[0].name + '. ' +
+          'Students can join it using this join code: ' + data.classes[0].joinCode,
+          closable: true
+        });
+      }
+    };
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken')
+    });
+    this._http.post(globals.backendURL + '/restricted/classes/list', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => gotClasses(data),
+        err => console.log(err),
+        () => console.log('Got classes')
+      );
+  }
   addNewClass() {
     let scope = this;
     let finishAddNewClass = function (data: any) {
@@ -40,7 +62,7 @@ export class NewClassComponent {
       'name': this.name
     });
     this.name = '';
-    this._http.post(globals.backendURL + '/restricted/new-class', body, globals.options)
+    this._http.post(globals.backendURL + '/restricted/prof/new-class', body, globals.options)
       .map(res => res.json())
       .subscribe(
         data => finishAddNewClass(data),
