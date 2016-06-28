@@ -17,14 +17,16 @@ export class ProjectConfig extends SeedConfig {
 
   constructor() {
     super();
-    // this.APP_TITLE = 'Put name of your app here';
+    this.APP_TITLE = 'Phenotate';
     let additional_deps: InjectableDependency[] = [
       { src: 'font-awesome/css/font-awesome.css', inject: true},
       { src: 'jquery/dist/jquery.js', inject: 'libs' },
       { src: 'highcharts/highcharts.js', inject: 'libs' },
       { src: 'highcharts/modules/exporting.js', inject: 'libs' },
       { src: 'jquery-typeahead/dist/jquery.typeahead.min.js', inject: 'libs' },
-      { src: 'jquery-typeahead/dist/jquery.typeahead.min.css', inject: true}
+      { src: 'jquery-typeahead/dist/jquery.typeahead.min.css', inject: true},
+      { src: 'datatables.net/js/jquery.dataTables.js', inject: 'libs' },
+      { src: 'datatables.net-dt/css/jquery.dataTables.css', inject: true}
     ];
 
     const seedDependencies = this.NPM_DEPENDENCIES;

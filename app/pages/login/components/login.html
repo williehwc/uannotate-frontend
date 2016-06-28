@@ -13,7 +13,7 @@
 						<input type="password" [(ngModel)]="password" (keyup.enter)="gotoDashboard()" class="form-control input-underline input-lg" id="" placeholder="Password">
 					</div>
 					<h7 *ngIf="errorBlank"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <em>All fields are required</em></h7>
-          <h7 *ngIf="errorWrongCredentials"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <em>Incorrect username and/or password</em></h7>
+          <h7 *ngIf="errorWrongCredentials"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <em>Incorrect email and/or password</em></h7>
 				</div>
 				<a class="btn rounded-btn" (click)="gotoDashboard()"> Log in </a>
 				&nbsp;

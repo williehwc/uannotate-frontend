@@ -15,38 +15,25 @@
   </div>
 
   <div class="row">
+
     <div class="col-lg-8">
       <div class="card card-block">
         <div class="table-responsive">
-          <table class="table table-hover table-sm">
+          <table id="table" class="table table-hover table-sm">
             <thead class="thead-inverse">
             <tr>
               <th>ID</th>
               <th>Disease</th>
-              <th>Status</th>
+              <th>Date created</th>
             </tr>
             </thead>
-            <tbody>
-            <tr>
-              <td>100</td>
-              <td>Weill-Marchesani syndrome 1 (277600)</td>
-              <td>Published</td>
-            </tr>
-            <tr>
-              <td>132</td>
-              <td>Cole disease (615522)</td>
-              <td>Draft</td>
-            </tr>
-            <tr>
-              <td>235</td>
-              <td>Peeling skin syndrome 4 (607936)</td>
-              <td>Draft</td>
-            </tr>
+            <tbody id="table-body">
             </tbody>
           </table>
         </div>
       </div>
     </div>
+
     <div class="col-lg-4">
       <div class="card card-block">
         <h4>New annotation</h4>
@@ -64,14 +51,41 @@
               </div>
             </div>
           </fieldset>
-          <pre class="card card-block card-header" _ngcontent-pyb-9="" *ngIf="diseaseSelected">{{newAnnotationDisease}}</pre>
-          <button *ngIf="diseaseSelected" style="margin-bottom: 4px" type="submit" class="btn btn-primary" (click)="createAnnotation()">Create annotation</button>
-          <br *ngIf="diseaseSelected" />
-          <button *ngIf="diseaseSelected" type="submit" class="btn btn-info" (click)="lookUpDisease()">Look up</button>
-          <button *ngIf="diseaseSelected" type="submit" class="btn btn-danger" (click)="clearDisease()">Clear</button>
         </form>
       </div>
     </div>
+
+    <div *ngIf="diseaseSelected" class="col-lg-7">
+      <div class="card">
+        <div class="card-header">
+          {{newAnnotationDisease}}
+        </div>
+        <div class="card-block">
+          <button *ngIf="diseaseSelected" class="btn btn-danger" (click)="clearDisease()">
+            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+          </button>
+          <button *ngIf="diseaseSelected" class="btn btn-info" (click)="lookUpDisease()">Look up</button>
+          <button *ngIf="diseaseSelected" class="btn btn-primary" (click)="createAnnotation()">Start from OMIM/Ordo</button>
+          <br />
+          <br />
+          <div class="table-responsive">
+            <table id="tableAnnotations" class="table table-hover table-sm">
+              <thead class="thead-inverse">
+              <tr>
+                <th>ID</th>
+                <th><i class="fa fa-code-fork" aria-hidden="true" title="Clone of"></i></th>
+                <th>Author</th>
+                <th><i class="fa fa-clone" aria-hidden="true" title="Number of clones"></i></th>
+                <th><i class="fa fa-thumbs-up" aria-hidden="true" title="Number of recommendations"></i></th>
+                <th>Date</th>
+              </tr>
+              </thead>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
 </div>

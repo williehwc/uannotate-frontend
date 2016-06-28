@@ -19,7 +19,42 @@ export class MyAnnotationsComponent implements OnInit {
   newAnnotationDisease: string;
   typeAheadBox: string;
   alerts: Array<Object> = [];
-  constructor( private _router: Router, private _http: Http) {}
+  constructor( private _router: Router, private _http: Http) {
+    let gotMyAnnotations = function (data: any) {
+      // ngFor and ngRepeat do not work with DataTable!
+      let tableBody = '';
+      for (let i = 0; i < data.annotations.length; i++) {
+        tableBody += '<tr id="d' + data.annotations[i].id + '"><td>';
+        if (data.annotations[i].status === 1) {
+          tableBody += '<i class="fa fa-pencil" aria-hidden="true" title="Draft (not yet published)"></i>';
+        } else {
+          tableBody += data.annotations[i].id;
+        }
+        tableBody += '</td><td>' +
+          data.annotations[i].diseaseName + '</td><td>' + data.annotations[i].date + '</td></tr>';
+        jQuery('#d' + data.annotations[i].id).click(function() {
+          alert(data.annotations[i].id);
+          this._router.navigate(['/dashboard', '/in-progress/' + data.annotations[i].id]);
+        });
+      }
+      jQuery('#table-body').html(tableBody);
+      jQuery('#table').DataTable({
+        'language': {
+          'emptyTable': 'Get started by creating or cloning an annotation!'
+        }
+      });
+    };
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken')
+    });
+    this._http.post(globals.backendURL + '/restricted/annotations/prof/list', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => gotMyAnnotations(data),
+        err => console.log(err),
+        () => console.log('Got my annotations')
+      );
+  }
   ngOnInit():any {
     let scope = this;
     jQuery('.js-typeahead').typeahead({
@@ -42,11 +77,13 @@ export class MyAnnotationsComponent implements OnInit {
     });
   }
   selectDisease() {
-    jQuery('.form-group').hide();
+    jQuery('.col-lg-8').attr('class', 'col-lg-5');
+    jQuery('.col-lg-4').hide();
     this.diseaseSelected = true;
   }
   clearDisease() {
-    jQuery('.form-group').show();
+    jQuery('.col-lg-5').attr('class', 'col-lg-8');
+    jQuery('.col-lg-4').show();
     this.diseaseSelected = false;
     this.typeAheadBox = '';
   }
@@ -76,7 +113,7 @@ export class MyAnnotationsComponent implements OnInit {
       let body = JSON.stringify({
         'token': localStorage.getItem('uaToken'),
         'diseaseName': diseaseName,
-        'vocabulary': 'omim'
+        'vocabulary': 'omim' //ORPHA TODO
       });
       this._http.post(globals.backendURL + '/restricted/annotations/prof/new-annotation', body, globals.options)
         .map(res => res.json())
