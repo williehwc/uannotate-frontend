@@ -19,15 +19,21 @@
     <div class="col-lg-8">
       <div class="card card-block">
         <div class="table-responsive">
-          <table id="table" class="table table-hover table-sm">
-            <thead class="thead-inverse">
+          <table id="table-my-annotations" class="table table-hover table-sm">
+            <thead class="thead-default">
             <tr>
-              <th>ID</th>
-              <th>Disease</th>
-              <th>Date created</th>
+              <th>
+                ID
+              </th>
+              <th>
+                Disease
+              </th>
+              <th>
+                Date created
+              </th>
             </tr>
             </thead>
-            <tbody id="table-body">
+            <tbody id="table-body-my-annotations">
             </tbody>
           </table>
         </div>
@@ -37,9 +43,6 @@
     <div class="col-lg-4">
       <div class="card card-block">
         <h4>New annotation</h4>
-        <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true" (close)="closeAlert(i)">
-          {{ alert?.msg }}
-        </alert>
         <p>Enter disease name or ID:</p>
         <form role="form">
           <fieldset class="form-group">
@@ -61,6 +64,9 @@
           {{newAnnotationDisease}}
         </div>
         <div class="card-block">
+          <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true" (close)="closeAlert(i)">
+            {{ alert?.msg }}
+          </alert>
           <button *ngIf="diseaseSelected" class="btn btn-danger" (click)="clearDisease()">
             <i class="fa fa-arrow-left" aria-hidden="true"></i>
           </button>
@@ -69,8 +75,8 @@
           <br />
           <br />
           <div class="table-responsive">
-            <table id="tableAnnotations" class="table table-hover table-sm">
-              <thead class="thead-inverse">
+            <table id="table-annotations" class="table table-hover table-sm">
+              <thead class="thead-default">
               <tr>
                 <th>ID</th>
                 <th><i class="fa fa-code-fork" aria-hidden="true" title="Clone of"></i></th>
@@ -80,6 +86,8 @@
                 <th>Date</th>
               </tr>
               </thead>
+              <tbody id="table-body-disease">
+              </tbody>
             </table>
           </div>
         </div>

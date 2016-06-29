@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, HostListener, OnInit} from '@angular/core';
 import {Router, ROUTER_DIRECTIVES } from '@angular/router';
 declare var jQuery: any;
 import {AlertComponent} from 'ng2-bootstrap/ng2-bootstrap';
@@ -24,7 +24,8 @@ export class MyAnnotationsComponent implements OnInit {
       // ngFor and ngRepeat do not work with DataTable!
       let tableBody = '';
       for (let i = 0; i < data.annotations.length; i++) {
-        tableBody += '<tr id="d' + data.annotations[i].id + '"><td>';
+        tableBody += '<tr style="cursor: pointer" onclick="localStorage.setItem(\'uaAnnotation\',\'' +
+          data.annotations[i].id + '\')"><td>';
         if (data.annotations[i].status === 1) {
           tableBody += '<i class="fa fa-pencil" aria-hidden="true" title="Draft (not yet published)"></i>';
         } else {
@@ -37,10 +38,10 @@ export class MyAnnotationsComponent implements OnInit {
           this._router.navigate(['/dashboard', '/in-progress/' + data.annotations[i].id]);
         });
       }
-      jQuery('#table-body').html(tableBody);
-      jQuery('#table').DataTable({
+      jQuery('#table-body-my-annotations').html(tableBody);
+      jQuery('#table-my-annotations').DataTable({
         'language': {
-          'emptyTable': 'Get started by creating or cloning an annotation!'
+          'emptyTable': 'You have no annotations.<br />Why not create or clone one from the Phenository?'
         }
       });
     };
@@ -55,8 +56,16 @@ export class MyAnnotationsComponent implements OnInit {
         () => console.log('Got my annotations')
       );
   }
+  @HostListener('document:click') onMouseEnter() {
+    let annotationID = localStorage.getItem('uaAnnotation');
+    if (annotationID) {
+      localStorage.removeItem('uaAnnotation');
+      this._router.navigate(['/dashboard', '/in-progress/' + annotationID]);
+    }
+  }
   ngOnInit():any {
     let scope = this;
+    //TODO
     jQuery('.js-typeahead').typeahead({
       dynamic: true,
       cancelButton: false,
@@ -80,6 +89,7 @@ export class MyAnnotationsComponent implements OnInit {
     jQuery('.col-lg-8').attr('class', 'col-lg-5');
     jQuery('.col-lg-4').hide();
     this.diseaseSelected = true;
+    this.listDiseaseAnnotations();
   }
   clearDisease() {
     jQuery('.col-lg-5').attr('class', 'col-lg-8');
@@ -88,8 +98,42 @@ export class MyAnnotationsComponent implements OnInit {
     this.typeAheadBox = '';
   }
   lookUpDisease() {
-    window.open(globals.omimURL + this.newAnnotationDisease.replace(/[^0-9]/g, '').substr(0,
-        this.newAnnotationDisease.indexOf(' ')), '_blank');
+    window.open(globals.omimURL + this.newAnnotationDisease.substr(0,
+        this.newAnnotationDisease.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
+  }
+  listDiseaseAnnotations() {
+    let gotAnnotations = function (data:any) {
+      let tableBody = '';
+      for (let i = 0; i < data.annotations.length; i++) {
+        tableBody += '<tr style="cursor: pointer" onclick="localStorage.setItem(\'uaAnnotation\',\'' +
+          data.annotations[i].annotationID + '\')">';
+        tableBody += '<td>' + data.annotations[i].annotationID + '</td>';
+        tableBody += '<td>' + ((data.annotations[i].cloneOf) ? data.annotations[i].cloneOf : '–' ) + '</td>';
+        tableBody += '<td>' + data.annotations[i].author + '</td>';
+        tableBody += '<td>' + data.annotations[i].numClones + '</td>';
+        tableBody += '<td>' + data.annotations[i].numLikes + '</td>';
+        tableBody += '<td>' + data.annotations[i].date + '</td>';
+        tableBody += '</tr>';
+      }
+      jQuery('#table-body-disease').html(tableBody);
+      jQuery('#table-annotations').DataTable({
+        'language': {
+          'emptyTable': 'There are no annotations for this disease.<br />Be the first to make one!'
+        }
+      });
+    };
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'dbDisease': this.newAnnotationDisease.substr(0, this.newAnnotationDisease.indexOf(' ')).replace(/[^0-9]/g, ''),
+      'vocabulary': 'omim' // ORPHA TODO
+    });
+    this._http.post(globals.backendURL + '/restricted/phenository/prof/annotations', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => gotAnnotations(data),
+        err => console.log(err),
+        () => console.log('Created annotation')
+      );
   }
   createAnnotation() {
     let scope = this;
