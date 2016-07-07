@@ -18,16 +18,69 @@
 
     <div class="col-lg-5">
       <div class="card card-block">
+
+        <div class="col-lg-8" style="padding: 0">
+          <div class="btn-group" _ngcontent-pyb-9="" *ngIf="!followingOnly">
+            <label class="btn btn-primary ng-untouched ng-pristine ng-valid active" btnradio="Left" _ngcontent-pyb-9="">Show all</label>
+            <label class="btn btn-primary ng-untouched ng-pristine ng-valid" btnradio="Right" _ngcontent-pyb-9="" (click)="setFollowing(true)">Following</label>
+          </div>
+          <div class="btn-group" _ngcontent-pyb-9="" *ngIf="followingOnly">
+            <label class="btn btn-primary ng-untouched ng-pristine ng-valid" btnradio="Left" _ngcontent-pyb-9="" (click)="setFollowing(false)">Show all</label>
+            <label class="btn btn-primary ng-untouched ng-pristine ng-valid active" btnradio="Right" _ngcontent-pyb-9="">Following</label>
+          </div>
+        </div>
+
+        <div class="col-lg-4" style="padding: 0">
+          <input placeholder="Search" class="form-control" id="search-phenository" style="display: none" />
+        </div>
+
         <div class="table-responsive">
           <table id="tableDiseases" class="table table-hover table-sm">
             <thead class="thead-inverse">
               <tr>
+                <th><i class="fa fa-plus" aria-hidden="true" title="Following"></i></th>
                 <th>Disease</th>
                 <th>Qty</th>
               </tr>
             </thead>
+            <tbody id="table-body-disease" *ngFor="let disease of diseases">
+              <tr (click)="setDisease(disease.name, disease.db)" style="cursor: pointer">
+                <td>
+                  <i class="fa fa-check" aria-hidden="true" *ngIf="disease.following"></i>
+                </td>
+                <td>{{disease.name}}</td>
+                <td style="text-align:right">{{disease.quantity}}</td>
+              </tr>
+            </tbody>
           </table>
         </div>
+
+        <pager class="ng-untouched ng-pristine ng-valid" _ngcontent-pyb-9="">
+          <ul class="pager">
+            <li>
+              <a (click)="gotoFirst()" style="cursor: pointer">
+                <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+              </a>
+            </li>
+            <li>
+              <a (click)="gotoPrevious()" style="cursor: pointer">
+                <i class="fa fa-angle-left" aria-hidden="true"></i>
+              </a>
+            </li>
+            {{offset + 1}} to {{to}} of {{total}}
+            <li>
+              <a (click)="gotoNext()" style="cursor: pointer">
+                <i class="fa fa-angle-right" aria-hidden="true"></i>
+              </a>
+            </li>
+            <li>
+              <a (click)="gotoLast()" style="cursor: pointer">
+                <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+              </a>
+            </li>
+          </ul>
+        </pager>
+
       </div>
     </div>
 
@@ -36,12 +89,21 @@
         <div class="card-header">
           {{diseaseName}}
         </div>
-        <div class="card-block">
+        <div class="card-block" *ngIf="diseaseName === null && noDiseaseOfTheDay">
+          Sorry, there is no Disease of the Day for today. Please check back tomorrow!
+        </div>
+        <div class="card-block" *ngIf="diseaseName !== null">
           <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true" (close)="closeAlert(i)">
             {{ alert?.msg }}
           </alert>
           <button class="btn btn-info" (click)="lookUpDisease()">Look up</button>
           <button class="btn btn-primary" (click)="createAnnotation()">Start from OMIM/Ordo</button>
+          <button class="btn btn-secondary" (click)="toggleFollow()" *ngIf="!following">
+            <i class="fa fa-plus" aria-hidden="true"></i> Follow
+          </button>
+          <button class="btn btn-success" (click)="toggleFollow()" *ngIf="following">
+            <i class="fa fa-check" aria-hidden="true"></i> Following
+          </button>
           <br />
           <br />
           <div class="table-responsive">
@@ -56,7 +118,7 @@
                 <th>Date</th>
               </tr>
               </thead>
-              <tbody id="table-body-disease">
+              <tbody id="table-body-annotations">
               </tbody>
             </table>
           </div>

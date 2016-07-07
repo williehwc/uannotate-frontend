@@ -15,6 +15,7 @@ import 'rxjs/Rx';
 
 
 export class MyAnnotationsComponent implements OnInit {
+  following: boolean;
   diseaseSelected: boolean = false;
   newAnnotationDisease: string;
   typeAheadBox: string;
@@ -65,7 +66,7 @@ export class MyAnnotationsComponent implements OnInit {
   }
   ngOnInit():any {
     let scope = this;
-    //TODO
+    //ORPHA TODO
     jQuery('.js-typeahead').typeahead({
       dynamic: true,
       cancelButton: false,
@@ -80,15 +81,22 @@ export class MyAnnotationsComponent implements OnInit {
       callback: {
         onClickAfter: function (node: any, a: any, item: any, event: any) {
           scope.newAnnotationDisease = item.display;
+          localStorage.setItem('uaMyAnnotationsDisease', item.display);
           scope.selectDisease();
         }
       }
     });
+    // Restore right panel (list of annotations pertaining to selected disease)
+    if (localStorage.getItem('uaMyAnnotationsDisease') !== null) {
+      this.newAnnotationDisease = localStorage.getItem('uaMyAnnotationsDisease');
+      this.selectDisease();
+    }
   }
   selectDisease() {
     jQuery('.col-lg-8').attr('class', 'col-lg-5');
     jQuery('.col-lg-4').hide();
     this.diseaseSelected = true;
+    this.checkFollowing();
     this.listDiseaseAnnotations();
   }
   clearDisease() {
@@ -96,6 +104,7 @@ export class MyAnnotationsComponent implements OnInit {
     jQuery('.col-lg-4').show();
     this.diseaseSelected = false;
     this.typeAheadBox = '';
+    localStorage.removeItem('uaMyAnnotationsDisease');
   }
   lookUpDisease() {
     window.open(globals.omimURL + this.newAnnotationDisease.substr(0,
@@ -167,5 +176,44 @@ export class MyAnnotationsComponent implements OnInit {
           () => console.log('Created annotation')
         );
     }
+  }
+  checkFollowing() {
+    let scope = this;
+    let gotFollowing = function (data:any) {
+      scope.following = data.following;
+    };
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'dbDisease': this.newAnnotationDisease.substr(0,
+        this.newAnnotationDisease.indexOf(' ')).replace(/[^0-9]/g, ''),
+      'vocabulary': 'omim'
+    });
+    this._http.post(globals.backendURL + '/restricted/phenository/prof/following', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => gotFollowing(data),
+        err => console.log(err),
+        () => console.log('Got following')
+      );
+  }
+  toggleFollow() {
+    let scope = this;
+    let gotFollowing = function (data:any) {
+      scope.following = data.following;
+    };
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'dbDisease': this.newAnnotationDisease.substr(0,
+        this.newAnnotationDisease.indexOf(' ')).replace(/[^0-9]/g, ''),
+      'vocabulary': 'omim',
+      'follow': !this.following
+    });
+    this._http.post(globals.backendURL + '/restricted/phenository/prof/follow', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => gotFollowing(data),
+        err => console.log(err),
+        () => console.log('Got following')
+      );
   }
 }

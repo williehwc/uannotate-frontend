@@ -7,13 +7,13 @@
             <i class="fa fa-fw fa-dashboard"></i> Dashboard
         </a>
         <a [routerLink]="['/dashboard', '/in-progress']" class="list-group-item">
-            <i class="fa fa-fw fa-pencil"></i> In progress
+            <i class="fa fa-fw fa-pencil"></i> Annotator
         </a>
         <a *ngIf="profLevel" [routerLink]="['/dashboard', '/my-annotations']" class="list-group-item">
           <i class="fa fa-fw fa-folder"></i> My annotations
         </a>
         <a *ngIf="profLevel" [routerLink]="['/dashboard', '/phenository']" class="list-group-item">
-          <i class="fa fa-fw fa-database"></i> Phenository
+          <i class="fa fa-cloud" aria-hidden="true"></i> Phenository
         </a>
         <!-- dropDown item -->
         <div class="nested-menu">

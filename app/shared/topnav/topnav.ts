@@ -33,8 +33,7 @@ export class TopNavComponent {
       scope.name = data.name;
     };
     let invalidUser = function () {
-      localStorage.removeItem('uaToken');
-      scope._router.navigate(['/']);
+      scope.logOut();
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken')
@@ -47,11 +46,21 @@ export class TopNavComponent {
         () => console.log('Got name')
       );
   }
+  logOut() {
+    localStorage.removeItem('uaToken');
+    localStorage.removeItem('uaAnnotation');
+    localStorage.removeItem('uaMyAnnotationsDisease');
+    localStorage.removeItem('uaPhenositoryDisease');
+    localStorage.removeItem('uaPhenositoryDiseaseDB');
+    localStorage.removeItem('uaPhenositoryFilter');
+    localStorage.removeItem('uaPhenositoryOffset');
+    localStorage.removeItem('uaPhenositoryFollowing');
+    this._router.navigate(['/']);
+  }
 	gotoLogin() {
     let scope = this;
     let finishLogout = function (data: any) {
-      localStorage.removeItem('uaToken');
-      scope._router.navigate(['/']);
+      scope.logOut();
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken')

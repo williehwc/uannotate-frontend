@@ -8,7 +8,7 @@
       </h2>
       <ol class="breadcrumb">
         <li class="active">
-          <i class="fa fa-info-circle"></i> Prepare your disease annotations and publish them to the Phenository.
+          <i class="fa fa-info-circle"></i> Prepare your disease annotations and submit them to the Phenository.
         </li>
       </ol>
     </div>
@@ -55,6 +55,7 @@
             </div>
           </fieldset>
         </form>
+        <p style="opacity: 0.5"><em>No symbols, please.</em></p>
       </div>
     </div>
 
@@ -72,6 +73,12 @@
           </button>
           <button *ngIf="diseaseSelected" class="btn btn-info" (click)="lookUpDisease()">Look up</button>
           <button *ngIf="diseaseSelected" class="btn btn-primary" (click)="createAnnotation()">Start from OMIM/Ordo</button>
+          <button class="btn btn-secondary" (click)="toggleFollow()" *ngIf="!following">
+            <i class="fa fa-plus" aria-hidden="true"></i> Follow
+          </button>
+          <button class="btn btn-success" (click)="toggleFollow()" *ngIf="following">
+            <i class="fa fa-check" aria-hidden="true"></i> Following
+          </button>
           <br />
           <br />
           <div class="table-responsive">
