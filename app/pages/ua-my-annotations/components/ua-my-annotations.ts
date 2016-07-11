@@ -25,7 +25,7 @@ export class MyAnnotationsComponent implements OnInit {
       // ngFor and ngRepeat do not work with DataTable!
       let tableBody = '';
       for (let i = 0; i < data.annotations.length; i++) {
-        tableBody += '<tr style="cursor: pointer" onclick="localStorage.setItem(\'uaAnnotation\',\'' +
+        tableBody += '<tr style="cursor: pointer" onclick="localStorage.setItem(\'uaAnnotationTemp\',\'' +
           data.annotations[i].id + '\')"><td>';
         if (data.annotations[i].status === 1) {
           tableBody += '<i class="fa fa-pencil" aria-hidden="true" title="Draft (not yet published)"></i>';
@@ -34,10 +34,6 @@ export class MyAnnotationsComponent implements OnInit {
         }
         tableBody += '</td><td>' +
           data.annotations[i].diseaseName + '</td><td>' + data.annotations[i].date + '</td></tr>';
-        jQuery('#d' + data.annotations[i].id).click(function() {
-          alert(data.annotations[i].id);
-          this._router.navigate(['/dashboard', '/in-progress/' + data.annotations[i].id]);
-        });
       }
       jQuery('#table-body-my-annotations').html(tableBody);
       jQuery('#table-my-annotations').DataTable({
@@ -58,10 +54,10 @@ export class MyAnnotationsComponent implements OnInit {
       );
   }
   @HostListener('document:click') onMouseEnter() {
-    let annotationID = localStorage.getItem('uaAnnotation');
-    if (annotationID) {
-      localStorage.removeItem('uaAnnotation');
-      this._router.navigate(['/dashboard', '/in-progress/' + annotationID]);
+    if (localStorage.getItem('uaAnnotationTemp')) {
+      localStorage.setItem('uaAnnotation', localStorage.getItem('uaAnnotationTemp'));
+      localStorage.removeItem('uaAnnotationTemp');
+      this._router.navigate(['/dashboard', '/in-progress']);
     }
   }
   ngOnInit():any {
@@ -114,7 +110,7 @@ export class MyAnnotationsComponent implements OnInit {
     let gotAnnotations = function (data:any) {
       let tableBody = '';
       for (let i = 0; i < data.annotations.length; i++) {
-        tableBody += '<tr style="cursor: pointer" onclick="localStorage.setItem(\'uaAnnotation\',\'' +
+        tableBody += '<tr style="cursor: pointer" onclick="localStorage.setItem(\'uaAnnotationTemp\',\'' +
           data.annotations[i].annotationID + '\')">';
         tableBody += '<td>' + data.annotations[i].annotationID + '</td>';
         tableBody += '<td>' + ((data.annotations[i].cloneOf) ? data.annotations[i].cloneOf : '–' ) + '</td>';
@@ -150,7 +146,8 @@ export class MyAnnotationsComponent implements OnInit {
     let diseaseName = this.newAnnotationDisease;
     let finishCreateAnnotation = function (data:any) {
       if (data.success) {
-        scope._router.navigate(['/dashboard', '/in-progress/' + data.annotationID]);
+        localStorage.setItem('uaAnnotation', data.annotationID);
+        scope._router.navigate(['/dashboard', '/in-progress']);
       } else {
         scope.alerts.push({
           type: 'danger',

@@ -3,27 +3,219 @@
   <!-- Page Heading -->
   <div class="row">
     <div class="col-lg-12">
-      <h2 class="page-header">
+      <h2 class="page-header" *ngIf="annotation == null || annotation.status == -1">
+        Annotator
+      </h2>
+      <h2 class="page-header" *ngIf="annotation != null && annotation.status == 1">
         Prepare annotation
       </h2>
-      <ol class="breadcrumb">
-        <li class="active">
-          <i class="fa fa-info-circle"></i> Created on 2015-05-05 by John Smith &lt;jsmith@example.com&gt;
+      <h2 class="page-header" *ngIf="annotation != null && annotation.status == 2">
+        View annotation
+      </h2>
+      <ol class="breadcrumb" *ngIf="annotation != null && annotation.status >= 0">
+        <li class="inactive" *ngIf="annotation.status == 1">
+          <i class="fa fa-info-circle"></i> Created on {{annotation.dateCreated}} by {{annotation.author.userName}} &lt;{{annotation.author.userEmail}}&gt;
+        </li>
+        <li class="inactive" *ngIf="annotation.status == 2">
+          <i class="fa fa-info-circle"></i> Published on {{annotation.dateCreated}} by {{annotation.author.userName}} &lt;{{annotation.author.userEmail}}&gt;
+        </li>
+        <li class="active" *ngIf="annotation.status > 0 && annotation.cloneOf === null">
+          Based on OMIM or Ordo
+        </li>
+        <li class="active" *ngIf="annotation.status > 0 && annotation.cloneOf !== null" (click)="gotoAnnotation(annotation.cloneOf)" style="cursor: pointer">
+          Based on annotation {{annotation.cloneOf}}
         </li>
       </ol>
-      <button class="btn btn-primary" (click)="createAnnotation()">
-        <i class="fa fa-cloud-upload" aria-hidden="true"></i> Submit
-      </button>
+      <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true" (close)="closeAlert(i)">
+        {{ alert?.msg }}
+      </alert>
+      <div *ngIf="annotation != null">
+        <button class="btn btn-primary" (click)="submitAnnotation()" *ngIf="annotation.status == 1">
+          <i class="fa fa-cloud-upload" aria-hidden="true"></i> Publish
+        </button>
+        <button class="btn btn-primary" (click)="submitAnnotation()" *ngIf="annotation.status == 0">
+          Submit
+        </button>
+        <button class="btn btn-secondary" (click)="cloneAnnotation()" *ngIf="annotation.status == 2">
+          <i class="fa fa-clone" aria-hidden="true"></i> Clone
+        </button>
+        <button class="btn btn-secondary" (click)="likeAnnotation(true)"  *ngIf="annotation.status == 2 && !recommended">
+          <i class="fa fa-thumbs-o-up" aria-hidden="true"></i> Recommend
+        </button>
+        <button class="btn btn-warning" (click)="likeAnnotation(false)"  *ngIf="annotation.status == 2 && recommended">
+          <i class="fa fa-thumbs-up" aria-hidden="true"></i> Recommended
+        </button>
+        <span style="opacity: 0.5" *ngIf="annotation.status == 2 && !recommended">
+          <i>&emsp;You can recommend one annotation for each disease.</i>
+        </span>
+      </div>
     </div>
   </div>
 
-  <div class="row">
+  <div class="row" style="margin-top: 20px" *ngIf="annotation != null && annotation.status >= 0">
 
     <div class="col-lg-8">
+      <tabset>
+        <tab>
+
+          <template tabHeading *ngIf="annotation.status == 0">
+            <div dropdown keyboardNav="true">
+              <a href id="simple-dropdown" dropdownToggle>
+                CATARACTS 44, CTS44
+              </a>
+              <ul class="dropdown-menu" role="menu" aria-labelledby="simple-btn-keyboard-nav">
+                <li role="menuitem"><a class="dropdown-item" href="#">Action</a></li>
+                <li role="menuitem"><a class="dropdown-item" href="#">Another action</a></li>
+                <li role="menuitem"><a class="dropdown-item" href="#">Something else here</a></li>
+              </ul>
+            </div>
+          </template>
+
+          <template tabHeading *ngIf="annotation.status > 0">
+            {{annotation.disease.diseaseName}}
+          </template>
+
+          <br />
+
+          <div *ngFor="let phenotype of annotation.phenotypes">
+
+            <div class="card card-block">
+              <h4>{{phenotype.phenotypeName}}</h4>
+              <div class="row" style="margin-top: 16px">
+                <div class="col-lg-2">
+                  Observed
+                </div>
+                <div class="col-lg-4">
+                  <select class="form-control" [(ngModel)]="phenotype.observed">
+                    <option>Yes</option>
+                    <option>No</option>
+                    <option>Irrelevant (remove)</option>
+                  </select>
+                </div>
+                <div class="col-lg-2">
+                  HPO ID
+                </div>
+                <div class="col-lg-4">
+                  {{phenotype.hpo}}
+                </div>
+              </div>
+              <div class="row" style="margin-top: 8px">
+                <div class="col-lg-2">
+                  <label>Frequency</label>
+                </div>
+                <div class="col-lg-4">
+                  <select class="form-control" [(ngModel)]="phenotype.frequency">
+                    <option value="">Not sure</option>
+                    <option value="0">Variable (probably 30% to 70%)</option>
+                    <option value="0.01">Very rare (1%)</option>
+                    <option value="0.05">Rare (5%)</option>
+                    <option value="0.075">Occasional (7.5%)</option>
+                    <option value="0.33">Frequent (33%)</option>
+                    <option value="0.5">Typical (50%)</option>
+                    <option value="0.75">Common (75%)</option>
+                    <option value="0.9">Hallmark (90%)</option>
+                    <option value="1">Obligate (100%)</option>
+                  </select>
+                </div>
+                <div class="col-lg-2">
+                  <label>Onset</label>
+                </div>
+                <div class="col-lg-4">
+                  <select class="form-control" [(ngModel)]="phenotype.onset">
+                    <option value="HP:">Not sure</option>
+                    <option value="HP:">Antenatal (before birth)</option>
+                    <option value="HP:">Congenital (at birth)</option>
+                    <option value="HP:">Neonatal</option>
+                    <option value="HP:">Infantile</option>
+                    <option value="HP:">Childhood</option>
+                    <option value="HP:">Juvenile (5 to 15 years)</option>
+                    <option value="HP:">Adult</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row" style="margin-top: 8px">
+                <div class="col-lg-12">
+                  <div style="float:left" class="paper">
+                    1
+                  </div>
+                  <div style="float:left" class="paper">
+                    2
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="card card-block card-primary">
+            <input class="form-control" placeholder="Add a phenotype">
+          </div>
+
+        </tab>
+      </tabset>
 
     </div>
 
     <div class="col-lg-4">
+      <tabset>
+        <tab>
+          <template tabHeading>
+            References
+          </template>
+
+          <br />
+
+          <div *ngFor="let citation of annotation.citations;let i = index">
+
+            <div class="card">
+              <div class="card-header card-default">
+                <div style="float:right" class="paper">
+                  {{i}}
+                </div>
+                {{citation.author}} ({{citation.year}})
+              </div>
+              <div class="card-block">
+                <p>
+                  {{citation.title}}
+                </p>
+                <i style="opacity: 0.5">PMID: {{citation.pmid}}</i>
+                <button type="button" class="btn btn-sm btn-danger" _ngcontent-ihs-13="" style="float:right;">
+                  Clear
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="card card-primary card-inverse">
+            <div class="card-header card-primary">
+              <strong>Add a citation</strong>
+            </div>
+            <div class="card-block bg-white">
+              <input class="form-control" placeholder="Title, author, or PMID">
+            </div>
+          </div>
+
+        </tab>
+        <tab *ngIf="annotation.status == 2">
+          <template tabHeading>
+            <i class="fa fa-clone"></i>
+          </template>
+          <br />
+          <h4 _ngcontent-eiy-9="">
+            10 clones
+          </h4>
+        </tab>
+        <tab *ngIf="annotation.status == 2">
+          <template tabHeading>
+            <i class="fa fa-thumbs-o-up"></i>
+          </template>
+          <br />
+          <h4 _ngcontent-eiy-9="">
+            10 recommendations
+          </h4>
+        </tab>
+      </tabset>
     </div>
 
   </div>

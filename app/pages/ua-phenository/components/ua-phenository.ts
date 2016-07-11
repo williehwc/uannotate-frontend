@@ -127,7 +127,7 @@ export class PhenositoryComponent {
     let gotAnnotations = function (data:any) {
       let tableBody = '';
       for (let i = 0; i < data.annotations.length; i++) {
-        tableBody += '<tr style="cursor: pointer" onclick="localStorage.setItem(\'uaAnnotation\',\'' +
+        tableBody += '<tr style="cursor: pointer" onclick="localStorage.setItem(\'uaAnnotationTemp\',\'' +
           data.annotations[i].annotationID + '\')">';
         tableBody += '<td>' + data.annotations[i].annotationID + '</td>';
         tableBody += '<td>' + ((data.annotations[i].cloneOf) ? data.annotations[i].cloneOf : '–' ) + '</td>';
@@ -168,7 +168,8 @@ export class PhenositoryComponent {
     let diseaseName = this.diseaseName;
     let finishCreateAnnotation = function (data:any) {
       if (data.success) {
-        scope._router.navigate(['/dashboard', '/in-progress/' + data.annotationID]);
+        localStorage.setItem('uaAnnotation', data.annotationID);
+        scope._router.navigate(['/dashboard', '/in-progress']);
       } else {
         scope.alerts.push({
           type: 'danger',
@@ -236,10 +237,10 @@ export class PhenositoryComponent {
       );
   }
   @HostListener('document:click') onMouseEnter() {
-    let annotationID = localStorage.getItem('uaAnnotation');
-    if (annotationID) {
-      localStorage.removeItem('uaAnnotation');
-      this._router.navigate(['/dashboard', '/in-progress/' + annotationID]);
+    if (localStorage.getItem('uaAnnotationTemp')) {
+      localStorage.setItem('uaAnnotation', localStorage.getItem('uaAnnotationTemp'));
+      localStorage.removeItem('uaAnnotationTemp');
+      this._router.navigate(['/dashboard', '/in-progress']);
     }
   }
 }

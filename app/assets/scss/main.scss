@@ -7,6 +7,15 @@ $sidebar-background-color: #424242;
     -webkit-border-radius: 50%;
             border-radius: 50%;
 }
+.paper {
+  width: 32px;
+  height: 32px;
+  background-image: url(/assets/img/paper.png);
+  text-align: center;
+  margin-top: -5px;
+  padding-top: 5px;
+  background-size: 32px 32px;
+}
 #toggle-sidebar{
     position: fixed;
     top: 0px;
