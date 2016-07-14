@@ -28,6 +28,7 @@ import {SidebarComponent} from '../../../shared/sidebar/sidebar';
 //noinspection TypeScriptValidateTypes
 @Routes([
   { path: '/home', component: HomeComponent},
+  { path: '/in-progress/:id', component: InProgressComponent},
   { path: '/in-progress', component: InProgressComponent},
   { path: '/my-annotations', component: MyAnnotationsComponent},
   { path: '/phenository', component: PhenositoryComponent},

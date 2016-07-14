@@ -7,6 +7,32 @@ $sidebar-background-color: #424242;
     -webkit-border-radius: 50%;
             border-radius: 50%;
 }
+body {
+  overflow-y: scroll;
+}
+.phenotype {
+  max-height: 64px;
+  z-index: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease-out;
+}
+.phenotype:hover {
+  max-height: 500px;
+  -moz-transition: max-height 0.3s ease-in;
+}
+.ref {
+  max-height: 48px;
+  z-index: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease-out;
+}
+.ref:hover {
+  max-height: 1000px;
+  -moz-transition: max-height 0.3s ease-in;
+}
+.ref .card-header {
+  border-radius: 0;
+}
 .paper {
   width: 32px;
   height: 32px;
@@ -16,6 +42,124 @@ $sidebar-background-color: #424242;
   padding-top: 5px;
   background-size: 32px 32px;
 }
+.typeahead__list_annotator, .typeahead__dropdown {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  z-index: 1000;
+  width: 100%;
+  min-width: 160px;
+  padding: 5px 0;
+  margin: 2px 0 2px;
+  list-style: none;
+  text-align: left;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  background-clip: padding-box;
+}
+
+.typeahead__result.detached .typeahead__list_annotator {
+  position: relative;
+  z-index: 1041;
+  top: initial;
+  left: initial;
+}
+.typeahead__list_annotator > li {
+  position: relative;
+  border-top: solid 1px #ccc;
+}
+
+.typeahead__list_annotator > li:first-child {
+  border-top: none;
+}
+
+.typeahead__list_annotator > li > a,
+.typeahead__dropdown > li > a {
+  display: block;
+  padding: 6px 12px;
+  clear: both;
+  color: #333333;
+  text-decoration: none;
+}
+
+.typeahead__list_annotator > li > a:hover,
+.typeahead__list_annotator > li > a:focus,
+.typeahead__list_annotator > li.active > a,
+.typeahead__dropdown > li > a:hover,
+.typeahead__dropdown > li > a:focus,
+.typeahead__dropdown > li.active > a {
+  background-color: #f5f5f5;
+  color: #3c3c3c;
+}
+
+.typeahead__list_annotator.empty > li > a {
+  cursor: default;
+}
+
+.typeahead__list_annotator.empty > li > a:hover,
+.typeahead__list_annotator.empty > li > a:focus,
+.typeahead__list_annotator.empty > li.active > a {
+  background-color: transparent;
+}
+
+.typeahead__list_annotator > li.typeahead__group {
+  border-color: #bfdef6;
+  font-weight: bold;
+}
+
+.typeahead__list_annotator > li.typeahead__group:first-child {
+  border-top: solid 1px #bfdef6;
+}
+
+.typeahead__list_annotator > li.typeahead__group > a,
+.typeahead__list_annotator > li.typeahead__group > a:hover,
+.typeahead__list_annotator > li.typeahead__group > a:focus,
+.typeahead__list_annotator > li.typeahead__group.active > a {
+  cursor: default;
+  color: #17639f;
+  background: #ecf5fc;
+}
+
+.typeahead__list_annotator > li.typeahead__group + li.typeahead__item {
+  border-color: #bfdef6;
+}
+
+.typeahead__container.result .typeahead__list_annotator,
+.typeahead__container.filter .typeahead__dropdown,
+.typeahead__container.hint .typeahead__hint,
+.typeahead__container.backdrop + .typeahead__backdrop {
+  display: block !important;
+}
+
+.typeahead__container .typeahead__list_annotator,
+.typeahead__container .typeahead__dropdown,
+.typeahead__container .typeahead__hint,
+.typeahead__container + .typeahead__backdrop {
+  display: none !important;
+}
+
+.add-bar {
+  height:48px;
+  position: fixed;
+  width: calc(100% - 225px);
+  right: 0;
+  bottom: 0;
+  background: rgba(222, 222, 222, 0.8);
+  z-index: 1000;
+}
+
+.hover-box {
+  padding: 10px;
+  background-color: rgba(50,50,50,0.9);
+  position: fixed;
+  width: 300px;
+  border-radius: 5px;
+  color: white;
+  margin: 10px;
+  z-index: 2000;
+}
+
 #toggle-sidebar{
     position: fixed;
     top: 0px;
@@ -280,6 +424,9 @@ a:hover{
     }
     .loading {
         left: 39% !important;
+    }
+    .add-bar {
+      width: 100%;
     }
 }
 .carousel {

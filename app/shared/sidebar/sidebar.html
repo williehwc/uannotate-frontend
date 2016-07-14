@@ -6,8 +6,11 @@
         <a [routerLink]="['/dashboard', '/home']" class="list-group-item">
             <i class="fa fa-fw fa-dashboard"></i> Dashboard
         </a>
-        <a [routerLink]="['/dashboard', '/in-progress']" class="list-group-item">
+        <a [routerLink]="['/dashboard', '/in-progress']" class="list-group-item" (dblclick)="gotoAnnotationID()" title="Double-click to jump to an annotation ID." *ngIf="profLevel">
             <i class="fa fa-fw fa-pencil"></i> Annotator
+        </a>
+        <a [routerLink]="['/dashboard', '/in-progress']" class="list-group-item" (dblclick)="gotoAnnotationID()" *ngIf="studentLevel">
+          <i class="fa fa-fw fa-pencil"></i> Annotator
         </a>
         <a *ngIf="profLevel" [routerLink]="['/dashboard', '/my-annotations']" class="list-group-item">
           <i class="fa fa-fw fa-folder"></i> My annotations

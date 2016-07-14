@@ -52,12 +52,13 @@ export class MyAnnotationsComponent implements OnInit {
         err => console.log(err),
         () => console.log('Got my annotations')
       );
+
   }
   @HostListener('document:click') onMouseEnter() {
     if (localStorage.getItem('uaAnnotationTemp')) {
-      localStorage.setItem('uaAnnotation', localStorage.getItem('uaAnnotationTemp'));
+      let id = localStorage.getItem('uaAnnotationTemp');
       localStorage.removeItem('uaAnnotationTemp');
-      this._router.navigate(['/dashboard', '/in-progress']);
+      this._router.navigate(['/dashboard', '/in-progress', id]);
     }
   }
   ngOnInit():any {
@@ -66,6 +67,7 @@ export class MyAnnotationsComponent implements OnInit {
     jQuery('.js-typeahead').typeahead({
       dynamic: true,
       cancelButton: false,
+      filter: false,
       source: {
         diseases: {
           ajax: {
@@ -146,8 +148,7 @@ export class MyAnnotationsComponent implements OnInit {
     let diseaseName = this.newAnnotationDisease;
     let finishCreateAnnotation = function (data:any) {
       if (data.success) {
-        localStorage.setItem('uaAnnotation', data.annotationID);
-        scope._router.navigate(['/dashboard', '/in-progress']);
+        scope._router.navigate(['/dashboard', '/in-progress', data.annotationID]);
       } else {
         scope.alerts.push({
           type: 'danger',

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ROUTER_DIRECTIVES } from '@angular/router';
+import { Router, ROUTER_DIRECTIVES } from '@angular/router';
 import { CORE_DIRECTIVES, FORM_DIRECTIVES } from '@angular/common';
 
 import {Http} from '@angular/http';
@@ -29,6 +29,10 @@ export class SidebarComponent {
 			this.showMenu = element;
 		}
 	}
+  gotoAnnotationID() {
+    let annotationID = prompt('Enter annotation ID.');
+    this._router.navigate(['/dashboard', '/in-progress', annotationID]);
+  }
   classUpdate() {
     let scope = this;
     let gotClasses = function (data: any) {
@@ -45,7 +49,7 @@ export class SidebarComponent {
         () => console.log('Got classes')
       );
   }
-  constructor(private _http: Http) {
+  constructor( private _router: Router, private _http: Http ) {
     let scope = this;
     let gotLevel = function (data: any) {
       if (data.level === 0) {
