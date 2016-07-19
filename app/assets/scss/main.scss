@@ -21,10 +21,14 @@ body {
   -moz-transition: max-height 0.3s ease-in;
 }
 .ref {
+  cursor: grab;
   max-height: 48px;
   z-index: 0;
   overflow: hidden;
   transition: max-height 0.5s ease-out;
+}
+.ref:active {
+  cursor: grabbing;
 }
 .ref:hover {
   max-height: 1000px;
@@ -33,7 +37,14 @@ body {
 .ref .card-header {
   border-radius: 0;
 }
+.gu-mirror {
+  display: none;
+}
+.gu-unselectable {
+  cursor: grabbing;
+}
 .paper {
+  cursor: pointer;
   width: 32px;
   height: 32px;
   background-image: url(/assets/img/paper.png);
@@ -41,6 +52,10 @@ body {
   margin-top: -5px;
   padding-top: 5px;
   background-size: 32px 32px;
+}
+.paper:hover {
+  background-image: url(/assets/img/paper-remove.png);
+  color: transparent;
 }
 .typeahead__list_annotator, .typeahead__dropdown {
   position: absolute;

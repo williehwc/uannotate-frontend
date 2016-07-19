@@ -43,7 +43,7 @@
           <i class="fa fa-info-circle"></i> Published on {{annotation.dateCreated}} by {{annotation.author.userName}} &lt;{{annotation.author.userEmail}}&gt;
         </li>
         <li class="active" *ngIf="annotation.status > 0 && annotation.cloneOf === null">
-          Based on OMIM or Ordo
+          Based on {{annotation.disease.diseaseDB.toUpperCase()}}
         </li>
         <li class="active" *ngIf="annotation.status > 0 && annotation.cloneOf !== null" (click)="jumpToAnnotation(annotation.cloneOf)" style="cursor: pointer">
           Based on annotation {{annotation.cloneOf}}
@@ -53,7 +53,7 @@
         {{ alert?.msg }}
       </alert>
       <div *ngIf="annotation != null">
-        <button class="btn btn-primary" (click)="submitAnnotation()" *ngIf="annotation.status == 1">
+        <button class="btn btn-primary" (click)="publishAnnotation()" *ngIf="annotation.status == 1">
           <i class="fa fa-cloud-upload" aria-hidden="true"></i> Publish
         </button>
         <button class="btn btn-primary" (click)="submitAnnotation()" *ngIf="annotation.status == 0">
@@ -98,7 +98,9 @@
           </template>
 
           <template tabHeading *ngIf="annotation.status > 0">
-            {{annotation.disease.diseaseName}}
+            <a (click)="gotoPhenository(annotation.disease.diseaseDB, annotation.disease.diseaseName)" title="View in Phenository">
+              {{annotation.disease.diseaseName}}
+            </a>
           </template>
 
           <br />
@@ -107,7 +109,7 @@
             <strong>Add a phenotype using the bottom bar.</strong>
           </p>
 
-          <div *ngFor="let phenotype of annotation.phenotypes">
+          <div *ngFor="let phenotype of annotation.phenotypes" [dragula]="'phenotypes'" class="phenotypes" id="phenotype-{{phenotype.phenotypeID}}">
 
             <div class="card card-block phenotype">
               <div class="btn-group" _ngcontent-pyb-9="" *ngIf="phenotype.observed == 1" style="float: right; margin-top: -4px">
@@ -118,9 +120,10 @@
                 <label title="Observed" class="btn btn-sm btn-secondary ng-untouched ng-pristine ng-valid" btnradio="Left" _ngcontent-pyb-9="" (click)="setObserved(phenotype.phenotypeID, true)">Y</label>
                 <label title="Not observed" class="btn btn-sm btn-secondary ng-untouched ng-pristine ng-valid active" btnradio="Right" _ngcontent-pyb-9=""><span style="color:red">N</span></label>
               </div>
+              <i class="fa fa-exclamation-circle" aria-hidden="true" *ngIf="phenotype.citations.length == 0 && markUncitedPhenotypes" style="float: right;margin-top: 4px; margin-right: 10px"></i>
               <h5 title="{{phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="annotation.status == 0">{{phenotype.phenotypeName}}</h5>
               <h5 title="{{phenotype.hpo}} {{phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="annotation.status > 0">{{phenotype.phenotypeName}}</h5>
-              <div class="row" style="margin-top: 20px">
+              <div class="row" style="margin-top: 20px" *ngIf="phenotype.observed == 1">
                 <div class="col-lg-2">
                   <label>Frequency:</label>
                 </div>
@@ -154,14 +157,19 @@
                   </select>
                 </div>
               </div>
+              <div *ngIf="phenotype.observed == 0" style="margin-top: 15px">
+                This phenotype is not present in <strong>all</strong> patients with this disease.
+              </div>
               <hr />
               <div class="row">
                 <div class="col-lg-12">
-                  <div style="float:left" class="paper">
-                    1
-                  </div>
-                  <div style="float:left" class="paper">
-                    2
+                  <span *ngIf="phenotype.citations == 0">
+                    <strong>Drag and drop references here!</strong>
+                  </span>
+                  <div *ngFor="let citation of phenotype.citations">
+                    <div style="float:left" class="paper" (click)="removeCitation(phenotype.phenotypeID, citation.refID)">
+                      {{citation.number}}
+                    </div>
                   </div>
                   <button type="button" class="btn btn-sm btn-danger" _ngcontent-ihs-13="" style="float:right;" (click)="removePhenotype(phenotype.phenotypeID)">
                     Remove
@@ -190,18 +198,20 @@
             <strong>Add a reference using the bottom bar.</strong>
           </p>
 
-          <div *ngFor="let ref of annotation.refs;let i = index">
+          <div *ngFor="let ref of annotation.refs;let i = index" [dragula]="'refs'" class="refs">
 
-            <div class="card" class="ref">
+            <div class="card ref" id="c-{{ref.refID}}">
               <div class="card-header card-default">
                 <div style="float:right" class="paper">
                   {{i + 1}}
                 </div>
-                {{ref.author}} ({{ref.year}})
+                {{ref.author}} {{ref.year}}
               </div>
               <div class="card-block">
                 <p>
-                  {{ref.title}}
+                  <a (click)="copyToClipboard(ref.title)" style="cursor: pointer">
+                    {{ref.title}}
+                  </a>
                 </p>
                 <i style="opacity: 0.5">PMID: {{ref.pmid}}</i>
                 <button type="button" class="btn btn-sm btn-danger" _ngcontent-ihs-13="" style="float:right;" (click)="removeRef(ref.refID)">

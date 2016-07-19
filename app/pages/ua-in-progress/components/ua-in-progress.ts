@@ -5,12 +5,14 @@ import {DROPDOWN_DIRECTIVES, TAB_DIRECTIVES, AlertComponent} from 'ng2-bootstrap
 import {Http} from '@angular/http';
 import globals = require('../../../globals');
 import 'rxjs/Rx';
+import {Dragula, DragulaService} from 'ng2-dragula/ng2-dragula';
 
 @Component({
   moduleId: module.id,
 	selector: 'ua-in-progress',
 	templateUrl: 'ua-in-progress.html',
-  directives: [[DROPDOWN_DIRECTIVES, TAB_DIRECTIVES, AlertComponent, ROUTER_DIRECTIVES]]
+  directives: [[DROPDOWN_DIRECTIVES, TAB_DIRECTIVES, AlertComponent, ROUTER_DIRECTIVES, Dragula]],
+  viewProviders: [DragulaService]
 })
 
 
@@ -18,6 +20,7 @@ export class InProgressComponent implements OnInit {
   alerts: Array<Object>;
   annotation: any = null;
   liked: boolean = false;
+  markUncitedPhenotypes: boolean = false;
   routerOnActivate(curr: RouteSegment) {
     if (curr.getParam('id'))
       localStorage.setItem('uaAnnotation', curr.getParam('id'));
@@ -35,7 +38,63 @@ export class InProgressComponent implements OnInit {
   jumpToAnnotation( annotationID: number ) {
     this._router.navigate(['/dashboard', '/in-progress', annotationID]);
   }
-  constructor( private _router: Router, private _http: Http) { }
+  constructor( private _router: Router, private _http: Http, private dragulaService: DragulaService) {
+    dragulaService.setOptions('refs', {
+      accepts: function (el: any, target: any, source: any, sibling: any) {
+        return false;
+      },
+      copy: true
+    });
+    dragulaService.setOptions('phenotypes', {
+      invalid: function (el: any, handle: any) {
+        return true; // don't prevent any drags from initiating by default
+      }
+    });
+    dragulaService.drag.subscribe((value: any) => {
+      jQuery('.ref').css('cursor', 'grabbing');
+      jQuery('.hover-box').text('Release over a phenotype.');
+      jQuery('.hover-box').show();
+    });
+    dragulaService.dragend.subscribe((value: any) => {
+      jQuery('.ref').css('cursor', 'grab');
+      jQuery('.hover-box').hide();
+    });
+    dragulaService.drop.subscribe((value: any) => {
+      let elements = document.querySelectorAll(':hover');
+      let element = elements[elements.length - 1];
+      while (!element.id.startsWith('phenotype-') && element.parentElement)
+        element = element.parentElement;
+      if (!element.id.startsWith('phenotype-'))
+        return;
+      let scope = this;
+      let finishAddCitation = function(data: any) {
+        let number: number;
+        for (let i = 0; i < scope.annotation.refs.length; i++) {
+          if (String(scope.annotation.refs[i].refID) === value[1].id.match(/\d+/)[0]) {
+            number = i + 1;
+            break;
+          }
+        }
+        for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
+          if (String(scope.annotation.phenotypes[i].phenotypeID) === element.id.match(/\d+/)[0])
+            scope.annotation.phenotypes[i].citations.push({refID: value[1].id.match(/\d+/)[0], number: number});
+        }
+      };
+      let body = JSON.stringify({
+        'token': localStorage.getItem('uaToken'),
+        'annotationID': this.annotation.annotationID,
+        'phenotypeID': element.id.match(/\d+/)[0],
+        'refID': value[1].id.match(/\d+/)[0],
+      });
+      this._http.post(globals.backendURL + '/restricted/annotation/edit/citation/add', body, globals.options)
+        .map(res => res.json())
+        .subscribe(
+          data => finishAddCitation(data),
+          err => console.log(err),
+          () => console.log('Finish add citation')
+        );
+    });
+  }
   gotoAnnotation( annotationID: number, scrollPosition: number ) {
     let scope = this;
     if (annotationID === null)
@@ -54,6 +113,24 @@ export class InProgressComponent implements OnInit {
           if (data.phenotypes[i].hpo === datum.id) {
             data.phenotypes[i].phenotypeName = datum.name;
             data.phenotypes[i].phenotypeDefinition = datum.def;
+            break;
+          }
+        }
+        scope.annotation = data;
+      };
+      let loadedCitation = function(datum: any) {
+        for (let i = 0; i < data.phenotypes.length; i++) {
+          if (String(data.phenotypes[i].phenotypeID) === datum.phenotypeID) {
+            data.phenotypes[i].citations = datum.citations;
+            for (let j = 0; j < data.phenotypes[i].citations.length; j++) {
+              for (let k = 0; k < data.refs.length; k++) {
+                if (data.refs[k].refID === data.phenotypes[i].citations[j].refID) {
+                  data.phenotypes[i].citations[j].number = k + 1;
+                  break;
+                }
+              }
+            }
+            break;
           }
         }
         scope.annotation = data;
@@ -68,6 +145,18 @@ export class InProgressComponent implements OnInit {
             data => loadedName(data),
             err => console.log(err),
             () => console.log('Got name')
+          );
+        body = JSON.stringify({
+          'token': localStorage.getItem('uaToken'),
+          'annotationID': data.annotationID,
+          'phenotypeID': data.phenotypes[i].phenotypeID
+        });
+        scope._http.post(globals.backendURL + '/restricted/annotation/view/citation', body, globals.options)
+          .map(res => res.json())
+          .subscribe(
+            data => loadedCitation(data),
+            err => console.log(err),
+            () => console.log('Got citation')
           );
       }
       // Look up refs
@@ -93,13 +182,14 @@ export class InProgressComponent implements OnInit {
             () => console.log('Got ref')
           );
       }
+      // Restore scroll position (after adding/removing phenotypes, and removing refs)
       document.documentElement.scrollTop = document.body.scrollTop = scrollPosition;
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
       'annotationID': annotationID
     });
-    this._http.post(globals.backendURL + '/restricted/annotation/view', body, globals.options)
+    this._http.post(globals.backendURL + '/restricted/annotation/view/full', body, globals.options)
       .map(res => res.json())
       .subscribe(
         data => initializeAnnotation(data),
@@ -197,7 +287,7 @@ export class InProgressComponent implements OnInit {
         onClickAfter: function (node: any, a: any, item: any, event: any) {
           jQuery('.hover-box').hide();
           scope.alerts = [];
-          let addedRef = function(data) {
+          let addedRef = function(data: any) {
             scope.annotation.refs.push({
               refID: data.refID,
               pmid: data.pmid,
@@ -359,6 +449,79 @@ export class InProgressComponent implements OnInit {
         data => finishRemoveRef(data),
         err => console.log(err),
         () => console.log('Finish remove ref')
+      );
+  }
+  removeCitation(phenotypeID: number, refID: number) {
+    let scope = this;
+    let finishRemoveCitation = function(data: any) {
+      for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
+        if (scope.annotation.phenotypes[i].phenotypeID === phenotypeID) {
+          for (let j = 0; j < scope.annotation.phenotypes[i].citations.length; j++) {
+            if (scope.annotation.phenotypes[i].citations[j].refID === refID)
+              scope.annotation.phenotypes[i].citations.splice(j, 1);
+          }
+        }
+      }
+    };
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'annotationID': this.annotation.annotationID,
+      'phenotypeID': phenotypeID,
+      'refID': refID,
+    });
+    this._http.post(globals.backendURL + '/restricted/annotation/edit/citation/remove', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishRemoveCitation(data),
+        err => console.log(err),
+        () => console.log('Finish remove citation')
+      );
+  }
+  gotoPhenository(diseaseDB: string, diseaseName: string) {
+    localStorage.setItem('uaPhenositoryDisease', diseaseName);
+    localStorage.setItem('uaPhenositoryDiseaseDB', diseaseDB);
+    this._router.navigate(['/dashboard', '/phenository']);
+  }
+  copyToClipboard(string: string) {
+    window.prompt('Copy to clipboard: Ctrl+C or Cmd+C', string);
+  }
+  publishAnnotation() {
+    let scope = this;
+    this.alerts = [];
+    let finishPublish = function (data: any) {
+      if (data.success) {
+        scope.annotation.status = 2;
+      } else if (data.uncitedPhenotypes) {
+        scope.markUncitedPhenotypes = true;
+        this.alerts.push({
+          type: 'danger',
+          msg: 'Please cite the phenotypes marked with (!).',
+          closable: true
+        });
+      } else if (data.refs.length > 0) {
+        this.alerts.push({
+          type: 'danger',
+          msg: 'Please assign or remove unused reference(s): ' + data.refs.toString(),
+          closable: true
+        });
+      } else {
+        this.alerts.push({
+          type: 'danger',
+          msg: 'You must have added at least one phenotype.',
+          closable: true
+        });
+      }
+    };
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'annotationID': this.annotation.annotationID
+    });
+    this._http.post(globals.backendURL + '/restricted/annotation/edit/publish', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishPublish(data),
+        err => console.log(err),
+        () => console.log('Published (or not)')
       );
   }
 }
