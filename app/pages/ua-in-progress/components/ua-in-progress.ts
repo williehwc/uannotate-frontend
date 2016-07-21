@@ -19,7 +19,6 @@ import {Dragula, DragulaService} from 'ng2-dragula/ng2-dragula';
 export class InProgressComponent implements OnInit {
   alerts: Array<Object>;
   annotation: any = null;
-  liked: boolean = false;
   markUncitedPhenotypes: boolean = false;
   routerOnActivate(curr: RouteSegment) {
     if (curr.getParam('id'))
@@ -39,9 +38,13 @@ export class InProgressComponent implements OnInit {
     this._router.navigate(['/dashboard', '/in-progress', annotationID]);
   }
   constructor( private _router: Router, private _http: Http, private dragulaService: DragulaService) {
+    let scope = this;
     dragulaService.setOptions('refs', {
       accepts: function (el: any, target: any, source: any, sibling: any) {
         return false;
+      },
+      invalid: function (el: any, handle: any) {
+        return scope.annotation.status === 2;
       },
       copy: true
     });
@@ -76,8 +79,13 @@ export class InProgressComponent implements OnInit {
           }
         }
         for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
-          if (String(scope.annotation.phenotypes[i].phenotypeID) === element.id.match(/\d+/)[0])
+          if (String(scope.annotation.phenotypes[i].phenotypeID) === element.id.match(/\d+/)[0]) {
             scope.annotation.phenotypes[i].citations.push({refID: value[1].id.match(/\d+/)[0], number: number});
+            scope.annotation.phenotypes[i].citations.sort(function(a: any, b: any) {
+              return a.number - b.number;
+            });
+            break;
+          }
         }
       };
       let body = JSON.stringify({
@@ -485,27 +493,55 @@ export class InProgressComponent implements OnInit {
   copyToClipboard(string: string) {
     window.prompt('Copy to clipboard: Ctrl+C or Cmd+C', string);
   }
+  deleteAnnotation() {
+    if (!confirm('Deleting an annotation cannot be undone!'))
+      return;
+    let scope = this;
+    let finishDelete = function (data: any) {
+      localStorage.removeItem('uaAnnotation');
+      scope._router.navigate(['/dashboard', '/home']);
+    };
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'annotationID': this.annotation.annotationID
+    });
+    this._http.post(globals.backendURL + '/restricted/annotation/edit/delete', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishDelete(data),
+        err => console.log(err),
+        () => console.log('Deleted')
+      );
+  }
   publishAnnotation() {
+    if (!confirm('Publish this annotation to the Phenository? You will not be able to change it afterwards.'))
+      return;
     let scope = this;
     this.alerts = [];
     let finishPublish = function (data: any) {
       if (data.success) {
-        scope.annotation.status = 2;
+        scope.gotoAnnotation(scope.annotation.annotationID,
+          document.documentElement.scrollTop || document.body.scrollTop);
+        scope.alerts.push({
+          type: 'success',
+          msg: 'Annotation published! By publishing this annotation, you recommend it for this disease.',
+          closable: true
+        });
       } else if (data.uncitedPhenotypes) {
         scope.markUncitedPhenotypes = true;
-        this.alerts.push({
+        scope.alerts.push({
           type: 'danger',
           msg: 'Please cite the phenotypes marked with (!).',
           closable: true
         });
       } else if (data.refs.length > 0) {
-        this.alerts.push({
+        scope.alerts.push({
           type: 'danger',
           msg: 'Please assign or remove unused reference(s): ' + data.refs.toString(),
           closable: true
         });
       } else {
-        this.alerts.push({
+        scope.alerts.push({
           type: 'danger',
           msg: 'You must have added at least one phenotype.',
           closable: true
@@ -516,12 +552,60 @@ export class InProgressComponent implements OnInit {
       'token': localStorage.getItem('uaToken'),
       'annotationID': this.annotation.annotationID
     });
-    this._http.post(globals.backendURL + '/restricted/annotation/edit/publish', body, globals.options)
+    this._http.post(globals.backendURL + '/restricted/annotation/edit/prof/publish', body, globals.options)
       .map(res => res.json())
       .subscribe(
         data => finishPublish(data),
         err => console.log(err),
         () => console.log('Published (or not)')
+      );
+  }
+  likeAnnotation(like: boolean) {
+    let scope = this;
+    let finishLike = function(data: any) {
+      if (data.success) {
+        if (like) {
+          scope.annotation.likes++;
+        } else {
+          scope.annotation.likes--;
+        }
+        scope.annotation.liked = like;
+      } else {
+        scope.alerts.push({
+          type: 'danger',
+          msg: 'You must recommend exactly one annotation for a disease that you have previously annotated.',
+          closable: true
+        });
+      }
+    };
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'annotationID': this.annotation.annotationID,
+      'like': like
+    });
+    this._http.post(globals.backendURL + '/restricted/annotation/prof/like', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishLike(data),
+        err => console.log(err),
+        () => console.log('Like/dislike complete')
+      );
+  }
+  cloneAnnotation() {
+    let scope = this;
+    let finishClone = function(data: any) {
+      scope.jumpToAnnotation(data.annotationID);
+    };
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'annotationID': this.annotation.annotationID,
+    });
+    this._http.post(globals.backendURL + '/restricted/annotation/prof/clone', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishClone(data),
+        err => console.log(err),
+        () => console.log('Cloned')
       );
   }
 }

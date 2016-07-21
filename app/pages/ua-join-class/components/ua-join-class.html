@@ -17,7 +17,7 @@
     <div class="row">
 
         <div class="col-lg-12">
-          <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true" (close)="closeAlert(i)">
+          <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true">
             {{ alert?.msg }}
           </alert>
           <p>Enter the join code for your class below. If you don't have a join code, please contact your instructor.</p>

@@ -49,12 +49,15 @@
           Based on annotation {{annotation.cloneOf}}
         </li>
       </ol>
-      <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true" (close)="closeAlert(i)">
+      <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true">
         {{ alert?.msg }}
       </alert>
       <div *ngIf="annotation != null">
         <button class="btn btn-primary" (click)="publishAnnotation()" *ngIf="annotation.status == 1">
           <i class="fa fa-cloud-upload" aria-hidden="true"></i> Publish
+        </button>
+        <button class="btn btn-danger" (click)="deleteAnnotation()" *ngIf="annotation.status == 1">
+          Delete
         </button>
         <button class="btn btn-primary" (click)="submitAnnotation()" *ngIf="annotation.status == 0">
           Submit
@@ -128,7 +131,7 @@
                   <label>Frequency:</label>
                 </div>
                 <div class="col-lg-4">
-                  <select class="form-control" [(ngModel)]="phenotype.frequency" (change)="setFrequency(phenotype.phenotypeID, $event.target.value)">
+                  <select class="form-control" [(ngModel)]="phenotype.frequency" (change)="setFrequency(phenotype.phenotypeID, $event.target.value)" [disabled]="annotation.status == 2" style="color:black">
                     <option value="-0.999">Not sure</option>
                     <option value="0">Variable (prob. 30% to 70%)</option>
                     <option value="0.01">Very rare (1%)</option>
@@ -145,7 +148,7 @@
                   <label>Onset:</label>
                 </div>
                 <div class="col-lg-4">
-                  <select class="form-control" [(ngModel)]="phenotype.onset" (change)="setOnset(phenotype.phenotypeID, $event.target.value)">
+                  <select class="form-control" [(ngModel)]="phenotype.onset" (change)="setOnset(phenotype.phenotypeID, $event.target.value)" [disabled]="annotation.status == 2" style="color:black">
                     <option value="-1">Not sure</option>
                     <option value="HP:0030674">Antenatal (before birth)</option>
                     <option value="HP:0003577">Congenital (at birth)</option>
@@ -167,11 +170,14 @@
                     <strong>Drag and drop references here!</strong>
                   </span>
                   <div *ngFor="let citation of phenotype.citations">
-                    <div style="float:left" class="paper" (click)="removeCitation(phenotype.phenotypeID, citation.refID)">
+                    <div style="float:left" class="paper" *ngIf="annotation.status == 2">
+                      {{citation.number}}
+                    </div>
+                    <div style="float:left" class="paper paper-remove" (click)="removeCitation(phenotype.phenotypeID, citation.refID)" *ngIf="annotation.status != 2">
                       {{citation.number}}
                     </div>
                   </div>
-                  <button type="button" class="btn btn-sm btn-danger" _ngcontent-ihs-13="" style="float:right;" (click)="removePhenotype(phenotype.phenotypeID)">
+                  <button type="button" class="btn btn-sm btn-danger" _ngcontent-ihs-13="" style="float:right;" (click)="removePhenotype(phenotype.phenotypeID)" *ngIf="annotation.status != 2">
                     Remove
                   </button>
                 </div>
@@ -214,7 +220,7 @@
                   </a>
                 </p>
                 <i style="opacity: 0.5">PMID: {{ref.pmid}}</i>
-                <button type="button" class="btn btn-sm btn-danger" _ngcontent-ihs-13="" style="float:right;" (click)="removeRef(ref.refID)">
+                <button type="button" class="btn btn-sm btn-danger" _ngcontent-ihs-13="" style="float:right;" (click)="removeRef(ref.refID)" *ngIf="annotation.status != 2">
                   Remove
                 </button>
               </div>

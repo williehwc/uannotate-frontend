@@ -93,7 +93,7 @@
           Sorry, there is no Disease of the Day for today. Please check back tomorrow!
         </div>
         <div class="card-block" *ngIf="diseaseName !== null">
-          <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true" (close)="closeAlert(i)">
+          <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true">
             {{ alert?.msg }}
           </alert>
           <button class="btn btn-info" (click)="lookUpDisease()">Look up</button>

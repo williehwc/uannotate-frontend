@@ -65,7 +65,7 @@
           {{newAnnotationDisease}}
         </div>
         <div class="card-block">
-          <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true" (close)="closeAlert(i)">
+          <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true">
             {{ alert?.msg }}
           </alert>
           <button *ngIf="diseaseSelected" class="btn btn-danger" (click)="clearDisease()">
