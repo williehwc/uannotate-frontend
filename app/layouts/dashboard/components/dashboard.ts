@@ -9,6 +9,7 @@ import {ClassStudentComponent} from '../../../pages/ua-class-student/components/
 import {ClassProfComponent} from '../../../pages/ua-class-prof/components/ua-class-prof';
 import {JoinClassComponent} from '../../../pages/ua-join-class/components/ua-join-class';
 import {NewClassComponent} from '../../../pages/ua-new-class/components/ua-new-class';
+import {ExerciseComponent} from '../../../pages/ua-exercise/components/ua-exercise';
 import {HelpStudentComponent} from '../../../pages/ua-help-student/components/ua-help-student';
 import {HelpProfComponent} from '../../../pages/ua-help-prof/components/ua-help-prof';
 import {AccountComponent} from '../../../pages/ua-account/components/ua-account';
@@ -32,10 +33,11 @@ import {SidebarComponent} from '../../../shared/sidebar/sidebar';
   { path: '/in-progress', component: InProgressComponent},
   { path: '/my-annotations', component: MyAnnotationsComponent},
   { path: '/phenository', component: PhenositoryComponent},
-  { path: '/class-student', component: ClassStudentComponent},
-  { path: '/class-prof', component: ClassProfComponent},
+  { path: '/class-student/:id', component: ClassStudentComponent},
+  { path: '/class-prof/:id', component: ClassProfComponent},
   { path: '/join-class', component: JoinClassComponent},
   { path: '/new-class', component: NewClassComponent},
+  { path: '/exercise/:id', component: ExerciseComponent},
   { path: '/help-student', component: HelpStudentComponent},
   { path: '/help-prof', component: HelpProfComponent},
   { path: '/account', component: AccountComponent},

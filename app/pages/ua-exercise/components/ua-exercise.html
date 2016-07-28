@@ -1,0 +1,147 @@
+<div class="container-fluid">
+
+  <div class="hover-box" style="display: none">
+    Release to reposition.
+  </div>
+
+  <!-- Page Heading -->
+  <div class="row">
+    <div class="col-lg-12">
+      <h2 class="page-header" *ngIf="exercise">
+        <span style="opacity:.5">{{exercise.className}} »</span> {{exercise.exerciseName}}
+      </h2>
+      <ol class="breadcrumb">
+        <li class="active">
+          <i class="fa fa-info-circle"></i> Modify the exercise and view submissions
+        </li>
+      </ol>
+      <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true">
+        {{ alert?.msg }}
+      </alert>
+      <button class="btn btn-secondary" (click)="renameExercise()">
+        Rename exercise
+      </button>
+      <button class="btn btn-danger" (click)="deleteExercise()">
+        Delete
+      </button>
+      <span style="opacity: 0.5">
+        <i>&emsp;You can delete this exercise before it starts.</i>
+      </span>
+    </div>
+  </div>
+
+  <br />
+
+  <div class="row">
+
+    <div class="col-lg-12">
+      <tabset>
+        <tab>
+          <template tabHeading *ngIf="exercise">
+            Diseases ({{exercise.problems.length}})
+          </template>
+
+          <br />
+
+          <div class="row">
+            <div class="col-lg-8" *ngIf="exercise">
+              <p *ngIf="exercise.problems.length === 0">
+                <strong>No diseases yet</strong>
+              </p>
+              <ul class="list-group" [dragula]="'problems'">
+                <li class="list-group-item problem" *ngFor="let problem of exercise.problems" id="p{{problem.problemID}}">
+                  <button type="button" class="btn btn-sm btn-danger" style="float:right;margin-left:5px;height:25px;padding-top:1px;" (click)="removeProblem(problem.problemID)" title="Remove">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-info" style="float:right;margin-left:5px;height:25px;padding-top:1px;" (click)="lookUpDisease(problem.diseaseName)" title="Look up">
+                    <i class="fa fa-book" aria-hidden="true"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-secondary" style="float:right;height:25px;padding-top:1px;" (click)="gotoPhenository(problem.diseaseDB, problem.diseaseName)" title="View in Phenository">
+                    <i class="fa fa-cloud" aria-hidden="true" style="color:#0275d8;"></i>
+                  </button>
+                  {{problem.diseaseName}}
+                </li>
+              </ul>
+            </div>
+            <div class="col-lg-4">
+              <div class="card card-block">
+                <h4>Add a disease</h4>
+                <p>Enter disease name or ID:</p>
+                <form role="form">
+                  <fieldset class="form-group">
+                    <div class="typeahead__container">
+                      <div class="typeahead__field">
+                        <span class="typeahead__query">
+                            <input class="js-typeahead" autocomplete="off" [(ngModel)]="typeAheadBox">
+                        </span>
+                      </div>
+                    </div>
+                  </fieldset>
+                </form>
+                <p style="opacity: 0.5"><em>No symbols, please.</em></p>
+              </div>
+              <div dropdown keyboardNav="true" *ngIf="otherExercises && exercise && exercise.problems.length > 0">
+                <a href class="btn btn-secondary dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false" dropdownToggle>
+                  Copy all to another exercise
+                </a>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="simple-btn-keyboard-nav">
+                  <li role="menuitem">
+                    <a class="dropdown-item" *ngFor="let otherExercise of otherExercises" (click)="copyProblems(otherExercise.exerciseID)" style="cursor:pointer">
+                      <span style="opacity:.5">{{otherExercise.className}} »</span> {{otherExercise.exerciseName}}
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </tab>
+        <tab>
+          <template tabHeading *ngIf="exercise">
+            Start/End
+          </template>
+          <br />
+          <div class="row">
+            <div class="col-lg-6">
+              <h4>Start</h4>
+              <br />
+              <input [(ngModel)]="startDate" datetime-picker date-only="false" />
+              <br />
+              <br />
+              <button class="btn btn-primary" (click)="updateStart()">
+                Update
+              </button>
+              <button class="btn btn-secondary" (click)="startNow()">
+                Start now
+              </button>
+              <br />
+              <br />
+            </div>
+            <div class="col-lg-6">
+              <h4>End (due)</h4>
+              <br />
+              <input [(ngModel)]="endDate" datetime-picker date-only="false" />
+              <br />
+              <br />
+              <button class="btn btn-primary" (click)="updateEnd()">
+                Update
+              </button>
+              <button class="btn btn-secondary" (click)="endNow()">
+                End now
+              </button>
+              <br />
+              <br />
+            </div>
+          </div>
+        </tab>
+        <tab>
+          <template tabHeading *ngIf="exercise">
+            Submissions
+          </template>
+        </tab>
+      </tabset>
+    </div>
+
+  </div>
+
+</div>

@@ -26,7 +26,8 @@
             <li class="nested" [ngClass]="{'expand' : showMenu === 'pages' }">
                 <ul class="submenu" *ngFor="let class of classes">
                     <li>
-                        <a href><span>{{ class.name }}</span></a>
+                        <a [routerLink]="['/dashboard', '/class-student', class.id]" *ngIf="studentLevel"><span>{{ class.name }}</span></a>
+                        <a [routerLink]="['/dashboard', '/class-prof', class.id]" *ngIf="profLevel"><span>{{ class.name }}</span></a>
                     </li>
                 </ul>
             </li>

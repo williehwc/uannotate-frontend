@@ -102,7 +102,7 @@
 
           <template tabHeading *ngIf="annotation.status > 0">
             <a (click)="gotoPhenository(annotation.disease.diseaseDB, annotation.disease.diseaseName)" title="View in Phenository">
-              {{annotation.disease.diseaseName}}
+              <i class="fa fa-cloud" aria-hidden="true"></i> {{annotation.disease.diseaseName}}
             </a>
           </template>
 
@@ -231,7 +231,7 @@
         </tab>
         <tab *ngIf="annotation.status == 2">
           <template tabHeading>
-            <i class="fa fa-clone"></i> ({{annotation.clones.length}})
+            <i class="fa fa-clone" title="Clones"></i> ({{annotation.clones.length}})
           </template>
           <br />
 

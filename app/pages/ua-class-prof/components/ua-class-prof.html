@@ -1,0 +1,104 @@
+<div class="container-fluid" *ngIf="classe">
+
+  <!-- Page Heading -->
+  <div class="row">
+    <div class="col-lg-12">
+      <h2 class="page-header">
+        {{classe.className}}
+      </h2>
+      <ol class="breadcrumb">
+        <li class="active">
+          <i class="fa fa-info-circle"></i> Manage exercises for this class
+        </li>
+        <li class="inactive">
+          Join code: {{classe.joinCode}} (<a style="cursor:pointer;" (click)="changeJoinCode()">Change</a>)
+        </li>
+      </ol>
+      <button class="btn btn-secondary" (click)="renameClass()">
+        Rename class
+      </button>
+      <button class="btn btn-danger" (click)="deleteClass()" *ngIf="classe.deletable === 1">
+        Delete
+      </button>
+      <span style="opacity: 0.5" *ngIf="classe.deletable === 1">
+        <i>&emsp;You can delete this class before a student joins it.</i>
+      </span>
+    </div>
+  </div>
+
+  <br />
+
+  <div class="row">
+
+    <div class="col-lg-12">
+      <tabset>
+        <tab>
+          <template tabHeading>
+            Exercises ({{classe.exercises.length}})
+          </template>
+          <br />
+          <div class="row">
+            <div class="col-lg-8">
+              <div *ngIf="classe.exercises.length === 0">
+                <strong>No exercises</strong>
+                <br />
+                <br />
+              </div>
+              <div class="table-responsive" *ngIf="classe.exercises.length > 0">
+                <table class="table table-hover table-sm">
+                  <thead class="thead-inverse">
+                  <tr>
+                    <th>No.</th>
+                    <th>Exercise</th>
+                    <th>Start</th>
+                    <th>End (due)</th>
+                  </tr>
+                  </thead>
+                  <tbody *ngFor="let exercise of classe.exercises; let i = index">
+                      <tr>
+                        <td>{{i + 1}}</td>
+                        <a [routerLink]="['/dashboard', '/exercise', exercise.exerciseID]">
+                          <td>{{exercise.exerciseName}}</td>
+                        </a>
+                        <td>{{exercise.dateStart}}</td>
+                        <td>{{exercise.dateEnd}}</td>
+                      </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="col-lg-4">
+              <div class="card card-block">
+                <h4>New exercise</h4>
+                <p>Exercise name:</p>
+                <fieldset class="form-group">
+                  <input class="form-control" [(ngModel)]="newExerciseName" (keyup.enter)="newExercise(newExerciseName)">
+                </fieldset>
+                <button type="submit" class="btn btn-primary" (click)="newExercise(newExerciseName)">Create</button>
+              </div>
+            </div>
+          </div>
+        </tab>
+        <tab>
+          <template tabHeading>
+            Students ({{classe.students.length}})
+          </template>
+          <br />
+          <p *ngIf="classe.students.length === 0">
+            <strong>No students yet. Students can join your class using the join code above.</strong>
+          </p>
+          <!--
+          <p *ngIf="classe.students.length > 0">
+            Click on a student's name to remove him/her from the class.
+          </p>
+          -->
+          <ul class="list-group">
+            <li class="list-group-item" *ngFor="let student of classe.students">{{student.studentName}}</li>
+          </ul>
+        </tab>
+      </tabset>
+    </div>
+
+  </div>
+
+</div>

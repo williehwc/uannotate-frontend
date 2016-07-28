@@ -10,6 +10,9 @@ $sidebar-background-color: #424242;
 body {
   overflow-y: scroll;
 }
+.problem {
+  cursor: grab;
+}
 .phenotype {
   max-height: 64px;
   z-index: 0;
@@ -172,7 +175,7 @@ body {
   border-radius: 5px;
   color: white;
   margin: 10px;
-  z-index: 2000;
+  z-index: 9999;
 }
 
 #toggle-sidebar{
@@ -241,7 +244,7 @@ a:hover{
 .sidebar{
   border-radius: 0;
   position: fixed;
-    z-index: 3;
+    z-index: 0;
     top: 50px;
     left: 225px;
     width: 225px;

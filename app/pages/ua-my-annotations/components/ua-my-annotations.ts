@@ -37,6 +37,7 @@ export class MyAnnotationsComponent implements OnInit {
       }
       jQuery('#table-body-my-annotations').html(tableBody);
       jQuery('#table-my-annotations').DataTable({
+        'order': [[ 2, 'desc' ]],
         'language': {
           'emptyTable': 'You have no annotations.<br />Why not create or clone one from the Phenository?'
         }

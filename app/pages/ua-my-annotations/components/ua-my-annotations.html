@@ -17,26 +17,24 @@
   <div class="row">
 
     <div class="col-lg-8">
-      <div class="card card-block">
-        <div class="table-responsive">
-          <table id="table-my-annotations" class="table table-hover table-sm">
-            <thead class="thead-default">
-            <tr>
-              <th>
-                ID
-              </th>
-              <th>
-                Disease
-              </th>
-              <th>
-                Date created
-              </th>
-            </tr>
-            </thead>
-            <tbody id="table-body-my-annotations">
-            </tbody>
-          </table>
-        </div>
+      <div class="table-responsive">
+        <table id="table-my-annotations" class="table table-hover table-sm">
+          <thead class="thead-default">
+          <tr>
+            <th>
+              ID
+            </th>
+            <th>
+              Disease
+            </th>
+            <th>
+              Date created
+            </th>
+          </tr>
+          </thead>
+          <tbody id="table-body-my-annotations">
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -71,13 +69,15 @@
           <button *ngIf="diseaseSelected" class="btn btn-danger" (click)="clearDisease()">
             <i class="fa fa-arrow-left" aria-hidden="true"></i>
           </button>
-          <button *ngIf="diseaseSelected" class="btn btn-info" (click)="lookUpDisease()">Look up</button>
+          <button *ngIf="diseaseSelected" class="btn btn-info" (click)="lookUpDisease()">
+            <i class="fa fa-book" aria-hidden="true"></i> Look up
+          </button>
           <button *ngIf="diseaseSelected" class="btn btn-primary" (click)="createAnnotation()">Start from OMIM/Ordo</button>
           <button class="btn btn-secondary" (click)="toggleFollow()" *ngIf="!following">
-            <i class="fa fa-plus" aria-hidden="true"></i> Follow
+            <i class="fa fa-eye" aria-hidden="true"></i> Watch
           </button>
           <button class="btn btn-success" (click)="toggleFollow()" *ngIf="following">
-            <i class="fa fa-check" aria-hidden="true"></i> Following
+            <i class="fa fa-check" aria-hidden="true"></i> Watching
           </button>
           <br />
           <br />

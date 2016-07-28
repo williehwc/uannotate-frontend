@@ -228,6 +228,7 @@ export class InProgressComponent implements OnInit {
       },
       callback: {
         onClickAfter: function (node: any, a: any, item: any, event: any) {
+          jQuery('.js-typeahead').val('');
           jQuery('.hover-box').hide();
           scope.alerts = [];
           let addedPhenotype = function() {
@@ -280,6 +281,7 @@ export class InProgressComponent implements OnInit {
     jQuery('.js-typeahead-ref').typeahead({
       dynamic: true,
       filter: false,
+      maxItem: 5,
       source: {
         phenotypes: {
           ajax: {
@@ -293,6 +295,7 @@ export class InProgressComponent implements OnInit {
       },
       callback: {
         onClickAfter: function (node: any, a: any, item: any, event: any) {
+          jQuery('.js-typeahead-ref').val('');
           jQuery('.hover-box').hide();
           scope.alerts = [];
           let addedRef = function(data: any) {
