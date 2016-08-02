@@ -20,10 +20,19 @@ export class ExerciseComponent implements OnInit {
   exercise: any;
   otherExercises: any;
   reposition: boolean = true;
+  dateNow: Date = new Date();
+  dateStart: Date = null;
+  dateEnd: Date = null;
   routerOnActivate(curr: RouteSegment) {
     let scope = this;
     let finishGetExercise = function(data: any) {
       scope.exercise = data;
+      if (scope.exercise.dateStart)
+        scope.dateStart = new Date(scope.exercise.dateStart);
+      scope.exercise.dateStart = scope.dateStart;
+      if (scope.exercise.dateEnd)
+        scope.dateEnd = new Date(scope.exercise.dateEnd);
+      scope.exercise.dateEnd = scope.dateEnd;
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
@@ -108,7 +117,7 @@ export class ExerciseComponent implements OnInit {
         return true;
       },
       invalid: function (el: any, handle: any) {
-        return !scope.reposition;
+        return !(scope.reposition && (!scope.dateStart || scope.dateStart > scope.dateNow));
       }
     });
     dragulaService.drag.subscribe((value: any) => {
@@ -146,7 +155,7 @@ export class ExerciseComponent implements OnInit {
   deleteExercise() {
     let scope = this;
     let finishDeleteExercise = function(data: any) {
-      this._router.navigate(['/dashboard', '/class-prof', scope.exercise.classID]);
+      scope._router.navigate(['/dashboard', '/class-prof', scope.exercise.classID]);
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
@@ -199,7 +208,7 @@ export class ExerciseComponent implements OnInit {
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
-      'exerciseID': scope.exercise.exerciseID,
+      'exerciseID': this.exercise.exerciseID,
       'problemID': problemID
     });
     this._http.post(globals.backendURL + '/restricted/exercise/prof/problem/remove', body, globals.options)
@@ -219,15 +228,146 @@ export class ExerciseComponent implements OnInit {
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
-      'exerciseID': scope.exercise.exerciseID,
+      'exerciseID': this.exercise.exerciseID,
       'toExerciseID': exerciseID
     });
-    this._http.post(globals.backendURL + '/restricted/exercise/prof/problem/copy', body, globals.options)
+    this._http.post(globals.backendURL + '/restricted/exercise/prof/copy-problems', body, globals.options)
       .map(res => res.json())
       .subscribe(
         data => finishCopyProblems(data),
         err => console.log(err),
         () => console.log('Copied problems')
+      );
+  }
+  startDate() {
+    let scope = this;
+    let finishStartDate = function(data: any) {
+      if (data.date)
+        scope.dateStart = new Date(data.date);
+      scope.exercise.dateStart = scope.dateStart;
+      if (data.changed) {
+        scope.alerts.push({
+          type: 'success',
+          msg: 'Start date updated',
+          closable: true
+        });
+      } else {
+        scope.alerts.push({
+          type: 'danger',
+          msg: 'Start date has not been updated.',
+          closable: true
+        });
+      }
+    };
+    this.alerts = [];
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'exerciseID': this.exercise.exerciseID,
+      'date': this.exercise.dateStart
+    });
+    this._http.post(globals.backendURL + '/restricted/exercise/prof/start-date', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishStartDate(data),
+        err => this.alerts.push({
+          type: 'danger',
+          msg: 'Please enter a valid date and time; they cannot be in the past or after the end date or time.',
+          closable: true
+        }),
+        () => console.log('Updated start date')
+      );
+  }
+  startNow() {
+    let scope = this;
+    let finishStartNow = function(data: any) {
+      if (data.date)
+        scope.dateStart = new Date(data.date);
+      scope.exercise.dateStart = scope.dateStart;
+      scope.dateNow = new Date();
+      scope.dateNow.setDate(scope.dateNow.getDate() + 1);
+      scope.alerts.push({
+        type: 'success',
+        msg: 'Start date updated',
+        closable: true
+      });
+      jQuery('#add-disease').hide();
+    };
+    this.alerts = [];
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'exerciseID': this.exercise.exerciseID
+    });
+    this._http.post(globals.backendURL + '/restricted/exercise/prof/start-now', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishStartNow(data),
+        err => console.log(err),
+        () => console.log('Start now')
+      );
+  }
+  endDate() {
+    let scope = this;
+    let finishEndDate = function(data: any) {
+      if (data.date)
+        scope.dateEnd = new Date(data.date);
+      scope.exercise.dateEnd = scope.dateEnd;
+      if (data.changed) {
+        scope.alerts.push({
+          type: 'success',
+          msg: 'End date updated',
+          closable: true
+        });
+      } else {
+        scope.alerts.push({
+          type: 'danger',
+          msg: 'End date has not been updated.',
+          closable: true
+        });
+      }
+    };
+    this.alerts = [];
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'exerciseID': this.exercise.exerciseID,
+      'date': this.exercise.dateEnd
+    });
+    this._http.post(globals.backendURL + '/restricted/exercise/prof/end-date', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishEndDate(data),
+        err => this.alerts.push({
+          type: 'danger',
+          msg: 'Please enter a valid date and time; they cannot be in the past or before the start date and time.',
+          closable: true
+        }),
+        () => console.log('Updated end date')
+      );
+  }
+  endNow() {
+    let scope = this;
+    let finishEndNow = function (data:any) {
+      if (data.date)
+        scope.dateEnd = new Date(data.date);
+      scope.exercise.dateEnd = scope.dateEnd;
+      scope.dateNow = new Date();
+      scope.dateNow.setDate(scope.dateNow.getDate() + 1);
+      scope.alerts.push({
+        type: 'success',
+        msg: 'End date updated',
+        closable: true
+      });
+    };
+    this.alerts = [];
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'exerciseID': this.exercise.exerciseID
+    });
+    this._http.post(globals.backendURL + '/restricted/exercise/prof/end-now', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishEndNow(data),
+        err => console.log(err),
+        () => console.log('End now')
       );
   }
 }

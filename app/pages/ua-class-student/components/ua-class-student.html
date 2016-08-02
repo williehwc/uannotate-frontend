@@ -3,8 +3,8 @@
     <!-- Page Heading -->
     <div class="row">
         <div class="col-lg-12">
-            <h2 class="page-header">
-                Class name
+            <h2 class="page-header" *ngIf="classe">
+                {{classe.className}}
             </h2>
             <ol class="breadcrumb">
                 <li class="active">
@@ -13,55 +13,38 @@
             </ol>
         </div>
     </div>
-    
+
     <div class="row">
         <div class="col-lg-12">
-            <table class="table table-hover table-sm">
+            <span *ngIf="classe && classe.exercises.length === 0">
+              <strong>No exercises</strong>
+            </span>
+            <table class="table table-hover table-sm" *ngIf="classe && classe.exercises.length > 0">
                 <thead class="thead-inverse">
                     <tr>
                         <th>Exercise</th>
-                        <th>Class</th>
                         <th>Due</th>
-                        <th>Status/grade</th>
+                        <th>Status</th>
+                        <th>Score</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody *ngFor="let exercise of classe.exercises">
                     <tr>
-                        <td>Somatosensory cortex</td>
-                        <td>Neuro</td>
-                        <td>2016-09-28 11:59 PM</td>
-                        <td>In progress</td>
-                    </tr>
-                    <tr>
-                        <td>Aorta</td>
-                        <td>Cardio</td>
-                        <td>2016-10-04 11:59 PM</td>
-                        <td>Saved</td>
-                    </tr>
-                    <tr>
-                        <td>Visual cortex</td>
-                        <td>Neuro</td>
-                        <td>2016-10-15 11:59 PM</td>
-                        <td>Open</td>
-                    </tr>
-                    <tr>
-                        <td>Insula</td>
-                        <td>Neuro</td>
-                        <td>78%</td>
-                    </tr>
-                    <tr>
-                        <td>Auditory cortex</td>
-                        <td>Neuro</td>
-                        <td>83%</td>
-                    </tr>
-                    <tr>
-                        <td>Glomerulus</td>
-                        <td>Urol</td>
-                        <td>75%</td>
+                        <td *ngIf="!((!exercise.dateEnd || exercise.dateDue > dateNow) || exercise.status === -2)">
+                          {{exercise.exerciseName}}
+                        </td>
+                        <td *ngIf="(!exercise.dateEnd || exercise.dateDue > dateNow) || exercise.status === -2">
+                          <a style="cursor: pointer" (click)="openExercise(exercise.exerciseID)">{{exercise.exerciseName}}</a>
+                        </td>
+                        <td>{{exercise.dateDue}}</td>
+                        <td *ngIf="(!exercise.dateEnd || exercise.dateDue > dateNow) && exercise.numAnnotations === 0">New</td>
+                        <td *ngIf="(!exercise.dateEnd || exercise.dateDue > dateNow) && exercise.numAnnotations > 0 && exercise.status === -1">In progress</td>
+                        <td *ngIf="(exercise.dateEnd && exercise.dateDue <= dateNow) && (exercise.numAnnotations === 0 || exercise.status === -1)">Missed</td>
+                        <td *ngIf="exercise.status === -2">Submitted</td>
+                        <td></td>
                     </tr>
                 </tbody>
             </table>
-            <p>Grades marked with an asterisk (*) are not final and may be increased before your instructor enters the grades into your university's LMS.</p>
         </div>
     </div>
 

@@ -25,7 +25,7 @@ export class ClassProfComponent {
       'token': localStorage.getItem('uaToken'),
       'classID': parseInt(curr.getParam('id'))
     });
-    this._http.post(globals.backendURL + '/restricted/class/view', body, globals.options)
+    this._http.post(globals.backendURL + '/restricted/class/prof/view', body, globals.options)
       .map(res => res.json())
       .subscribe(
         data => finishGetClass(data),

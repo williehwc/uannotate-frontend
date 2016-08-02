@@ -21,10 +21,10 @@
       <button class="btn btn-secondary" (click)="renameExercise()">
         Rename exercise
       </button>
-      <button class="btn btn-danger" (click)="deleteExercise()">
+      <button class="btn btn-danger" (click)="deleteExercise()" *ngIf="!dateStart || dateStart > dateNow">
         Delete
       </button>
-      <span style="opacity: 0.5">
+      <span style="opacity: 0.5" *ngIf="!dateStart || dateStart > dateNow">
         <i>&emsp;You can delete this exercise before it starts.</i>
       </span>
     </div>
@@ -50,7 +50,7 @@
               </p>
               <ul class="list-group" [dragula]="'problems'">
                 <li class="list-group-item problem" *ngFor="let problem of exercise.problems" id="p{{problem.problemID}}">
-                  <button type="button" class="btn btn-sm btn-danger" style="float:right;margin-left:5px;height:25px;padding-top:1px;" (click)="removeProblem(problem.problemID)" title="Remove">
+                  <button type="button" class="btn btn-sm btn-danger" style="float:right;margin-left:5px;height:25px;padding-top:1px;" (click)="removeProblem(problem.problemID)" title="Remove" *ngIf="!dateStart || dateStart > dateNow">
                     <i class="fa fa-times" aria-hidden="true"></i>
                   </button>
                   <button type="button" class="btn btn-sm btn-info" style="float:right;margin-left:5px;height:25px;padding-top:1px;" (click)="lookUpDisease(problem.diseaseName)" title="Look up">
@@ -59,12 +59,14 @@
                   <button type="button" class="btn btn-sm btn-secondary" style="float:right;height:25px;padding-top:1px;" (click)="gotoPhenository(problem.diseaseDB, problem.diseaseName)" title="View in Phenository">
                     <i class="fa fa-cloud" aria-hidden="true" style="color:#0275d8;"></i>
                   </button>
-                  {{problem.diseaseName}}
+                  <span *ngIf="problem.numAnnotations > 0">{{problem.diseaseName}}</span>
+                  <span *ngIf="problem.numAnnotations === 0"><i>{{problem.diseaseName}}</i></span>
                 </li>
               </ul>
+              <br />
             </div>
             <div class="col-lg-4">
-              <div class="card card-block">
+              <div class="card card-block" id="add-disease">
                 <h4>Add a disease</h4>
                 <p>Enter disease name or ID:</p>
                 <form role="form">
@@ -72,7 +74,7 @@
                     <div class="typeahead__container">
                       <div class="typeahead__field">
                         <span class="typeahead__query">
-                            <input class="js-typeahead" autocomplete="off" [(ngModel)]="typeAheadBox">
+                            <input class="js-typeahead" autocomplete="off" [(ngModel)]="typeAheadBox" [disabled]="!(!dateStart || dateStart > dateNow)">
                         </span>
                       </div>
                     </div>
@@ -80,6 +82,13 @@
                 </form>
                 <p style="opacity: 0.5"><em>No symbols, please.</em></p>
               </div>
+              <div class="card card-block">
+                <h5>Tip</h5>
+                <p><i>Italicized diseases</i> do not have any published annotations. For grading purposes, you should add at least one disease with published annotation(s).</p>
+              </div>
+              <!--<div class="card card-block" *ngIf="!(!dateStart || dateStart > dateNow)">
+                You cannot add, move, or remove diseases after the exercise has started.
+              </div>-->
               <div dropdown keyboardNav="true" *ngIf="otherExercises && exercise && exercise.problems.length > 0">
                 <a href class="btn btn-secondary dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false" dropdownToggle>
                   Copy all to another exercise
@@ -104,14 +113,13 @@
           <div class="row">
             <div class="col-lg-6">
               <h4>Start</h4>
+              <p>Date and time:</p>
+              <input class="form-control" *ngIf="exercise" [(ngModel)]="exercise.dateStart" (keyup.enter)="startDate()" [disabled]="!(!dateStart || dateStart > dateNow)">
               <br />
-              <input [(ngModel)]="startDate" datetime-picker date-only="false" />
-              <br />
-              <br />
-              <button class="btn btn-primary" (click)="updateStart()">
+              <button class="btn btn-primary" (click)="startDate()" *ngIf="!dateStart || dateStart > dateNow">
                 Update
               </button>
-              <button class="btn btn-secondary" (click)="startNow()">
+              <button class="btn btn-secondary" (click)="startNow()" *ngIf="!dateStart || dateStart > dateNow">
                 Start now
               </button>
               <br />
@@ -119,14 +127,13 @@
             </div>
             <div class="col-lg-6">
               <h4>End (due)</h4>
+              <p>Date and time:</p>
+              <input class="form-control" *ngIf="exercise" [(ngModel)]="exercise.dateEnd" (keyup.enter)="endDate()" [disabled]="!(dateStart && (!dateEnd || dateEnd > dateNow))">
               <br />
-              <input [(ngModel)]="endDate" datetime-picker date-only="false" />
-              <br />
-              <br />
-              <button class="btn btn-primary" (click)="updateEnd()">
+              <button class="btn btn-primary" (click)="endDate()" *ngIf="dateStart && (!dateEnd || dateEnd > dateNow)">
                 Update
               </button>
-              <button class="btn btn-secondary" (click)="endNow()">
+              <button class="btn btn-secondary" (click)="endNow()" *ngIf="dateStart <= dateNow && (!dateEnd || dateEnd > dateNow)">
                 End now
               </button>
               <br />
