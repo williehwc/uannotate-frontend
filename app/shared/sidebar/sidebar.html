@@ -4,24 +4,27 @@
 <nav class="sidebar" [ngClass]="{sidebarPushRight: isActive}">
     <ul class="list-group">
         <a [routerLink]="['/dashboard', '/home']" class="list-group-item">
-            <i class="fa fa-fw fa-dashboard"></i> Dashboard
+            <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-dashboard"></i></span> Dashboard
         </a>
         <a [routerLink]="['/dashboard', '/in-progress']" class="list-group-item" (dblclick)="gotoAnnotationID()" title="Double-click to jump to an annotation ID." *ngIf="profLevel">
-            <i class="fa fa-fw fa-pencil"></i> Annotator
+            <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-pencil"></i></span> Annotator
         </a>
         <a [routerLink]="['/dashboard', '/in-progress']" class="list-group-item" (dblclick)="gotoAnnotationID()" *ngIf="studentLevel">
-          <i class="fa fa-fw fa-pencil"></i> Annotator
+          <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-pencil"></i></span> Annotator
+        </a>
+        <a [routerLink]="['/dashboard', '/comparator']" class="list-group-item">
+          <span style="display: inline-block;width: 20px;"><i class="fa fa-columns"></i></span> Comparator
         </a>
         <a *ngIf="profLevel" [routerLink]="['/dashboard', '/my-annotations']" class="list-group-item">
-          <i class="fa fa-fw fa-folder"></i> My annotations
+          <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-folder"></i></span> My annotations
         </a>
         <a *ngIf="profLevel" [routerLink]="['/dashboard', '/phenository']" class="list-group-item">
-          <i class="fa fa-cloud" aria-hidden="true"></i> Phenository
+          <span style="display: inline-block;width: 20px;"><i class="fa fa-cloud" aria-hidden="true"></i></span> Phenository
         </a>
         <!-- dropDown item -->
         <div class="nested-menu">
             <a class="list-group-item" (click)="addExpandClass('pages')">
-                <span><i class="fa fa-users"></i> &#8201;My classes &#9662;</span>
+                <span><span style="display: inline-block;width: 20px;"><i class="fa fa-users"></i></span> &#8201;My classes &#9662;</span>
             </a>
             <li class="nested" [ngClass]="{'expand' : showMenu === 'pages' }">
                 <ul class="submenu" *ngFor="let class of classes">
@@ -33,16 +36,16 @@
             </li>
         </div>
         <a *ngIf="studentLevel" [routerLink]="['/dashboard', '/join-class']" class="list-group-item">
-            <i class="fa fa-fw fa-plus"></i> Join class
+            <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-plus"></i></span> Join class
         </a>
         <a *ngIf="studentLevel" [routerLink]="['/dashboard', '/help-student']" class="list-group-item">
-            <i class="fa fa-fw fa-question"></i> Help
+            <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-question"></i></span> Help
         </a>
         <a *ngIf="profLevel" [routerLink]="['/dashboard', '/new-class']" class="list-group-item">
-          <i class="fa fa-fw fa-plus"></i> New class
+          <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-plus"></i></span> New class
         </a>
         <a *ngIf="profLevel" [routerLink]="['/dashboard', '/help-prof']" class="list-group-item">
-          <i class="fa fa-fw fa-question"></i> Help
+          <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-question"></i></span> Help
         </a>
     </ul>
 </nav>

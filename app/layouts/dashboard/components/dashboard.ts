@@ -3,6 +3,7 @@ import { ROUTER_DIRECTIVES, Routes } from '@angular/router';
 
 import {HomeComponent} from '../../../pages/ua-home/components/ua-home';
 import {InProgressComponent} from '../../../pages/ua-in-progress/components/ua-in-progress';
+import {ComparatorComponent} from '../../../pages/ua-comparator/components/ua-comparator';
 import {MyAnnotationsComponent} from '../../../pages/ua-my-annotations/components/ua-my-annotations';
 import {PhenositoryComponent} from '../../../pages/ua-phenository/components/ua-phenository';
 import {ClassStudentComponent} from '../../../pages/ua-class-student/components/ua-class-student';
@@ -14,6 +15,7 @@ import {HelpStudentComponent} from '../../../pages/ua-help-student/components/ua
 import {HelpProfComponent} from '../../../pages/ua-help-prof/components/ua-help-prof';
 import {AccountComponent} from '../../../pages/ua-account/components/ua-account';
 import {PhenositoryReloadComponent} from '../../../pages/ua-phenository-reload/components/ua-phenository-reload';
+import {SubmitComponent} from '../../../pages/ua-submit/components/ua-submit';
 
 import {TopNavComponent} from '../../../shared/topnav/topnav';
 import {SidebarComponent} from '../../../shared/sidebar/sidebar';
@@ -31,6 +33,7 @@ import {SidebarComponent} from '../../../shared/sidebar/sidebar';
   { path: '/home', component: HomeComponent},
   { path: '/in-progress/:id', component: InProgressComponent},
   { path: '/in-progress', component: InProgressComponent},
+  { path: '/comparator', component: ComparatorComponent},
   { path: '/my-annotations', component: MyAnnotationsComponent},
   { path: '/phenository', component: PhenositoryComponent},
   { path: '/class-student/:id', component: ClassStudentComponent},
@@ -41,7 +44,8 @@ import {SidebarComponent} from '../../../shared/sidebar/sidebar';
   { path: '/help-student', component: HelpStudentComponent},
   { path: '/help-prof', component: HelpProfComponent},
   { path: '/account', component: AccountComponent},
-  { path: '/phenository-reload', component: PhenositoryReloadComponent}
+  { path: '/phenository-reload', component: PhenositoryReloadComponent},
+  { path: '/submit/:id', component: SubmitComponent}
 ])
 
 export class DashboardComponent { }

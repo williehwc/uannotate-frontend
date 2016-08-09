@@ -1,0 +1,148 @@
+<div class="container-fluid">
+
+  <!-- Page Heading -->
+  <div class="row">
+    <div class="col-lg-12">
+      <h2 class="page-header">
+        Comparator
+      </h2>
+      <ol class="breadcrumb">
+        <li class="active">
+          <i class="fa fa-info-circle"></i> Compare two annotations for
+        </li>
+      </ol>
+      <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true">
+        {{ alert?.msg }}
+      </alert>
+      <button class="btn btn-secondary" style="color:#0275d8;">
+        <i class="fa fa-cloud" aria-hidden="true"></i> View in Phenository
+      </button>
+      <button class="btn btn-info" (click)="lookUpDisease()">
+        <i class="fa fa-book" aria-hidden="true"></i> Look up
+      </button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card card-block" style="margin-top: 10px">
+        <form style="margin-bottom: 10px">
+          <div class="row">
+            <div class="col-lg-7">
+              <input type="radio" name="grade" id="no-grade" value="no-grade">
+              <label for="no-grade">Do not grade</label>
+              <br />
+              <input type="radio" name="grade" id="auto-grade" value="auto-grade">
+              <label for="auto-grade">Award the calculated score for this response: XX%</label>
+              <br />
+              <input type="radio" name="grade" id="manual-grade" value="manual-grade">
+              <label for="manual-grade">Define a score manually:</label>
+              <input type="text" name="score" id="score" maxlength="2" size="2" /> %
+            </div>
+            <div class="col-lg-5">
+              <label for="comment">Comment</label>
+              <br />
+              <textarea id="comment"></textarea>
+            </div>
+          </div>
+        </form>
+        <button class="btn btn-secondary">
+          Save
+        </button>
+        <button class="btn btn-primary">
+          Save and release
+        </button>
+        <button class="btn btn-primary">
+          Update
+        </button>
+        <button class="btn btn-danger">
+          Unrelease score
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-6">
+      <div dropdown keyboardNav="true" style="display: inline">
+        <a href class="btn btn-secondary dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false" dropdownToggle>
+          Lorem ipsum
+        </a>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="simple-btn-keyboard-nav">
+          <li role="menuitem">
+            <a class="dropdown-item" style="cursor:pointer">
+              Lorem ipsum
+            </a>
+          </li>
+        </ul>
+      </div>
+      <button class="btn btn-secondary" title="Open in Annotator" (click)="goToAnnotator()">
+        <i class="fa fa-fw fa-pencil"></i>
+      </button>
+    </div>
+    <div class="col-lg-6">
+      <div dropdown keyboardNav="true" style="display: inline">
+        <a href class="btn btn-secondary dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false" dropdownToggle>
+          Lorem ipsum
+        </a>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="simple-btn-keyboard-nav">
+          <li role="menuitem">
+            <a class="dropdown-item" style="cursor:pointer">
+              Lorem ipsum
+            </a>
+          </li>
+        </ul>
+      </div>
+      <button class="btn btn-secondary" title="Open in Annotator" (click)="goToAnnotatorCompareTo()">
+        <i class="fa fa-fw fa-pencil"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <br />
+      <div class="card card-block card-header">
+        <strong>
+          System
+        </strong>
+        <span style="float: right">XX%</span>
+        <input type="range" name="points" min="0" max="100" style="float: right; margin-right: 10px" />
+      </div>
+      <div class="row">
+        <div class="col-lg-6">
+          <div style="height: 30px">
+            <pre class="frequency-onset" style="background-image: url(/assets/img/-1.png);">CHI</pre>
+            Delayed cranial suture closure
+            <img src="/assets/img/bonus.gif" style="height: 20px" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-12">
+      <br />
+      <div class="card card-block card-header">
+        <strong>
+          System
+        </strong>
+        <span style="float: right">XX%</span>
+        <input type="range" name="points" min="0" max="100" style="float: right; margin-right: 10px" />
+      </div>
+      <div class="row">
+        <div class="col-lg-6">
+          <div style="height: 30px">
+            <pre class="frequency-onset" style="background-image: url(/assets/img/-1.png);">CHI</pre>
+            Delayed cranial suture closure
+            <img src="/assets/img/bonus.gif" style="height: 20px" />
+          </div>
+          <div style="height: 30px">
+            <pre class="frequency-onset" style="background-image: url(/assets/img/-1.png);">CHI</pre>
+            Delayed cranial suture closure
+            <img src="/assets/img/bonus.gif" style="height: 20px" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

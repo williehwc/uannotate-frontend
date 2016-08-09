@@ -95,6 +95,7 @@ export class ClassProfComponent {
     let scope = this;
     let finishNewExercise = function(data: any) {
       scope.classe.exercises.push({
+        exerciseID: data.exerciseID,
         exerciseName: newExerciseName,
         dateStart: '',
         dateEnd: ''

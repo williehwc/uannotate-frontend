@@ -11,6 +11,9 @@
                     <i class="fa fa-info-circle"></i> Start or continue an exercise
                 </li>
             </ol>
+            <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true">
+              {{ alert?.msg }}
+            </alert>
         </div>
     </div>
 
@@ -30,10 +33,10 @@
                 </thead>
                 <tbody *ngFor="let exercise of classe.exercises">
                     <tr>
-                        <td *ngIf="!((!exercise.dateEnd || exercise.dateDue > dateNow) || exercise.status === -2)">
+                        <td *ngIf="(exercise.dateEnd && exercise.dateDue <= dateNow) && (exercise.numAnnotations === 0 || exercise.status === -1)">
                           {{exercise.exerciseName}}
                         </td>
-                        <td *ngIf="(!exercise.dateEnd || exercise.dateDue > dateNow) || exercise.status === -2">
+                        <td *ngIf="!((exercise.dateEnd && exercise.dateDue <= dateNow) && (exercise.numAnnotations === 0 || exercise.status === -1))">
                           <a style="cursor: pointer" (click)="openExercise(exercise.exerciseID)">{{exercise.exerciseName}}</a>
                         </td>
                         <td>{{exercise.dateDue}}</td>
@@ -41,7 +44,7 @@
                         <td *ngIf="(!exercise.dateEnd || exercise.dateDue > dateNow) && exercise.numAnnotations > 0 && exercise.status === -1">In progress</td>
                         <td *ngIf="(exercise.dateEnd && exercise.dateDue <= dateNow) && (exercise.numAnnotations === 0 || exercise.status === -1)">Missed</td>
                         <td *ngIf="exercise.status === -2">Submitted</td>
-                        <td></td>
+                        <td><span *ngIf="exercise.possibleScore > 0">{{exercise.sumScore}} / {{exercise.possibleScore}} ({{100 * exercise.sumScore / exercise.possibleScore}}%)</span></td>
                     </tr>
                 </tbody>
             </table>

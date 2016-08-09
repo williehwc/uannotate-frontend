@@ -10,6 +10,20 @@ $sidebar-background-color: #424242;
 body {
   overflow-y: scroll;
 }
+.ok {
+  background: url(/assets/img/ok-question.gif);
+  width: 33px;
+  height: 20px;
+  float: right;
+  margin-right: 10px;
+  background-size: 33px 20px;
+  margin-top: 1px;
+  cursor: pointer;
+}
+.ok:hover {
+  background: url(/assets/img/ok-exclamation.gif);
+  background-size: 33px 20px;
+}
 .problem {
   cursor: grab;
 }
@@ -45,6 +59,15 @@ body {
 }
 .gu-unselectable {
   cursor: grabbing;
+}
+.frequency-onset {
+  height: 24px;
+  width: 72px;
+  display: inline-table;
+  background-size: 72px 24px;
+  padding-left: 34px;
+  line-height: 24px;
+  margin-right: 10px;
 }
 .paper {
   width: 32px;
@@ -163,7 +186,7 @@ body {
   width: calc(100% - 225px);
   right: 0;
   bottom: 0;
-  background: rgba(222, 222, 222, 0.8);
+  background: rgba(241, 103, 0, 1);
   z-index: 1000;
 }
 

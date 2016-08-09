@@ -8,7 +8,7 @@
   <div class="row">
     <div class="col-lg-12">
       <h2 class="page-header" *ngIf="exercise">
-        <span style="opacity:.5">{{exercise.className}} »</span> {{exercise.exerciseName}}
+        <a [routerLink]="['/dashboard', '/class-prof', exercise.classID]">{{exercise.className}}</a> » {{exercise.exerciseName}}
       </h2>
       <ol class="breadcrumb">
         <li class="active">
@@ -49,18 +49,23 @@
                 <strong>No diseases yet</strong>
               </p>
               <ul class="list-group" [dragula]="'problems'">
-                <li class="list-group-item problem" *ngFor="let problem of exercise.problems" id="p{{problem.problemID}}">
+                <li class="list-group-item problem" *ngFor="let problem of exercise.problems; let i = index" id="p{{problem.problemID}}">
                   <button type="button" class="btn btn-sm btn-danger" style="float:right;margin-left:5px;height:25px;padding-top:1px;" (click)="removeProblem(problem.problemID)" title="Remove" *ngIf="!dateStart || dateStart > dateNow">
-                    <i class="fa fa-times" aria-hidden="true"></i>
+                    <i class="fa fa-times"></i>
                   </button>
                   <button type="button" class="btn btn-sm btn-info" style="float:right;margin-left:5px;height:25px;padding-top:1px;" (click)="lookUpDisease(problem.diseaseName)" title="Look up">
-                    <i class="fa fa-book" aria-hidden="true"></i>
+                    <i class="fa fa-book"></i>
                   </button>
                   <button type="button" class="btn btn-sm btn-secondary" style="float:right;height:25px;padding-top:1px;" (click)="gotoPhenository(problem.diseaseDB, problem.diseaseName)" title="View in Phenository">
-                    <i class="fa fa-cloud" aria-hidden="true" style="color:#0275d8;"></i>
+                    <i class="fa fa-cloud" style="color:#0275d8;"></i>
                   </button>
-                  <span *ngIf="problem.numAnnotations > 0">{{problem.diseaseName}}</span>
-                  <span *ngIf="problem.numAnnotations === 0"><i>{{problem.diseaseName}}</i></span>
+                  <span><span style="background: black;color: white;" *ngIf="showNumbers">&nbsp;{{i + 1}}&nbsp;</span> {{problem.diseaseName}}</span>
+                  <span *ngIf="problem.numAnnotations === 0" style="color:rgb(217, 83, 79);font-size: small">
+                    <br />
+                    This disease has no published annotations.
+                    <a (click)="createAnnotation(problem.diseaseName)" style="cursor: pointer" *ngIf="problem.numMyAnnotations === 0">Create annotation</a>
+                    <a (click)="createAnnotation(problem.diseaseName)" style="cursor: pointer" *ngIf="problem.numMyAnnotations > 0" [routerLink]="['/dashboard', '/my-annotations']">My annotations</a>
+                  </span>
                 </li>
               </ul>
               <br />
@@ -82,10 +87,6 @@
                 </form>
                 <p style="opacity: 0.5"><em>No symbols, please.</em></p>
               </div>
-              <div class="card card-block">
-                <h5>Tip</h5>
-                <p><i>Italicized diseases</i> do not have any published annotations. For grading purposes, you should add at least one disease with published annotation(s).</p>
-              </div>
               <!--<div class="card card-block" *ngIf="!(!dateStart || dateStart > dateNow)">
                 You cannot add, move, or remove diseases after the exercise has started.
               </div>-->
@@ -105,8 +106,8 @@
           </div>
 
         </tab>
-        <tab>
-          <template tabHeading *ngIf="exercise">
+        <tab *ngIf="exercise">
+          <template tabHeading>
             Start/End
           </template>
           <br />
@@ -139,12 +140,54 @@
               <br />
               <br />
             </div>
+            <div class="col-lg-12">
+              <div class="card card-block">
+                <h5>Tip</h5>
+                <ol>
+                  <li>The default time zone is GMT. You can specify a time zone by appending the date with a time zone abbreviation, such as EST or PDT.</li>
+                  <li>Start and end dates are optional. Alternatively, you can start and end exercises at any time using the <strong>Start now</strong> and <strong>End now</strong> buttons.</li>
+                </ol>
+              </div>
+            </div>
           </div>
         </tab>
-        <tab>
-          <template tabHeading *ngIf="exercise">
-            Submissions
+        <tab *ngIf="exercise">
+          <template tabHeading>
+            Submissions ({{exercise.submissions.length}})
           </template>
+          <br />
+          <strong *ngIf="exercise.submissions.length === 0">No submissions yet</strong>
+          <button class="btn btn-secondary" (click)="renameExercise()">
+            <i class="fa fa-check-square-o" aria-hidden="true"></i> All
+          </button>
+          <button class="btn btn-primary" (click)="renameExercise()">
+            Release scores
+          </button>
+          <button class="btn btn-danger" (click)="renameExercise()">
+            Unrelease scores
+          </button>
+          <br />
+          <br />
+          <div class="table-responsive" *ngIf="exercise.submissions.length > 0">
+            <table class="table table-hover table-sm">
+              <thead class="thead-inverse">
+              <tr>
+                <th></th>
+                <th>Student</th>
+                <th>Score</th>
+                <th>Released</th>
+              </tr>
+              </thead>
+              <tbody *ngFor="let submission of exercise.submissions">
+              <tr>
+                <td><input type="checkbox" value="{{submission.userID}}" /></td>
+                <td>{{submission.studentName}}</td>
+                <td><span *ngIf="submission.possibleScore > 0">{{submission.sumScore}} / {{submission.possibleScore}} ({{100 * submission.sumScore / submission.possibleScore}}%)</span></td>
+                <td>{{submission.numReleased}} / {{submission.numAnnotations}}</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
         </tab>
       </tabset>
     </div>

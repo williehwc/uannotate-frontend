@@ -19,8 +19,12 @@ import {Dragula, DragulaService} from 'ng2-dragula/ng2-dragula';
 export class InProgressComponent implements OnInit {
   alerts: Array<Object>;
   annotation: any = null;
-  markUncitedPhenotypes: boolean = false;
+  markUncitedPhenotypes: boolean = true;
+  systemNames: Array<Object> = [];
+  studentLevel: boolean = false;
+  profLevel: boolean = false;
   routerOnActivate(curr: RouteSegment) {
+    let scope = this;
     if (curr.getParam('id'))
       localStorage.setItem('uaAnnotation', curr.getParam('id'));
     if (localStorage.getItem('uaAnnotation') === null) {
@@ -33,6 +37,25 @@ export class InProgressComponent implements OnInit {
       return;
     }
     this.gotoAnnotation(localStorage.getItem('uaAnnotation'), 0);
+    let gotLevel = function (data: any) {
+      if (data.level === 0) {
+        scope.studentLevel = true;
+        scope.profLevel = false;
+      } else {
+        scope.studentLevel = false;
+        scope.profLevel = true;
+      }
+    };
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken')
+    });
+    this._http.post(globals.backendURL + '/restricted/user', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => gotLevel(data),
+        err => console.log(err),
+        () => console.log('Got level')
+      );
   }
   jumpToAnnotation( annotationID: number ) {
     this._router.navigate(['/dashboard', '/in-progress', annotationID]);
@@ -44,14 +67,9 @@ export class InProgressComponent implements OnInit {
         return false;
       },
       invalid: function (el: any, handle: any) {
-        return scope.annotation.status === 2;
+        return scope.annotation.status === 2 || scope.annotation.status === -2;
       },
       copy: true
-    });
-    dragulaService.setOptions('phenotypes', {
-      invalid: function (el: any, handle: any) {
-        return true; // don't prevent any drags from initiating by default
-      }
     });
     dragulaService.drag.subscribe((value: any) => {
       jQuery('.ref').css('cursor', 'grabbing');
@@ -84,6 +102,7 @@ export class InProgressComponent implements OnInit {
             scope.annotation.phenotypes[i].citations.sort(function(a: any, b: any) {
               return a.number - b.number;
             });
+            scope.annotation.phenotypes[i].notOK = 0;
             break;
           }
         }
@@ -112,7 +131,7 @@ export class InProgressComponent implements OnInit {
     jQuery('.add-bar').hide();
     let initializeAnnotation = function (data:any) {
       scope.annotation = data;
-      if (data.status !== 2) {
+      if (data.status !== 2 && data.status !== -2) {
         jQuery('.add-bar').show();
       }
       // Look up phenotype names
@@ -121,6 +140,11 @@ export class InProgressComponent implements OnInit {
           if (data.phenotypes[i].hpo === datum.id) {
             data.phenotypes[i].phenotypeName = datum.name;
             data.phenotypes[i].phenotypeDefinition = datum.def;
+            // If the phenotype is not an abnormality, we should remove it
+            if (datum.term_category.indexOf('HP:0000118') === -1) {
+              data.phenotypes[i].display = false;
+              scope.removePhenotype(data.phenotypes[i].phenotypeID, false);
+            }
             break;
           }
         }
@@ -143,6 +167,17 @@ export class InProgressComponent implements OnInit {
         }
         scope.annotation = data;
       };
+      let loadedSystem = function(datum: any) {
+        console.log(datum);
+        // Add to list of systemNames
+        if (scope.systemNames.indexOf(datum.systemName) === -1)
+          scope.systemNames.push(datum.systemName);
+        for (let i = 0; i < data.phenotypes.length; i++) {
+          if (data.phenotypes[i].phenotypeID === datum.phenotypeID) {
+            data.phenotypes[i].systemName = datum.systemName;
+          }
+        }
+      };
       for (let i = 0; i < data.phenotypes.length; i++) {
         let body = JSON.stringify({
           'phenotypeName': data.phenotypes[i].hpo
@@ -163,6 +198,18 @@ export class InProgressComponent implements OnInit {
           .map(res => res.json())
           .subscribe(
             data => loadedCitation(data),
+            err => console.log(err),
+            () => console.log('Got citation')
+          );
+        body = JSON.stringify({
+          'token': localStorage.getItem('uaToken'),
+          'annotationID': data.annotationID,
+          'phenotypeID': data.phenotypes[i].phenotypeID
+        });
+        scope._http.post(globals.backendURL + '/restricted/annotation/system', body, globals.options)
+          .map(res => res.json())
+          .subscribe(
+            data => loadedSystem(data),
             err => console.log(err),
             () => console.log('Got citation')
           );
@@ -255,7 +302,7 @@ export class InProgressComponent implements OnInit {
           jQuery('.hover-box').text('Loading definition…');
           jQuery('.hover-box').show();
           let loadedDefinition = function(data: any) {
-            if (data.name === display && scope.annotation.status === 0) {
+            if (data.name === display && scope.studentLevel) {
               jQuery('.hover-box').html(data.def);
             } else if (data.name === display) {
               jQuery('.hover-box').html('<strong>' + data.id + '</strong><br />' + data.def);
@@ -363,6 +410,7 @@ export class InProgressComponent implements OnInit {
       for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
         if (scope.annotation.phenotypes[i].phenotypeID === data.phenotypeID) {
           scope.annotation.phenotypes[i].observed = data.observed;
+          scope.annotation.phenotypes[i].notOK = 0;
         }
       }
     };
@@ -386,6 +434,7 @@ export class InProgressComponent implements OnInit {
       for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
         if (scope.annotation.phenotypes[i].phenotypeID === data.phenotypeID) {
           scope.annotation.phenotypes[i].frequency = data.frequency;
+          scope.annotation.phenotypes[i].notOK = 0;
         }
       }
     };
@@ -409,6 +458,7 @@ export class InProgressComponent implements OnInit {
       for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
         if (scope.annotation.phenotypes[i].phenotypeID === data.phenotypeID) {
           scope.annotation.phenotypes[i].onset = data.onset;
+          scope.annotation.phenotypes[i].notOK = 0;
         }
       }
     };
@@ -426,10 +476,11 @@ export class InProgressComponent implements OnInit {
         () => console.log('Finish set onset')
       );
   }
-  removePhenotype(phenotypeID: number) {
+  removePhenotype(phenotypeID: number, reload: boolean) {
     let scope = this;
     let finishRemovePhenotype = function(data: any) {
-      scope.gotoAnnotation(localStorage.getItem('uaAnnotation'), document.documentElement.scrollTop || document.body.scrollTop);
+      if (reload)
+        scope.gotoAnnotation(localStorage.getItem('uaAnnotation'), document.documentElement.scrollTop || document.body.scrollTop);
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
@@ -610,5 +661,8 @@ export class InProgressComponent implements OnInit {
         err => console.log(err),
         () => console.log('Cloned')
       );
+  }
+  submitExercise(exerciseID: number) {
+    this._router.navigate(['/dashboard', '/submit', exerciseID]);
   }
 }

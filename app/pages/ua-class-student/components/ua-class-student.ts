@@ -1,5 +1,6 @@
 import {Component} from '@angular/core';
 import {Router, ROUTER_DIRECTIVES, RouteSegment} from '@angular/router';
+import {AlertComponent} from 'ng2-bootstrap/ng2-bootstrap';
 import {Http} from '@angular/http';
 import globals = require('../../../globals');
 import 'rxjs/Rx';
@@ -8,7 +9,7 @@ import 'rxjs/Rx';
   moduleId: module.id,
 	selector: 'ua-class-student',
 	templateUrl: 'ua-class-student.html',
-  directives: [[ROUTER_DIRECTIVES]]
+  directives: [[ROUTER_DIRECTIVES, AlertComponent]]
 })
 
 
@@ -21,9 +22,9 @@ export class ClassStudentComponent {
     let finishGetClass = function(data: any) {
       scope.classe = data;
       for (let i = 0; i < scope.classe.exercises.length; i++) {
-        scope.classe.exercises[i].dateDue = new Date(scope.classe.exercises[i].dateEnd);
+        if (scope.classe.exercises[i].dateEnd)
+          scope.classe.exercises[i].dateDue = new Date(scope.classe.exercises[i].dateEnd);
       }
-      console.log(scope.classe);
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
@@ -54,7 +55,7 @@ export class ClassStudentComponent {
         data => finishOpenExercise(data),
         err => this.alerts.push({
           type: 'danger',
-          msg: 'Unable to open exercise. Possible reasons: exercise is empty or past due date',
+          msg: 'Unable to open exercise. Possible reasons: exercise is empty or has not started',
           closable: true
         }),
         () => console.log('Opened exercise')

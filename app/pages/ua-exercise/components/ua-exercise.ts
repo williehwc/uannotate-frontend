@@ -23,6 +23,7 @@ export class ExerciseComponent implements OnInit {
   dateNow: Date = new Date();
   dateStart: Date = null;
   dateEnd: Date = null;
+  showNumbers: boolean = false;
   routerOnActivate(curr: RouteSegment) {
     let scope = this;
     let finishGetExercise = function(data: any) {
@@ -33,6 +34,8 @@ export class ExerciseComponent implements OnInit {
       if (scope.exercise.dateEnd)
         scope.dateEnd = new Date(scope.exercise.dateEnd);
       scope.exercise.dateEnd = scope.dateEnd;
+      if (scope.dateStart && scope.dateStart <= scope.dateNow)
+        scope.showNumbers = true;
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
@@ -290,7 +293,7 @@ export class ExerciseComponent implements OnInit {
         msg: 'Start date updated',
         closable: true
       });
-      jQuery('#add-disease').hide();
+      jQuery('.js-typeahead').prop('disabled', true);
     };
     this.alerts = [];
     let body = JSON.stringify({
@@ -368,6 +371,34 @@ export class ExerciseComponent implements OnInit {
         data => finishEndNow(data),
         err => console.log(err),
         () => console.log('End now')
+      );
+  }
+  createAnnotation(diseaseName: string) {
+    let scope = this;
+    this.alerts = [];
+    let finishCreateAnnotation = function (data:any) {
+      if (data.success) {
+        scope._router.navigate(['/dashboard', '/in-progress', data.annotationID]);
+      } else {
+        scope.alerts.push({
+          type: 'danger',
+          msg: 'Invalid disease',
+          closable: true
+        });
+      }
+    };
+    // Create new annotation
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'diseaseName': diseaseName,
+      'vocabulary': 'omim' //ORPHA TODO
+    });
+    this._http.post(globals.backendURL + '/restricted/annotations/prof/new-annotation', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishCreateAnnotation(data),
+        err => console.log(err),
+        () => console.log('Created annotation')
       );
   }
 }
