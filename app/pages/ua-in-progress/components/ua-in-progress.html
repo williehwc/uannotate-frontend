@@ -69,6 +69,12 @@
         <button class="btn btn-primary" (click)="submitExercise(annotation.exerciseID)" *ngIf="annotation.status == -1">
           Submit
         </button>
+        <button class="btn btn-secondary" (click)="gotoPhenository(annotation.disease.diseaseDB, annotation.disease.diseaseName)" *ngIf="profLevel" style="color:#0275d8" title="View in Phenository">
+          <i class="fa fa-cloud"></i>
+        </button>
+        <button class="btn btn-info" (click)="lookUpDisease(annotation.disease.diseaseName)" *ngIf="profLevel" style="margin-right: 10px" title="Look up">
+          <i class="fa fa-book"></i>
+        </button>
         <button class="btn btn-secondary" (click)="cloneAnnotation()" *ngIf="annotation.status == 2">
           <i class="fa fa-clone" aria-hidden="true"></i> Clone
         </button>
@@ -86,7 +92,7 @@
         </span>
         <div class="card card-block" *ngIf="annotation.status == -2 && annotation.released">
           <p><strong>Score (out of 1; blank means "not graded")</strong>: {{annotation.score}}</p>
-          <p *ngIf="annotation.comment"><strong>Comment</strong>: {{annotation.comment}}</p>
+          <p *ngIf="annotation.memo"><strong>Comment</strong>: {{annotation.memo}}</p>
         </div>
       </div>
     </div>
@@ -110,9 +116,7 @@
           </template>
 
           <template tabHeading *ngIf="annotation.status > 0">
-            <a (click)="gotoPhenository(annotation.disease.diseaseDB, annotation.disease.diseaseName)" title="View in Phenository">
-              <i class="fa fa-cloud" aria-hidden="true"></i> {{annotation.disease.diseaseName}}
-            </a>
+            Phenotypes
           </template>
 
           <br />
@@ -137,7 +141,7 @@
                 <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + phenotype.frequency.toString().split('.').join(',') + '.png)', 'color' : (phenotype.frequency == '0.75') ? 'black' : 'white'}" title="Frequency: {{frequencyDescription(phenotype.frequency)}}&#013;Onset: {{onsetDescription(phenotype.onset)}}">{{onsetAbbreviation(phenotype.onset)}}</pre>
                 <pre *ngIf="phenotype.observed === 0" class="frequency-onset" [ngStyle]="{'background-image': 'none', 'color' : 'white'}" title="This phenotype is not present in all patients with this disease.">{{onsetAbbreviation(phenotype.onset)}}</pre>
                 <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1">{{phenotype.phenotypeName}}</span>
-                <span title="{{phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through" *ngIf="phenotype.observed == 0">{{phenotype.phenotypeName}}</span>
+                <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through" *ngIf="phenotype.observed == 0">{{phenotype.phenotypeName}}</span>
                 <sup>
                 <span *ngFor="let citation of phenotype.citations; let i = index">{{(i > 0) ? ', ' : ''}}{{citation.number}}</span>
                 </sup>
@@ -209,7 +213,7 @@
                         {{citation.number}}
                       </div>
                     </div>
-                    <button type="button" class="btn btn-sm btn-danger" _ngcontent-ihs-13="" style="float:right;" (click)="removePhenotype(phenotype.phenotypeID, true)" *ngIf="!(annotation.status == 2 || annotation.status == -2)">
+                    <button type="button" class="btn btn-sm btn-danger" _ngcontent-ihs-13="" style="float:right;" (click)="removePhenotype(phenotype.phenotypeID)" *ngIf="!(annotation.status == 2 || annotation.status == -2)">
                       Remove
                     </button>
                   </div>
@@ -261,7 +265,7 @@
                   </a>
                 </p>
                 <i style="opacity: 0.5">PMID: {{ref.pmid}}</i>
-                <button type="button" class="btn btn-sm btn-danger" _ngcontent-ihs-13="" style="float:right;" (click)="removeRef(ref.refID)" *ngIf="annotation.status != 2">
+                <button type="button" class="btn btn-sm btn-danger" _ngcontent-ihs-13="" style="float:right;" (click)="removeRef(ref.refID)" *ngIf="annotation.status != 2 && annotation.status != -2">
                   Remove
                 </button>
               </div>

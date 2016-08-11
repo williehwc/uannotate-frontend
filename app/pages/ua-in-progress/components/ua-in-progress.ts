@@ -36,7 +36,7 @@ export class InProgressComponent implements OnInit {
       });
       return;
     }
-    this.gotoAnnotation(localStorage.getItem('uaAnnotation'), 0);
+    this.gotoAnnotation(localStorage.getItem('uaAnnotation'), 0, false);
     let gotLevel = function (data: any) {
       if (data.level === 0) {
         scope.studentLevel = true;
@@ -122,42 +122,47 @@ export class InProgressComponent implements OnInit {
         );
     });
   }
-  gotoAnnotation( annotationID: number, scrollPosition: number ) {
+  gotoAnnotation( annotationID: number, scrollPosition: number, checkNew: boolean ) {
     let scope = this;
     if (annotationID === null)
       return;
     this.alerts = [];
+    if (!checkNew)
+      this.systemNames = [];
     localStorage.setItem('uaAnnotation', '' + annotationID);
     jQuery('.add-bar').hide();
     let initializeAnnotation = function (data:any) {
-      scope.annotation = data;
+      if (!checkNew) {
+        scope.annotation = data;
+      } else {
+        scope.annotation.phenotypes.push(data.phenotypes[data.phenotypes.length - 1]);
+      }
       if (data.status !== 2 && data.status !== -2) {
         jQuery('.add-bar').show();
       }
       // Look up phenotype names
       let loadedName = function(datum: any) {
-        for (let i = 0; i < data.phenotypes.length; i++) {
-          if (data.phenotypes[i].hpo === datum.id) {
-            data.phenotypes[i].phenotypeName = datum.name;
-            data.phenotypes[i].phenotypeDefinition = datum.def;
+        for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
+          if (scope.annotation.phenotypes[i].hpo === datum.id) {
+            scope.annotation.phenotypes[i].phenotypeName = datum.name;
+            scope.annotation.phenotypes[i].phenotypeDefinition = datum.def;
             // If the phenotype is not an abnormality, we should remove it
             if (datum.term_category.indexOf('HP:0000118') === -1) {
-              data.phenotypes[i].display = false;
-              scope.removePhenotype(data.phenotypes[i].phenotypeID, false);
+              scope.annotation.phenotypes[i].display = false;
+              scope.removePhenotype(scope.annotation.phenotypes[i].phenotypeID);
             }
             break;
           }
         }
-        scope.annotation = data;
       };
       let loadedCitation = function(datum: any) {
-        for (let i = 0; i < data.phenotypes.length; i++) {
-          if (String(data.phenotypes[i].phenotypeID) === datum.phenotypeID) {
-            data.phenotypes[i].citations = datum.citations;
-            for (let j = 0; j < data.phenotypes[i].citations.length; j++) {
-              for (let k = 0; k < data.refs.length; k++) {
-                if (data.refs[k].refID === data.phenotypes[i].citations[j].refID) {
-                  data.phenotypes[i].citations[j].number = k + 1;
+        for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
+          if (String(scope.annotation.phenotypes[i].phenotypeID) === datum.phenotypeID) {
+            scope.annotation.phenotypes[i].citations = datum.citations;
+            for (let j = 0; j < scope.annotation.phenotypes[i].citations.length; j++) {
+              for (let k = 0; k < scope.annotation.refs.length; k++) {
+                if (scope.annotation.refs[k].refID === scope.annotation.phenotypes[i].citations[j].refID) {
+                  scope.annotation.phenotypes[i].citations[j].number = k + 1;
                   break;
                 }
               }
@@ -165,13 +170,14 @@ export class InProgressComponent implements OnInit {
             break;
           }
         }
-        scope.annotation = data;
       };
       let loadedSystem = function(datum: any) {
         console.log(datum);
         // Add to list of systemNames
-        if (scope.systemNames.indexOf(datum.systemName) === -1)
+        if (scope.systemNames.indexOf(datum.systemName) === -1) {
           scope.systemNames.push(datum.systemName);
+          scope.systemNames.sort();
+        }
         for (let i = 0; i < data.phenotypes.length; i++) {
           if (data.phenotypes[i].phenotypeID === datum.phenotypeID) {
             data.phenotypes[i].systemName = datum.systemName;
@@ -179,6 +185,8 @@ export class InProgressComponent implements OnInit {
         }
       };
       for (let i = 0; i < data.phenotypes.length; i++) {
+        if (checkNew)
+          i = data.phenotypes.length - 1;
         let body = JSON.stringify({
           'phenotypeName': data.phenotypes[i].hpo
         });
@@ -223,22 +231,23 @@ export class InProgressComponent implements OnInit {
             data.refs[i].year = datum.year;
           }
         }
-        scope.annotation = data;
       };
-      for (let i = 0; i < data.refs.length; i++) {
-        let body = JSON.stringify({
-          'pmid': data.refs[i].pmid
-        });
-        scope._http.post(globals.backendURL + '/efetch', body, globals.options)
-          .map(res => res.json())
-          .subscribe(
-            data => loadedRef(data),
-            err => console.log(err),
-            () => console.log('Got ref')
-          );
+      if (!checkNew) {
+        for (let i = 0; i < data.refs.length; i++) {
+          let body = JSON.stringify({
+            'pmid': data.refs[i].pmid
+          });
+          scope._http.post(globals.backendURL + '/efetch', body, globals.options)
+            .map(res => res.json())
+            .subscribe(
+              data => loadedRef(data),
+              err => console.log(err),
+              () => console.log('Got ref')
+            );
+        }
       }
       // Restore scroll position (after adding/removing phenotypes, and removing refs)
-      document.documentElement.scrollTop = document.body.scrollTop = scrollPosition;
+      // document.documentElement.scrollTop = document.body.scrollTop = scrollPosition;
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
@@ -279,7 +288,7 @@ export class InProgressComponent implements OnInit {
           jQuery('.hover-box').hide();
           scope.alerts = [];
           let addedPhenotype = function() {
-            scope.gotoAnnotation(scope.annotation.annotationID, document.documentElement.scrollTop || document.body.scrollTop);
+            scope.gotoAnnotation(scope.annotation.annotationID, document.documentElement.scrollTop || document.body.scrollTop, true);
           };
           let body = JSON.stringify({
             'token': localStorage.getItem('uaToken'),
@@ -476,11 +485,28 @@ export class InProgressComponent implements OnInit {
         () => console.log('Finish set onset')
       );
   }
-  removePhenotype(phenotypeID: number, reload: boolean) {
+  removePhenotype(phenotypeID: number) {
     let scope = this;
     let finishRemovePhenotype = function(data: any) {
-      if (reload)
-        scope.gotoAnnotation(localStorage.getItem('uaAnnotation'), document.documentElement.scrollTop || document.body.scrollTop);
+      for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
+        if (scope.annotation.phenotypes[i].phenotypeID === phenotypeID) {
+          let systemName = scope.annotation.phenotypes[i].systemName;
+          scope.annotation.phenotypes.splice(i, 1);
+          let found: boolean = false;
+          for (let j = 0; j < scope.annotation.phenotypes.length; j++) {
+            if (scope.annotation.phenotypes[j].systemName === systemName) {
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            for (let j = 0; j < scope.systemNames.length; j++) {
+              if (scope.systemNames[j] === systemName)
+                scope.systemNames.splice(j, 1);
+            }
+          }
+        }
+      }
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
@@ -498,7 +524,7 @@ export class InProgressComponent implements OnInit {
   removeRef(refID: number) {
     let scope = this;
     let finishRemoveRef = function(data: any) {
-      scope.gotoAnnotation(localStorage.getItem('uaAnnotation'), document.documentElement.scrollTop || document.body.scrollTop);
+      scope.gotoAnnotation(localStorage.getItem('uaAnnotation'), document.documentElement.scrollTop || document.body.scrollTop, false);
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
@@ -544,6 +570,9 @@ export class InProgressComponent implements OnInit {
     localStorage.setItem('uaPhenositoryDiseaseDB', diseaseDB);
     this._router.navigate(['/dashboard', '/phenository']);
   }
+  lookUpDisease(diseaseName: string) {
+    window.open(globals.omimURL + diseaseName.substr(0, diseaseName.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
+  }
   copyToClipboard(string: string) {
     window.prompt('Copy to clipboard: Ctrl+C or Cmd+C', string);
   }
@@ -575,7 +604,7 @@ export class InProgressComponent implements OnInit {
     let finishPublish = function (data: any) {
       if (data.success) {
         scope.gotoAnnotation(scope.annotation.annotationID,
-          document.documentElement.scrollTop || document.body.scrollTop);
+          document.documentElement.scrollTop || document.body.scrollTop, false);
         scope.alerts.push({
           type: 'success',
           msg: 'Annotation published! By publishing this annotation, you recommend it for this disease.',
@@ -664,5 +693,71 @@ export class InProgressComponent implements OnInit {
   }
   submitExercise(exerciseID: number) {
     this._router.navigate(['/dashboard', '/submit', exerciseID]);
+  }
+  onsetAbbreviation(hpo: string) {
+    switch (hpo) {
+      case 'HP:0030674':
+        return 'ANT';
+      case 'HP:0003577':
+        return 'CON';
+      case 'HP:0003623':
+        return 'NEO';
+      case 'HP:0003593':
+        return 'INF';
+      case 'HP:0011463':
+        return 'CHI';
+      case 'HP:0003621':
+        return 'JUV';
+      case 'HP:0003581':
+        return 'ADU';
+      default:
+        return '–––';
+    }
+  }
+  onsetDescription(hpo: string) {
+    switch (hpo) {
+      case 'HP:0030674':
+        return 'Antenatal (before birth)';
+      case 'HP:0003577':
+        return 'Congenital (at birth)';
+      case 'HP:0003623':
+        return 'Neonatal (0 to 28 days)';
+      case 'HP:0003593':
+        return 'Infantile (28 days to 1 year)';
+      case 'HP:0011463':
+        return 'Childhood (1 to 5 years)';
+      case 'HP:0003621':
+        return 'Juvenile (5 to 15 years)';
+      case 'HP:0003581':
+        return 'Adult (16 years or later)';
+      default:
+        return 'Not sure';
+    }
+  }
+  frequencyDescription(frequency: number) {
+    switch (frequency) {
+      case -1:
+        return 'Not sure';
+      case 0:
+        return 'Variable (prob. 30% to 70%)';
+      case 0.01:
+        return 'Very rare (1%)';
+      case 0.05:
+        return 'Rare (5%)';
+      case 0.075:
+        return 'Occasional (7.5%)';
+      case 0.33:
+        return 'Frequent (33%)';
+      case 0.5:
+        return 'Typical (50%)';
+      case 0.75:
+        return 'Common (75%)';
+      case 0.9:
+        return 'Hallmark (90%)';
+      case 1:
+        return 'Obligate (100%)';
+      default:
+        return 'Not sure';
+    }
   }
 }

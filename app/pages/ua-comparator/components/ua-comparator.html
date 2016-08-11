@@ -3,27 +3,32 @@
   <!-- Page Heading -->
   <div class="row">
     <div class="col-lg-12">
-      <h2 class="page-header">
+      <h2 class="page-header" *ngIf="!comparison || comparison.status > 0">
         Comparator
       </h2>
-      <ol class="breadcrumb">
+      <h2 class="page-header" *ngIf="comparison && comparison.status <= 0">
+        {{comparison.exerciseName}}
+      </h2>
+      <ol class="breadcrumb" *ngIf="comparison">
         <li class="active">
-          <i class="fa fa-info-circle"></i> Compare two annotations for
+          <i class="fa fa-info-circle"></i> Compare two annotations for {{comparison.diseaseName}}
         </li>
       </ol>
       <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true">
         {{ alert?.msg }}
       </alert>
-      <button class="btn btn-secondary" style="color:#0275d8;">
+    </div>
+    <div class="col-lg-12" *ngIf="comparison && profLevel">
+      <button class="btn btn-secondary" style="color:#0275d8;" (click)="gotoPhenository(comparison.diseaseDB, comparison.diseaseName)">
         <i class="fa fa-cloud" aria-hidden="true"></i> View in Phenository
       </button>
-      <button class="btn btn-info" (click)="lookUpDisease()">
+      <button class="btn btn-info" (click)="lookUpDisease(comparison.diseaseName)">
         <i class="fa fa-book" aria-hidden="true"></i> Look up
       </button>
     </div>
   </div>
 
-  <div class="row">
+  <div class="row" *ngIf="comparison && profLevel && comparison.status === -2">
     <div class="col-lg-12">
       <div class="card card-block" style="margin-top: 10px">
         <form style="margin-bottom: 10px">
@@ -42,103 +47,100 @@
             <div class="col-lg-5">
               <label for="comment">Comment</label>
               <br />
-              <textarea id="comment"></textarea>
+              <textarea id="comment">
+                {{comparison.memo}}
+              </textarea>
             </div>
           </div>
         </form>
-        <button class="btn btn-secondary">
+        <button class="btn btn-secondary" *ngIf="!comparison.released">
           Save
         </button>
-        <button class="btn btn-primary">
+        <button class="btn btn-primary" *ngIf="!comparison.released">
           Save and release
         </button>
-        <button class="btn btn-primary">
+        <button class="btn btn-primary" *ngIf="comparison.released">
           Update
         </button>
-        <button class="btn btn-danger">
+        <button class="btn btn-danger" *ngIf="comparison.released">
           Unrelease score
         </button>
       </div>
     </div>
   </div>
 
-  <div class="row">
+  <br *ngIf="comparison" />
+
+  <div class="row" *ngIf="comparison">
     <div class="col-lg-6">
-      <div dropdown keyboardNav="true" style="display: inline">
+      <span *ngIf="comparison.status > 0" style="margin-right: 10px">
+        Annotation {{comparison.annotationID}}
+      </span>
+      <div dropdown keyboardNav="true" *ngIf="comparison.status <= 0" style="display: inline">
         <a href class="btn btn-secondary dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false" dropdownToggle>
-          Lorem ipsum
+          {{comparison.userName}}
         </a>
         <ul class="dropdown-menu" role="menu" aria-labelledby="simple-btn-keyboard-nav">
-          <li role="menuitem">
-            <a class="dropdown-item" style="cursor:pointer">
-              Lorem ipsum
+          <li role="menuitem" *ngFor="let submission of comparison.submissions">
+            <a class="dropdown-item" style="cursor:pointer" (click)="gotoComparison(submission.annotationID, comparison.compareToAnnotationID)">
+              {{submission.userName}}
             </a>
           </li>
         </ul>
       </div>
-      <button class="btn btn-secondary" title="Open in Annotator" (click)="goToAnnotator()">
+      <button class="btn btn-secondary" title="Open in Annotator" (click)="goToAnnotator(comparison.annotationID)">
         <i class="fa fa-fw fa-pencil"></i>
       </button>
     </div>
-    <div class="col-lg-6">
+    <div class="col-lg-6" *ngIf="comparison.annotationID !== comparison.compareToAnnotationID">
       <div dropdown keyboardNav="true" style="display: inline">
         <a href class="btn btn-secondary dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false" dropdownToggle>
-          Lorem ipsum
+          Annotation {{comparison.compareToAnnotationID}}
         </a>
         <ul class="dropdown-menu" role="menu" aria-labelledby="simple-btn-keyboard-nav">
-          <li role="menuitem">
-            <a class="dropdown-item" style="cursor:pointer">
-              Lorem ipsum
+          <li role="menuitem" *ngFor="let annotation of comparison.annotations">
+            <a class="dropdown-item" style="cursor:pointer" (click)="gotoComparison(comparison.annotationID, annotation.annotationID)">
+              Annotation {{annotation.annotationID}} (<i class="fa fa-thumbs-up" aria-hidden="true"></i> {{annotation.numLikes}})
             </a>
           </li>
         </ul>
       </div>
-      <button class="btn btn-secondary" title="Open in Annotator" (click)="goToAnnotatorCompareTo()">
+      <button class="btn btn-secondary" title="Open in Annotator" (click)="goToAnnotator(comparison.compareToAnnotationID)">
         <i class="fa fa-fw fa-pencil"></i>
       </button>
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-lg-12">
+  <div *ngIf="comparison && comparison.annotationID === comparison.compareToAnnotationID">
+    <br />
+    <strong>There are no published annotations to compare to.</strong>
+  </div>
+
+  <div class="row" *ngIf="comparison && comparison.annotationID !== comparison.compareToAnnotationID">
+    <div class="col-lg-12" *ngFor="let system of comparison.systems">
       <br />
       <div class="card card-block card-header">
         <strong>
-          System
+          {{system.systemName}}
         </strong>
-        <span style="float: right">XX%</span>
-        <input type="range" name="points" min="0" max="100" style="float: right; margin-right: 10px" />
+        <input type="range" name="points" min="0" max="1" step="0.01" style="float: right; margin-left: 10px" value="{{system.systemScore}}" *ngIf="profLevel && comparison.status === -2" />
+        <span style="float: right">{{system.systemScore * 100}}%</span>
       </div>
       <div class="row">
         <div class="col-lg-6">
-          <div style="height: 30px">
-            <pre class="frequency-onset" style="background-image: url(/assets/img/-1.png);">CHI</pre>
-            Delayed cranial suture closure
-            <img src="/assets/img/bonus.gif" style="height: 20px" />
+          <div style="height: 30px" *ngFor="let phenotype of system.phenotypes">
+            <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + phenotype.frequency.toString().split('.').join(',') + '.png)', 'color' : (phenotype.frequency == '0.75') ? 'black' : 'white'}" title="Frequency: {{frequencyDescription(phenotype.frequency)}}&#013;Onset: {{onsetDescription(phenotype.onset)}}">{{onsetAbbreviation(phenotype.onset)}}</pre>
+            <pre *ngIf="phenotype.observed === 0" class="frequency-onset" [ngStyle]="{'background-image': 'none', 'color' : 'white'}" title="This phenotype is not present in all patients with this disease.">{{onsetAbbreviation(phenotype.onset)}}</pre>
+            <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1">{{phenotype.phenotypeName}}</span>
+            <span title="{{phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through" *ngIf="phenotype.observed == 0">{{phenotype.phenotypeName}}</span>
           </div>
         </div>
-      </div>
-    </div>
-    <div class="col-lg-12">
-      <br />
-      <div class="card card-block card-header">
-        <strong>
-          System
-        </strong>
-        <span style="float: right">XX%</span>
-        <input type="range" name="points" min="0" max="100" style="float: right; margin-right: 10px" />
-      </div>
-      <div class="row">
         <div class="col-lg-6">
-          <div style="height: 30px">
-            <pre class="frequency-onset" style="background-image: url(/assets/img/-1.png);">CHI</pre>
-            Delayed cranial suture closure
-            <img src="/assets/img/bonus.gif" style="height: 20px" />
-          </div>
-          <div style="height: 30px">
-            <pre class="frequency-onset" style="background-image: url(/assets/img/-1.png);">CHI</pre>
-            Delayed cranial suture closure
-            <img src="/assets/img/bonus.gif" style="height: 20px" />
+          <div style="height: 30px" *ngFor="let phenotype of system.compareToPhenotypes">
+            <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + phenotype.frequency.toString().split('.').join(',') + '.png)', 'color' : (phenotype.frequency == '0.75') ? 'black' : 'white'}" title="Frequency: {{frequencyDescription(phenotype.frequency)}}&#013;Onset: {{onsetDescription(phenotype.onset)}}">{{onsetAbbreviation(phenotype.onset)}}</pre>
+            <pre *ngIf="phenotype.observed === 0" class="frequency-onset" [ngStyle]="{'background-image': 'none', 'color' : 'white'}" title="This phenotype is not present in all patients with this disease.">{{onsetAbbreviation(phenotype.onset)}}</pre>
+            <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1">{{phenotype.phenotypeName}}</span>
+            <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through" *ngIf="phenotype.observed == 0">{{phenotype.phenotypeName}}</span>
           </div>
         </div>
       </div>

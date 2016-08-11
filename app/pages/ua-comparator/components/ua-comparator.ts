@@ -50,11 +50,13 @@ export class ComparatorComponent {
         () => console.log('Got level')
       );
   }
-  gotoComparison(annotationID, compareToAnnotationID) {
+  gotoComparison(annotationID: number, compareToAnnotationID: number) {
     let scope = this;
     this.alerts = [];
     let loadedName = function(datum: any) {
       for (let s = 0; s < scope.comparison.systems.length; s++) {
+        if (scope.comparison.systems[s].systemHPO === datum.id)
+          scope.comparison.systems[s].systemName = datum.name;
         for (let i = 0; i < scope.comparison.systems[s].phenotypes.length; i++) {
           if (scope.comparison.systems[s].phenotypes[i].hpo === datum.id) {
             scope.comparison.systems[s].phenotypes[i].phenotypeName = datum.name;
@@ -71,6 +73,7 @@ export class ComparatorComponent {
     };
     let initializeComparison = function (data:any) {
       scope.comparison = data;
+      localStorage.setItem('uaAnnotation', '' + data.annotationID);
       localStorage.setItem('uaCompareTo', '' + data.compareToAnnotationID);
       let usedPhenotypes: Array<string> = [];
       for (let s = 0; s < data.systems.length; s++) {
@@ -104,12 +107,24 @@ export class ComparatorComponent {
               () => console.log('Got name')
             );
         }
+        for (let i = 0; i < data.systems.length; i++) {
+          let body = JSON.stringify({
+            'phenotypeName': data.systems[s].systemHPO
+          });
+          scope._http.post(globals.backendURL + '/definition', body, globals.options)
+            .map(res => res.json())
+            .subscribe(
+              data => loadedName(data),
+              err => console.log(err),
+              () => console.log('Got name')
+            );
+        }
       }
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
-      'annotationID': localStorage.getItem('uaAnnotation'),
-      'compareToAnnotationID': localStorage.getItem('uaCompareTo')
+      'annotationID': annotationID,
+      'compareToAnnotationID': compareToAnnotationID
     });
     this._http.post(globals.backendURL + '/restricted/annotation/compare', body, globals.options)
       .map(res => res.json())
@@ -117,17 +132,22 @@ export class ComparatorComponent {
         data => initializeComparison(data),
         err => this.alerts.push({
           type: 'danger',
-          msg: 'Invalid annotation',
+          msg: 'Comparator is not available for this annotation',
           closable: true
         }),
         () => console.log('Got full comparison')
       );
   }
-  goToAnnotator() {
-    this._router.navigate(['/dashboard', '/in-progress', this.comparison.annotationID]);
+  goToAnnotator(annotationID: number) {
+    this._router.navigate(['/dashboard', '/in-progress', annotationID]);
   }
-  goToAnnotatorCompareTo() {
-    this._router.navigate(['/dashboard', '/in-progress', this.comparison.compareToAnnotationID]);
+  gotoPhenository(diseaseDB: string, diseaseName: string) {
+    localStorage.setItem('uaPhenositoryDisease', diseaseName);
+    localStorage.setItem('uaPhenositoryDiseaseDB', diseaseDB);
+    this._router.navigate(['/dashboard', '/phenository']);
+  }
+  lookUpDisease(diseaseName: string) {
+    window.open(globals.omimURL + diseaseName.substr(0, diseaseName.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
   }
   onsetAbbreviation(hpo: string) {
     switch (hpo) {
