@@ -64,7 +64,7 @@
                     <br />
                     This disease has no published annotations.
                     <a (click)="createAnnotation(problem.diseaseName)" style="cursor: pointer" *ngIf="problem.numMyAnnotations === 0">Create annotation</a>
-                    <a (click)="createAnnotation(problem.diseaseName)" style="cursor: pointer" *ngIf="problem.numMyAnnotations > 0" [routerLink]="['/dashboard', '/my-annotations']">My annotations</a>
+                    <!--<a (click)="createAnnotation(problem.diseaseName)" style="cursor: pointer" *ngIf="problem.numMyAnnotations > 0" [routerLink]="['/dashboard', '/my-annotations']">My annotations</a>-->
                   </span>
                 </li>
               </ul>
@@ -142,7 +142,7 @@
             </div>
             <div class="col-lg-12">
               <div class="card card-block">
-                <h5>Tip</h5>
+                <h5>Tips</h5>
                 <ol>
                   <li>The default time zone is GMT. You can specify a time zone by appending the date with a time zone abbreviation, such as EST or PDT.</li>
                   <li>Start and end dates are optional. Alternatively, you can start and end exercises at any time using the <strong>Start now</strong> and <strong>End now</strong> buttons.</li>
@@ -157,13 +157,13 @@
           </template>
           <br />
           <strong *ngIf="exercise.submissions.length === 0">No submissions yet</strong>
-          <button class="btn btn-secondary" (click)="renameExercise()">
+          <button class="btn btn-secondary" (click)="selectAll()">
             <i class="fa fa-check-square-o" aria-hidden="true"></i> All
           </button>
-          <button class="btn btn-primary" (click)="renameExercise()">
+          <button class="btn btn-primary" (click)="releaseAll(true)">
             Release scores
           </button>
-          <button class="btn btn-danger" (click)="renameExercise()">
+          <button class="btn btn-danger" (click)="releaseAll(false)">
             Unrelease scores
           </button>
           <br />
@@ -178,10 +178,10 @@
                 <th>Released</th>
               </tr>
               </thead>
-              <tbody *ngFor="let submission of exercise.submissions">
-              <tr>
-                <td><input type="checkbox" value="{{submission.userID}}" /></td>
-                <td>{{submission.studentName}}</td>
+              <tbody>
+              <tr *ngFor="let submission of exercise.submissions">
+                <td><input type="checkbox" name="release" value="{{submission.annotationID}}" /></td>
+                <td><a style="cursor: pointer" (click)="gotoComparator(submission.annotationID)">{{submission.studentName}}</a></td>
                 <td><span *ngIf="submission.possibleScore > 0">{{submission.sumScore}} / {{submission.possibleScore}} ({{100 * submission.sumScore / submission.possibleScore}}%)</span></td>
                 <td>{{submission.numReleased}} / {{submission.numAnnotations}}</td>
               </tr>

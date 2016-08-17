@@ -401,4 +401,49 @@ export class ExerciseComponent implements OnInit {
         () => console.log('Created annotation')
       );
   }
+  gotoComparator(annotationID: number) {
+    localStorage.setItem('uaAnnotation', '' + annotationID);
+    this._router.navigate(['/dashboard', '/comparator']);
+  }
+  selectAll() {
+    let checkboxes: any = document.getElementsByName('release');
+    let select = false;
+    for (var i = 0; i < checkboxes.length; i++) {
+      if (!checkboxes[i].checked) {
+        select = true;
+        break;
+      }
+    }
+    for (var i = 0; i < checkboxes.length; i++) {
+      checkboxes[i].checked = select;
+    }
+  }
+  releaseAll(release: boolean) {
+    let checkboxes: any = document.getElementsByName('release');
+    for (var i = 0; i < checkboxes.length; i++) {
+      if (checkboxes[i].checked) {
+        for (let j = 0; j < this.exercise.submissions.length; j++) {
+          if (this.exercise.submissions[i].annotationID.toString() === checkboxes[i].value) {
+            if (release) {
+              this.exercise.submissions[i].numReleased = this.exercise.submissions[i].numAnnotations;
+            } else {
+              this.exercise.submissions[i].numReleased = 0;
+            }
+          }
+        }
+        let body = JSON.stringify({
+          'token': localStorage.getItem('uaToken'),
+          'annotationID': checkboxes[i].value,
+          'release': release
+        });
+        this._http.post(globals.backendURL + '/restricted/annotation/prof/score/release/all', body, globals.options)
+          .map(res => res.json())
+          .subscribe(
+            data => console.log(data),
+            err => console.log(err),
+            () => console.log('Created annotation')
+          );
+      }
+    }
+  }
 }

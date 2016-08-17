@@ -11,7 +11,20 @@
       </h2>
       <ol class="breadcrumb" *ngIf="comparison">
         <li class="active">
-          <i class="fa fa-info-circle"></i> Compare two annotations for {{comparison.diseaseName}}
+          <i class="fa fa-info-circle"></i> Compare two annotations for
+          <span *ngIf="comparison.status > 0">
+            {{comparison.diseaseName}}
+          </span>
+          <span *ngIf="comparison.status <= 0">
+            <div dropdown keyboardNav="true" style="display: inline">
+              <a href id="simple-dropdown" dropdownToggle>
+                {{comparison.diseaseName}}
+              </a>
+              <ul class="dropdown-menu" role="menu" aria-labelledby="simple-btn-keyboard-nav">
+                <li role="menuitem"><a class="dropdown-item" *ngFor="let disease of comparison.diseases" (click)="gotoComparison(disease.annotationID, null)" style="cursor: pointer">{{disease.diseaseName}}</a></li>
+              </ul>
+            </div>
+          </span>
         </li>
       </ol>
       <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true">
@@ -25,6 +38,9 @@
       <button class="btn btn-info" (click)="lookUpDisease(comparison.diseaseName)">
         <i class="fa fa-book" aria-hidden="true"></i> Look up
       </button>
+      <button class="btn btn-secondary" (click)="gotoMyClasses()" *ngIf="comparison.exerciseID">
+        <i class="fa fa-users" aria-hidden="true"></i> View in My Classes
+      </button>
     </div>
   </div>
 
@@ -34,49 +50,57 @@
         <form style="margin-bottom: 10px">
           <div class="row">
             <div class="col-lg-7">
-              <input type="radio" name="grade" id="no-grade" value="no-grade">
+              <input type="radio" name="grade" id="no-grade" value="no-grade" *ngIf="comparison.score != null">
+              <input type="radio" name="grade" id="no-grade" value="no-grade" *ngIf="comparison.score == null" checked>
               <label for="no-grade">Do not grade</label>
               <br />
-              <input type="radio" name="grade" id="auto-grade" value="auto-grade">
-              <label for="auto-grade">Award the calculated score for this response: XX%</label>
+              <input type="radio" name="grade" id="auto-grade" value="auto-grade" *ngIf="comparison.score == null || !comparison.standard">
+              <input type="radio" name="grade" id="auto-grade" value="auto-grade" *ngIf="comparison.score != null && comparison.standard" checked>
+              <label for="auto-grade">Award the calculated score for this response: {{calculatedScore * 100}}%</label>
               <br />
-              <input type="radio" name="grade" id="manual-grade" value="manual-grade">
+              <input type="radio" name="grade" id="manual-grade" value="manual-grade" *ngIf="comparison.score == null || comparison.standard">
+              <input type="radio" name="grade" id="manual-grade" value="manual-grade" *ngIf="comparison.score != null && !comparison.standard" checked>
               <label for="manual-grade">Define a score manually:</label>
-              <input type="text" name="score" id="score" maxlength="2" size="2" /> %
+              <input type="text" name="score" id="score" maxlength="2" size="2" style="text-align: right" *ngIf="comparison.score == null || comparison.standard" />
+              <input type="text" name="score" id="score" maxlength="2" size="2" style="text-align: right" *ngIf="comparison.score != null && !comparison.standard" [ngModel]="comparison.score * 100" />
+              %
             </div>
             <div class="col-lg-5">
               <label for="comment">Comment</label>
               <br />
-              <textarea id="comment">
-                {{comparison.memo}}
-              </textarea>
+              <textarea id="comment">{{comparison.memo}}</textarea>
             </div>
           </div>
         </form>
-        <button class="btn btn-secondary" *ngIf="!comparison.released">
+        <button class="btn btn-secondary" *ngIf="!comparison.released" (click)="saveScore()">
           Save
         </button>
-        <button class="btn btn-primary" *ngIf="!comparison.released">
+        <button class="btn btn-primary" *ngIf="!comparison.released" (click)="saveAndReleaseScore()">
           Save and release
         </button>
-        <button class="btn btn-primary" *ngIf="comparison.released">
+        <button class="btn btn-primary" *ngIf="comparison.released" (click)="saveScore()">
           Update
         </button>
-        <button class="btn btn-danger" *ngIf="comparison.released">
+        <button class="btn btn-danger" *ngIf="comparison.released" (click)="unreleaseScore()">
           Unrelease score
         </button>
       </div>
     </div>
   </div>
 
+  <div class="card card-block" *ngIf="studentLevel && comparison && comparison.released">
+    <p><strong>Score (out of 1; blank means "not graded")</strong>: {{comparison.score}}</p>
+    <p *ngIf="comparison.memo"><strong>Comment</strong>: {{comparison.memo}}</p>
+  </div>
+
   <br *ngIf="comparison" />
 
   <div class="row" *ngIf="comparison">
     <div class="col-lg-6">
-      <span *ngIf="comparison.status > 0" style="margin-right: 10px">
+      <span *ngIf="comparison.status > 0 && profLevel" style="margin-right: 10px">
         Annotation {{comparison.annotationID}}
       </span>
-      <div dropdown keyboardNav="true" *ngIf="comparison.status <= 0" style="display: inline">
+      <div dropdown keyboardNav="true" *ngIf="comparison.status <= 0 && profLevel" style="display: inline">
         <a href class="btn btn-secondary dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false" dropdownToggle>
           {{comparison.userName}}
         </a>
@@ -88,32 +112,48 @@
           </li>
         </ul>
       </div>
+      <span *ngIf="studentLevel" style="margin-right: 10px">
+        Response
+      </span>
       <button class="btn btn-secondary" title="Open in Annotator" (click)="goToAnnotator(comparison.annotationID)">
         <i class="fa fa-fw fa-pencil"></i>
       </button>
     </div>
     <div class="col-lg-6" *ngIf="comparison.annotationID !== comparison.compareToAnnotationID">
-      <div dropdown keyboardNav="true" style="display: inline">
+      <div dropdown keyboardNav="true" style="display: inline" *ngIf="profLevel">
         <a href class="btn btn-secondary dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false" dropdownToggle>
-          Annotation {{comparison.compareToAnnotationID}}
+          <i>Annotation {{comparison.compareToAnnotationID}}</i>
         </a>
         <ul class="dropdown-menu" role="menu" aria-labelledby="simple-btn-keyboard-nav">
           <li role="menuitem" *ngFor="let annotation of comparison.annotations">
             <a class="dropdown-item" style="cursor:pointer" (click)="gotoComparison(comparison.annotationID, annotation.annotationID)">
-              Annotation {{annotation.annotationID}} (<i class="fa fa-thumbs-up" aria-hidden="true"></i> {{annotation.numLikes}})
+              <i>Annotation {{annotation.annotationID}} (<i class="fa fa-thumbs-up" aria-hidden="true"></i> {{annotation.numLikes}})</i>
             </a>
           </li>
         </ul>
       </div>
+      <span *ngIf="studentLevel" style="margin-right: 10px">
+        <i>Standard</i>
+      </span>
       <button class="btn btn-secondary" title="Open in Annotator" (click)="goToAnnotator(comparison.compareToAnnotationID)">
         <i class="fa fa-fw fa-pencil"></i>
       </button>
     </div>
   </div>
 
-  <div *ngIf="comparison && comparison.annotationID === comparison.compareToAnnotationID">
+  <div *ngIf="comparison && comparison.annotationID === comparison.compareToAnnotationID && profLevel">
     <br />
     <strong>There are no published annotations to compare to.</strong>
+  </div>
+
+  <div *ngIf="comparison && comparison.annotationID === comparison.compareToAnnotationID && studentLevel && comparison.graded">
+    <br />
+    <strong>Your professor or teaching assistant has not released a standard to which you can compare your annotation. Please contact him/her if you have questions about your score.</strong>
+  </div>
+
+  <div *ngIf="comparison && comparison.annotationID === comparison.compareToAnnotationID && studentLevel && !comparison.graded">
+    <br />
+    <strong>There are currently no annotations to compare to.</strong>
   </div>
 
   <div class="row" *ngIf="comparison && comparison.annotationID !== comparison.compareToAnnotationID">
@@ -123,12 +163,13 @@
         <strong>
           {{system.systemName}}
         </strong>
-        <input type="range" name="points" min="0" max="1" step="0.01" style="float: right; margin-left: 10px" value="{{system.systemScore}}" *ngIf="profLevel && comparison.status === -2" />
-        <span style="float: right">{{system.systemScore * 100}}%</span>
+        <input type="range" name="{{system.systemHPO}}" min="0" max="100" style="float: right; margin-left: 10px" value="{{system.systemScore * 100}}" *ngIf="profLevel && comparison.status === -2" (mouseup)="setSystemScoreEvent($event)" />
+        <span style="float: right">{{round(system.systemScore * 100)}}%</span>
+        <div class="ok" (click)="setSystemScore(system.systemHPO, system.systemScore)" title="This system score was automatically calculated. Click (or edit the system score) to confirm that it is correct." *ngIf="!system.systemScoreSet && comparison.status <= 0"></div>
       </div>
       <div class="row">
         <div class="col-lg-6">
-          <div style="height: 30px" *ngFor="let phenotype of system.phenotypes">
+          <div style="white-space: nowrap;height: 30px" *ngFor="let phenotype of system.phenotypes">
             <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + phenotype.frequency.toString().split('.').join(',') + '.png)', 'color' : (phenotype.frequency == '0.75') ? 'black' : 'white'}" title="Frequency: {{frequencyDescription(phenotype.frequency)}}&#013;Onset: {{onsetDescription(phenotype.onset)}}">{{onsetAbbreviation(phenotype.onset)}}</pre>
             <pre *ngIf="phenotype.observed === 0" class="frequency-onset" [ngStyle]="{'background-image': 'none', 'color' : 'white'}" title="This phenotype is not present in all patients with this disease.">{{onsetAbbreviation(phenotype.onset)}}</pre>
             <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1">{{phenotype.phenotypeName}}</span>
@@ -136,11 +177,11 @@
           </div>
         </div>
         <div class="col-lg-6">
-          <div style="height: 30px" *ngFor="let phenotype of system.compareToPhenotypes">
+          <div style="white-space: nowrap;height: 30px" *ngFor="let phenotype of system.compareToPhenotypes">
             <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + phenotype.frequency.toString().split('.').join(',') + '.png)', 'color' : (phenotype.frequency == '0.75') ? 'black' : 'white'}" title="Frequency: {{frequencyDescription(phenotype.frequency)}}&#013;Onset: {{onsetDescription(phenotype.onset)}}">{{onsetAbbreviation(phenotype.onset)}}</pre>
             <pre *ngIf="phenotype.observed === 0" class="frequency-onset" [ngStyle]="{'background-image': 'none', 'color' : 'white'}" title="This phenotype is not present in all patients with this disease.">{{onsetAbbreviation(phenotype.onset)}}</pre>
-            <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1">{{phenotype.phenotypeName}}</span>
-            <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through" *ngIf="phenotype.observed == 0">{{phenotype.phenotypeName}}</span>
+            <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1"><i>{{phenotype.phenotypeName}}</i></span>
+            <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through" *ngIf="phenotype.observed == 0"><i>{{phenotype.phenotypeName}}</i></span>
           </div>
         </div>
       </div>

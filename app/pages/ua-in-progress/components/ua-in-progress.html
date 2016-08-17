@@ -90,7 +90,7 @@
         <span style="opacity: 0.5" *ngIf="annotation.status == 2 && annotation.liked">
           <i>&emsp;You recommend this annotation for this disease.</i>
         </span>
-        <div class="card card-block" *ngIf="annotation.status == -2 && annotation.released">
+        <div class="card card-block" *ngIf="annotation.status == -2 && annotation.released" style="margin-top: 10px;">
           <p><strong>Score (out of 1; blank means "not graded")</strong>: {{annotation.score}}</p>
           <p *ngIf="annotation.memo"><strong>Comment</strong>: {{annotation.memo}}</p>
         </div>
@@ -137,7 +137,7 @@
 
             <div *ngFor="let phenotype of annotation.phenotypes" class="phenotypes" id="phenotype-{{phenotype.phenotypeID}}">
 
-              <div style="height: 30px" *ngIf="phenotype.systemName === systemName && (annotation.status === 2 || annotation.status === -2)">
+              <div style="white-space: nowrap;height: 30px" *ngIf="phenotype.systemName === systemName && (annotation.status === 2 || annotation.status === -2)">
                 <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + phenotype.frequency.toString().split('.').join(',') + '.png)', 'color' : (phenotype.frequency == '0.75') ? 'black' : 'white'}" title="Frequency: {{frequencyDescription(phenotype.frequency)}}&#013;Onset: {{onsetDescription(phenotype.onset)}}">{{onsetAbbreviation(phenotype.onset)}}</pre>
                 <pre *ngIf="phenotype.observed === 0" class="frequency-onset" [ngStyle]="{'background-image': 'none', 'color' : 'white'}" title="This phenotype is not present in all patients with this disease.">{{onsetAbbreviation(phenotype.onset)}}</pre>
                 <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1">{{phenotype.phenotypeName}}</span>

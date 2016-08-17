@@ -4,6 +4,7 @@ import {DROPDOWN_DIRECTIVES, AlertComponent} from 'ng2-bootstrap/ng2-bootstrap';
 import {Http} from '@angular/http';
 import globals = require('../../../globals');
 import 'rxjs/Rx';
+declare var jQuery: any;
 
 @Component({
 	moduleId: module.id,
@@ -18,6 +19,7 @@ export class ComparatorComponent {
   systemNames: Array<Object> = [];
   studentLevel: boolean = false;
   profLevel: boolean = false;
+  calculatedScore: number = 0;
   constructor( private _router: Router, private _http: Http) {
     let scope = this;
     if (localStorage.getItem('uaAnnotation') === null) {
@@ -55,8 +57,16 @@ export class ComparatorComponent {
     this.alerts = [];
     let loadedName = function(datum: any) {
       for (let s = 0; s < scope.comparison.systems.length; s++) {
-        if (scope.comparison.systems[s].systemHPO === datum.id)
+        if (scope.comparison.systems[s].systemHPO === datum.id) {
           scope.comparison.systems[s].systemName = datum.name;
+          scope.comparison.systems.sort(function(a: any, b: any) {
+            if (b.systemName > a.systemName) {
+              return -1;
+            } else {
+              return 1;
+            }
+          });
+        }
         for (let i = 0; i < scope.comparison.systems[s].phenotypes.length; i++) {
           if (scope.comparison.systems[s].phenotypes[i].hpo === datum.id) {
             scope.comparison.systems[s].phenotypes[i].phenotypeName = datum.name;
@@ -75,6 +85,8 @@ export class ComparatorComponent {
       scope.comparison = data;
       localStorage.setItem('uaAnnotation', '' + data.annotationID);
       localStorage.setItem('uaCompareTo', '' + data.compareToAnnotationID);
+      if (data.systems.length === 0)
+        return scope.gotoComparison(localStorage.getItem('uaAnnotation'), localStorage.getItem('uaCompareTo'));
       let usedPhenotypes: Array<string> = [];
       for (let s = 0; s < data.systems.length; s++) {
         for (let i = 0; i < data.systems[s].phenotypes.length; i++) {
@@ -148,6 +160,149 @@ export class ComparatorComponent {
   }
   lookUpDisease(diseaseName: string) {
     window.open(globals.omimURL + diseaseName.substr(0, diseaseName.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
+  }
+  gotoMyClasses() {
+    this._router.navigate(['/dashboard', '/exercise', this.comparison.exerciseID]);
+  }
+  setSystemScoreEvent(event: any) {
+    let scope = this;
+    this.alerts = [];
+    this.comparison.standard = false;
+    for (let i = 0; i < scope.comparison.systems.length; i++) {
+      if (scope.comparison.systems[i].systemHPO === event.target.name) {
+        scope.comparison.systems[i].systemScore = event.target.valueAsNumber / 100;
+        scope.comparison.systems[i].systemScoreSet = true;
+      }
+    }
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'annotationID': this.comparison.annotationID,
+      'compareToAnnotationID': this.comparison.compareToAnnotationID,
+      'hpo': event.target.name,
+      'score': event.target.valueAsNumber / 100
+    });
+    this._http.post(globals.backendURL + '/restricted/annotation/prof/score/system', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => console.log(data),
+        err => this.alerts.push({
+          type: 'danger',
+          msg: 'Cannot set system score',
+          closable: true
+        }),
+        () => console.log('Set system score')
+      );
+  }
+  setSystemScore(hpo: string, score: number) {
+    let scope = this;
+    this.alerts = [];
+    this.comparison.standard = false;
+    for (let i = 0; i < scope.comparison.systems.length; i++) {
+      if (scope.comparison.systems[i].systemHPO === hpo) {
+        scope.comparison.systems[i].systemScore = score;
+        scope.comparison.systems[i].systemScoreSet = true;
+      }
+    }
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'annotationID': this.comparison.annotationID,
+      'compareToAnnotationID': this.comparison.compareToAnnotationID,
+      'hpo': hpo,
+      'score': score
+    });
+    this._http.post(globals.backendURL + '/restricted/annotation/prof/score/system', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => console.log(data),
+        err => this.alerts.push({
+          type: 'danger',
+          msg: 'Cannot set system score',
+          closable: true
+        }),
+        () => console.log('Set system score')
+      );
+  }
+  saveScore() {
+    this.alerts = [];
+    let body: string;
+    if (jQuery('#no-grade').is(':checked')) {
+      body = JSON.stringify({
+        'token': localStorage.getItem('uaToken'),
+        'annotationID': this.comparison.annotationID,
+        'compareToAnnotationID': null,
+        'score': null
+      });
+    }
+    if (jQuery('#auto-grade').is(':checked')) {
+      alert('Auto grade');
+    }
+    if (jQuery('#manual-grade').is(':checked')) {
+      body = JSON.stringify({
+        'token': localStorage.getItem('uaToken'),
+        'annotationID': this.comparison.annotationID,
+        'compareToAnnotationID': null,
+        'score': Math.round(jQuery('#score').val()) / 100
+      });
+      jQuery('#score').val(Math.round(jQuery('#score').val()));
+    }
+    this._http.post(globals.backendURL + '/restricted/annotation/prof/score/save', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => this.alerts.push({
+          type: 'success',
+          msg: 'Score saved',
+          closable: true
+        }),
+        err => this.alerts.push({
+          type: 'danger',
+          msg: 'Cannot save score',
+          closable: true
+        }),
+        () => console.log('Saved score')
+      );
+  }
+  saveAndReleaseScore() {
+    this.saveScore();
+    this.comparison.released = true;
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'annotationID': this.comparison.annotationID,
+      release: true
+    });
+    this._http.post(globals.backendURL + '/restricted/annotation/prof/score/release', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => console.log(data),
+        err => this.alerts.push({
+          type: 'danger',
+          msg: 'Cannot release score',
+          closable: true
+        }),
+        () => console.log('Released score')
+      );
+  }
+  unreleaseScore() {
+    this.alerts = [];
+    this.comparison.released = false;
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'annotationID': this.comparison.annotationID,
+      release: false
+    });
+    this._http.post(globals.backendURL + '/restricted/annotation/prof/score/release', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => console.log(data),
+        err => this.alerts.push({
+          type: 'danger',
+          msg: 'Cannot unrelease score',
+          closable: true
+        }),
+        () => console.log('Unreleased score')
+      );
+  }
+  round(x: number) {
+    return Math.round(x);
   }
   onsetAbbreviation(hpo: string) {
     switch (hpo) {

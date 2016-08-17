@@ -1,79 +1,163 @@
 <div class="container-fluid">
-    
+
     <!-- Jumbotron -->
-    <div class="jumbotron">
-        <h1>Hello, John!</h1>
-        <p>
-            You currently have an exercise in progress:
-            <br />
-            <em>Limbic system</em>
+    <div class="jumbotron" *ngIf="studentLevel" style="background: linear-gradient(to bottom, #014f8e 0%,#0275d8 100%); color:white;">
+        <h1>Hello, {{name}}!</h1>
+        <p *ngIf="random === 0">
+            <strong>Did you know?</strong> You can get bonus points for entering the correct frequency and age of onset. You may also receive bonus points if the frequency and age of onset are close enough.
         </p>
-        <p><a href="javascript:;" class="btn btn-primary btn-lg" role="button">Continue exercise »</a>
+        <p *ngIf="random === 1">
+            <strong>Did you know?</strong> When viewing your score for an exercise you submitted, be sure to click on Comparator in the sidebar to check if your professor has released a standard to which you can compare your annotation. If so, you will be able to view the score breakdown by system.
+        </p>
+        <p *ngIf="random === 2">
+            <strong>Did you know?</strong> You can switch between diseases using the dropdown menu above the phenotype list. So, don't forget to complete annotations for all the diseases in an exercise!
+        </p>
+        <p *ngIf="random === 3">
+            <strong>Did you know?</strong> You will receive partial marks if you enter a specific phenotype (e.g. primary open angle glaucoma) where a more general phenotype (e.g. glaucoma) is correct, and vice versa.
+        </p>
+        <p *ngIf="random === 4">
+            <strong>Did you know?</strong> Your annotations will be used to improve the performance of clinical diagnostics software used in hospitals.
         </p>
     </div>
-    
-    <div class="row">
-        <div class="col-xl-6 col-lg-12">
-            <h4>Open exercises</h4>
+
+    <div class="row" *ngIf="studentLevel && dashboard">
+        <div class="col-xl-6 col-lg-12" *ngIf="dashboard.exercisesToDo.length > 0">
+            <h4>Exercises to do</h4>
             <div class="table-responsive">
                 <table class="table table-hover table-sm">
                     <thead class="thead-inverse">
                         <tr>
                             <th>Exercise</th>
                             <th>Class</th>
-                            <th>Due</th>
+                            <th>Due*</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Somatosensory cortex</td>
-                            <td>Neuro</td>
-                            <td>2016-09-28 11:59 PM</td>
-                        </tr>
-                        <tr>
-                            <td>Aorta</td>
-                            <td>Cardio</td>
-                            <td>2016-10-04 11:59 PM</td>
-                        </tr>
-                        <tr>
-                            <td>Visual cortex</td>
-                            <td>Neuro</td>
-                            <td>2016-10-15 11:59 PM</td>
+                        <tr *ngFor="let exercise of dashboard.exercisesToDo">
+                            <td><a style="cursor: pointer" (click)="openExercise(exercise.exerciseID, exercise.classID)">{{exercise.exerciseName}} <i class="fa fa-pencil" *ngIf="exercise.numAnnotations > 0"></i></a></td>
+                            <td><a style="cursor: pointer" (click)="gotoClass(exercise.classID)">{{exercise.className}}</a></td>
+                            <td>{{exercise.dateEnd}}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+            <p><i>* The exact due time for each exercise can be viewed in My Classes.</i></p>
         </div>
-        <div class="col-xl-6 col-lg-12">
-            <h4>Continue an exercise</h4>
+        <div class="col-xl-6 col-lg-12" *ngIf="dashboard.recentlyGradedExercises.length > 0">
+            <h4>Recently graded and released</h4>
             <div class="table-responsive">
                 <table class="table table-hover table-sm">
                     <thead class="thead-inverse">
                         <tr>
                             <th>Exercise</th>
                             <th>Class</th>
-                            <th>Grade</th>
+                            <th>Score</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Insula</td>
-                            <td>Neuro</td>
-                            <td>78%</td>
-                        </tr>
-                        <tr>
-                            <td>Auditory cortex</td>
-                            <td>Neuro</td>
-                            <td>83%</td>
-                        </tr>
-                        <tr>
-                            <td>Glomerulus</td>
-                            <td>Urol</td>
-                            <td>75%</td>
+                        <tr *ngFor="let exercise of dashboard.recentlyGradedExercises">
+                            <td><a style="cursor: pointer" (click)="openExercise(exercise.exerciseID, exercise.classID)">{{exercise.exerciseName}}</a></td>
+                            <td><a style="cursor: pointer" (click)="gotoClass(exercise.classID)">{{exercise.className}}</a></td>
+                            <td>{{exercise.sumScore}} / {{exercise.possibleScore}} ({{100 * exercise.sumScore / exercise.possibleScore}}%)</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+
+  <div style="background: linear-gradient(to bottom, #014f8e 0%,#0275d8 100%); height: 50px; color:white; margin-bottom: 20px; padding-left: 20px; padding-top: 10px" *ngIf="profLevel">
+    <h3><i>Welcome</i></h3>
+  </div>
+
+    <div class="row" *ngIf="profLevel && dashboard">
+      <div class="col-xl-6 col-lg-12" *ngIf="dashboard.latestAnnotations.length > 0">
+        <h4>Latest annotations</h4>
+        <div class="table-responsive">
+          <table class="table table-hover table-sm">
+            <thead class="thead-inverse">
+            <tr>
+              <th>ID</th>
+              <th>Disease</th>
+              <th>Author</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let annotation of dashboard.latestAnnotations">
+              <td><a style="cursor: pointer" (click)="gotoAnnotation(annotation.annotationID)">{{annotation.annotationID}}</a></td>
+              <td><a style="cursor: pointer" (click)="gotoPhenository(annotation.diseaseDB, annotation.diseaseName)">{{annotation.diseaseName}}</a></td>
+              <td>{{annotation.authorName}}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="col-xl-6 col-lg-12" *ngIf="dashboard.watchedAnnotations.length > 0">
+        <h4>Updates on watched diseases</h4>
+        <div class="table-responsive">
+          <table class="table table-hover table-sm">
+            <thead class="thead-inverse">
+            <tr>
+              <th>ID</th>
+              <th>Disease</th>
+              <th>Author</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let annotation of dashboard.watchedAnnotations">
+              <td><a style="cursor: pointer" (click)="gotoAnnotation(annotation.annotationID)">{{annotation.annotationID}}</a></td>
+              <td><a style="cursor: pointer" (click)="gotoPhenository(annotation.diseaseDB, annotation.diseaseName)">{{annotation.diseaseName}}</a></td>
+              <td>{{annotation.authorName}}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="profLevel && dashboard">
+      <div class="col-xl-6 col-lg-12" *ngIf="dashboard.cloneAnnotations.length > 0">
+        <h4>Clones of your annotations</h4>
+        <div class="table-responsive">
+          <table class="table table-hover table-sm">
+            <thead class="thead-inverse">
+            <tr>
+              <th>ID</th>
+              <th>Disease</th>
+              <th>Author</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let annotation of dashboard.cloneAnnotations">
+              <td><a style="cursor: pointer" (click)="gotoAnnotation(annotation.annotationID)">{{annotation.annotationID}}</a></td>
+              <td><a style="cursor: pointer" (click)="gotoPhenository(annotation.diseaseDB, annotation.diseaseName)">{{annotation.diseaseName}}</a></td>
+              <td>{{annotation.authorName}}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="col-xl-6 col-lg-12" *ngIf="dashboard.exercises.length > 0">
+        <h4>Current and recent exercises</h4>
+        <div class="table-responsive">
+          <table class="table table-hover table-sm">
+            <thead class="thead-inverse">
+            <tr>
+              <th>Exercise</th>
+              <th>Class</th>
+              <th>Submissions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let exercise of dashboard.exercises">
+              <td><a style="cursor: pointer" (click)="gotoExercise(exercise.exerciseID)">{{exercise.exerciseName}}</a></td>
+              <td><a style="cursor: pointer" (click)="gotoClass(exercise.classID)">{{exercise.className}}</a></td>
+              <td>{{exercise.numSubmissions}}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
 </div>

@@ -44,8 +44,8 @@
               <th>Qty</th>
             </tr>
           </thead>
-          <tbody id="table-body-disease" *ngFor="let disease of diseases">
-            <tr (click)="setDisease(disease.name, disease.db)" style="cursor: pointer">
+          <tbody id="table-body-disease">
+            <tr (click)="setDisease(disease.name, disease.db)" style="cursor: pointer" *ngFor="let disease of diseases">
               <td>
                 <i class="fa fa-check" *ngIf="disease.following"></i>
               </td>

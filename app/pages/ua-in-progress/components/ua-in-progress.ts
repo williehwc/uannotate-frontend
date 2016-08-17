@@ -88,25 +88,23 @@ export class InProgressComponent implements OnInit {
       if (!element.id.startsWith('phenotype-'))
         return;
       let scope = this;
-      let finishAddCitation = function(data: any) {
-        let number: number;
-        for (let i = 0; i < scope.annotation.refs.length; i++) {
-          if (String(scope.annotation.refs[i].refID) === value[1].id.match(/\d+/)[0]) {
-            number = i + 1;
-            break;
-          }
+      let number: number;
+      for (let i = 0; i < scope.annotation.refs.length; i++) {
+        if (String(scope.annotation.refs[i].refID) === value[1].id.match(/\d+/)[0]) {
+          number = i + 1;
+          break;
         }
-        for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
-          if (String(scope.annotation.phenotypes[i].phenotypeID) === element.id.match(/\d+/)[0]) {
-            scope.annotation.phenotypes[i].citations.push({refID: value[1].id.match(/\d+/)[0], number: number});
-            scope.annotation.phenotypes[i].citations.sort(function(a: any, b: any) {
-              return a.number - b.number;
-            });
-            scope.annotation.phenotypes[i].notOK = 0;
-            break;
-          }
+      }
+      for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
+        if (String(scope.annotation.phenotypes[i].phenotypeID) === element.id.match(/\d+/)[0]) {
+          scope.annotation.phenotypes[i].citations.push({refID: value[1].id.match(/\d+/)[0], number: number});
+          scope.annotation.phenotypes[i].citations.sort(function(a: any, b: any) {
+            return a.number - b.number;
+          });
+          scope.annotation.phenotypes[i].notOK = 0;
+          break;
         }
-      };
+      }
       let body = JSON.stringify({
         'token': localStorage.getItem('uaToken'),
         'annotationID': this.annotation.annotationID,
@@ -116,7 +114,7 @@ export class InProgressComponent implements OnInit {
       this._http.post(globals.backendURL + '/restricted/annotation/edit/citation/add', body, globals.options)
         .map(res => res.json())
         .subscribe(
-          data => finishAddCitation(data),
+          data => console.log(data),
           err => console.log(err),
           () => console.log('Finish add citation')
         );
@@ -415,6 +413,12 @@ export class InProgressComponent implements OnInit {
   }
   setObserved(phenotypeID: number, observed: boolean) {
     let scope = this;
+    for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
+      if (scope.annotation.phenotypes[i].phenotypeID === phenotypeID) {
+        scope.annotation.phenotypes[i].observed = observed;
+        scope.annotation.phenotypes[i].notOK = 0;
+      }
+    }
     let finishSetObserved = function(data: any) {
       for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
         if (scope.annotation.phenotypes[i].phenotypeID === data.phenotypeID) {
@@ -541,16 +545,14 @@ export class InProgressComponent implements OnInit {
   }
   removeCitation(phenotypeID: number, refID: number) {
     let scope = this;
-    let finishRemoveCitation = function(data: any) {
-      for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
-        if (scope.annotation.phenotypes[i].phenotypeID === phenotypeID) {
-          for (let j = 0; j < scope.annotation.phenotypes[i].citations.length; j++) {
-            if (scope.annotation.phenotypes[i].citations[j].refID === refID)
-              scope.annotation.phenotypes[i].citations.splice(j, 1);
-          }
+    for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
+      if (scope.annotation.phenotypes[i].phenotypeID === phenotypeID) {
+        for (let j = 0; j < scope.annotation.phenotypes[i].citations.length; j++) {
+          if (scope.annotation.phenotypes[i].citations[j].refID === refID)
+            scope.annotation.phenotypes[i].citations.splice(j, 1);
         }
       }
-    };
+    }
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
       'annotationID': this.annotation.annotationID,
@@ -560,7 +562,7 @@ export class InProgressComponent implements OnInit {
     this._http.post(globals.backendURL + '/restricted/annotation/edit/citation/remove', body, globals.options)
       .map(res => res.json())
       .subscribe(
-        data => finishRemoveCitation(data),
+        data => console.log(data),
         err => console.log(err),
         () => console.log('Finish remove citation')
       );

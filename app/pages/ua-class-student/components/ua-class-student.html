@@ -31,8 +31,8 @@
                         <th>Score</th>
                     </tr>
                 </thead>
-                <tbody *ngFor="let exercise of classe.exercises">
-                    <tr>
+                <tbody>
+                    <tr *ngFor="let exercise of classe.exercises">
                         <td *ngIf="(exercise.dateEnd && exercise.dateDue <= dateNow) && (exercise.numAnnotations === 0 || exercise.status === -1)">
                           {{exercise.exerciseName}}
                         </td>
