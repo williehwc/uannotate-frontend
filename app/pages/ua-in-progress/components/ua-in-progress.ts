@@ -23,6 +23,7 @@ export class InProgressComponent implements OnInit {
   systemNames: Array<Object> = [];
   studentLevel: boolean = false;
   profLevel: boolean = false;
+  loading: boolean = true;
   routerOnActivate(curr: RouteSegment) {
     let scope = this;
     if (curr.getParam('id'))
@@ -139,17 +140,28 @@ export class InProgressComponent implements OnInit {
         jQuery('.add-bar').show();
       }
       // Look up phenotype names
-      let loadedName = function(datum: any) {
-        for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
-          if (scope.annotation.phenotypes[i].hpo === datum.id) {
-            scope.annotation.phenotypes[i].phenotypeName = datum.name;
-            scope.annotation.phenotypes[i].phenotypeDefinition = datum.def;
-            // If the phenotype is not an abnormality, we should remove it
-            if (datum.term_category.indexOf('HP:0000118') === -1) {
-              scope.annotation.phenotypes[i].display = false;
-              scope.removePhenotype(scope.annotation.phenotypes[i].phenotypeID);
+      let loadedNames = function(data: any) {
+        scope.loading = false;
+        for (let x = 0; x < data.rows.length; x++) {
+          let datum = data.rows[x];
+          for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
+            if (scope.annotation.phenotypes[i].systemHPO === datum.id) {
+              scope.annotation.phenotypes[i].systemName = datum.name;
+              if (scope.systemNames.indexOf(datum.name) === -1) {
+                scope.systemNames.push(datum.name);
+                scope.systemNames.sort();
+              }
             }
-            break;
+            if (scope.annotation.phenotypes[i].hpo === datum.id) {
+              scope.annotation.phenotypes[i].phenotypeName = datum.name;
+              scope.annotation.phenotypes[i].phenotypeDefinition = datum.def;
+              // If the phenotype is not an abnormality, we should remove it
+              if (datum.term_category.indexOf('HP:0000118') === -1) {
+                scope.annotation.phenotypes[i].display = false;
+                scope.removePhenotype(scope.annotation.phenotypes[i].phenotypeID);
+              }
+              break;
+            }
           }
         }
       };
@@ -182,20 +194,12 @@ export class InProgressComponent implements OnInit {
           }
         }
       };
+      let phenotypeNames: Array<string> = [];
       for (let i = 0; i < data.phenotypes.length; i++) {
         if (checkNew)
           i = data.phenotypes.length - 1;
+        phenotypeNames.push(data.phenotypes[i].hpo);
         let body = JSON.stringify({
-          'phenotypeName': data.phenotypes[i].hpo
-        });
-        scope._http.post(globals.backendURL + '/definition', body, globals.options)
-          .map(res => res.json())
-          .subscribe(
-            data => loadedName(data),
-            err => console.log(err),
-            () => console.log('Got name')
-          );
-        body = JSON.stringify({
           'token': localStorage.getItem('uaToken'),
           'annotationID': data.annotationID,
           'phenotypeID': data.phenotypes[i].phenotypeID
@@ -207,19 +211,33 @@ export class InProgressComponent implements OnInit {
             err => console.log(err),
             () => console.log('Got citation')
           );
-        body = JSON.stringify({
-          'token': localStorage.getItem('uaToken'),
-          'annotationID': data.annotationID,
-          'phenotypeID': data.phenotypes[i].phenotypeID
-        });
-        scope._http.post(globals.backendURL + '/restricted/annotation/system', body, globals.options)
-          .map(res => res.json())
-          .subscribe(
-            data => loadedSystem(data),
-            err => console.log(err),
-            () => console.log('Got citation')
-          );
+        if (!data.phenotypes[i].systemHPO) {
+          body = JSON.stringify({
+            'token': localStorage.getItem('uaToken'),
+            'annotationID': data.annotationID,
+            'phenotypeID': data.phenotypes[i].phenotypeID
+          });
+          scope._http.post(globals.backendURL + '/restricted/annotation/system', body, globals.options)
+            .map(res => res.json())
+            .subscribe(
+              data => loadedSystem(data),
+              err => console.log(err),
+              () => console.log('Got system')
+            );
+        } else if (phenotypeNames.indexOf(data.phenotypes[i].systemHPO) === -1) {
+          phenotypeNames.push(data.phenotypes[i].systemHPO);
+        }
       }
+      let body = JSON.stringify({
+        'phenotypeNames': phenotypeNames
+      });
+      scope._http.post(globals.backendURL + '/definitions', body, globals.options)
+        .map(res => res.json())
+        .subscribe(
+          data => loadedNames(data),
+          err => console.log(err),
+          () => console.log('Got names')
+        );
       // Look up refs
       let loadedRef = function(datum: any) {
         for (let i = 0; i < data.refs.length; i++) {
@@ -607,9 +625,16 @@ export class InProgressComponent implements OnInit {
       if (data.success) {
         scope.gotoAnnotation(scope.annotation.annotationID,
           document.documentElement.scrollTop || document.body.scrollTop, false);
+        scope.loading = true;
         scope.alerts.push({
           type: 'success',
           msg: 'Annotation published! By publishing this annotation, you recommend it for this disease.',
+          closable: true
+        });
+      } else if (data.exactDuplicate) {
+        scope.alerts.push({
+          type: 'danger',
+          msg: 'This annotation is exactly the same as annotation ' + data.exactDuplicate + '.',
           closable: true
         });
       } else if (data.uncitedPhenotypes) {

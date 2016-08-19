@@ -104,8 +104,9 @@
       <tabset>
         <tab>
 
-          <template tabHeading *ngIf="annotation.status <= 0">
+          <template tabHeading *ngIf="annotation.status <= 0 && annotation.exerciseAnnotations.length > 1">
             <div dropdown keyboardNav="true">
+              Select disease:
               <a href id="simple-dropdown" dropdownToggle>
                 {{annotation.disease.diseaseName}}
               </a>
@@ -115,11 +116,17 @@
             </div>
           </template>
 
+          <template tabHeading *ngIf="annotation.status <= 0 && annotation.exerciseAnnotations.length == 1">
+            Disease: {{annotation.disease.diseaseName}}
+          </template>
+
           <template tabHeading *ngIf="annotation.status > 0">
             Phenotypes
           </template>
 
           <br />
+
+          <img *ngIf="annotation.phenotypes.length > 0 && loading" src="/assets/img/loading.gif"/>
 
           <p *ngIf="annotation.phenotypes.length == 0">
             <strong style="color: #F16700">Add a phenotype using the bottom bar.</strong>

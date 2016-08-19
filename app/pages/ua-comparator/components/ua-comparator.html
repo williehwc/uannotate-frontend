@@ -66,9 +66,9 @@
               %
             </div>
             <div class="col-lg-5">
-              <label for="comment">Comment</label>
+              <label for="memo">Comment</label>
               <br />
-              <textarea id="comment">{{comparison.memo}}</textarea>
+              <textarea id="memo">{{comparison.memo}}</textarea>
             </div>
           </div>
         </form>
@@ -174,6 +174,7 @@
             <pre *ngIf="phenotype.observed === 0" class="frequency-onset" [ngStyle]="{'background-image': 'none', 'color' : 'white'}" title="This phenotype is not present in all patients with this disease.">{{onsetAbbreviation(phenotype.onset)}}</pre>
             <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1">{{phenotype.phenotypeName}}</span>
             <span title="{{phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through" *ngIf="phenotype.observed == 0">{{phenotype.phenotypeName}}</span>
+            <img src="/assets/img/bonus.gif" style="height: 20px" *ngIf="phenotype.bonus" />
           </div>
         </div>
         <div class="col-lg-6">

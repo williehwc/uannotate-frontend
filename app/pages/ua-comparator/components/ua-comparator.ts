@@ -52,34 +52,53 @@ export class ComparatorComponent {
         () => console.log('Got level')
       );
   }
+  calculateScore() {
+    let totalNumPhenotypesInclDuplicates = 0;
+    this.calculatedScore = 0;
+    for (let s = 0; s < this.comparison.systems.length; s++) {
+      totalNumPhenotypesInclDuplicates += this.comparison.systems[s].phenotypes.length +
+        this.comparison.systems[s].compareToPhenotypes.length;
+    }
+    for (let s = 0; s < this.comparison.systems.length; s++) {
+      let numPhenotypesInclDuplicates = this.comparison.systems[s].phenotypes.length +
+        this.comparison.systems[s].compareToPhenotypes.length;
+      this.calculatedScore += this.comparison.systems[s].systemScore * numPhenotypesInclDuplicates /
+        totalNumPhenotypesInclDuplicates;
+    }
+    this.calculatedScore = Math.ceil(this.calculatedScore * 100) / 100;
+  }
   gotoComparison(annotationID: number, compareToAnnotationID: number) {
     let scope = this;
     this.alerts = [];
-    let loadedName = function(datum: any) {
-      for (let s = 0; s < scope.comparison.systems.length; s++) {
-        if (scope.comparison.systems[s].systemHPO === datum.id) {
-          scope.comparison.systems[s].systemName = datum.name;
-          scope.comparison.systems.sort(function(a: any, b: any) {
-            if (b.systemName > a.systemName) {
-              return -1;
-            } else {
-              return 1;
-            }
-          });
-        }
-        for (let i = 0; i < scope.comparison.systems[s].phenotypes.length; i++) {
-          if (scope.comparison.systems[s].phenotypes[i].hpo === datum.id) {
-            scope.comparison.systems[s].phenotypes[i].phenotypeName = datum.name;
-            scope.comparison.systems[s].phenotypes[i].phenotypeDefinition = datum.def;
+    let loadedName = function(data: any) {
+      for (let x = 0; x < data.rows.length; x++) {
+        let datum = data.rows[x];
+        for (let s = 0; s < scope.comparison.systems.length; s++) {
+          if (scope.comparison.systems[s].systemHPO === datum.id) {
+            scope.comparison.systems[s].systemName = datum.name;
+            scope.comparison.systems.sort(function (a: any, b: any) {
+              if (b.systemName > a.systemName) {
+                return -1;
+              } else {
+                return 1;
+              }
+            });
           }
-        }
-        for (let i = 0; i < scope.comparison.systems[s].compareToPhenotypes.length; i++) {
-          if (scope.comparison.systems[s].compareToPhenotypes[i].hpo === datum.id) {
-            scope.comparison.systems[s].compareToPhenotypes[i].phenotypeName = datum.name;
-            scope.comparison.systems[s].compareToPhenotypes[i].phenotypeDefinition = datum.def;
+          for (let i = 0; i < scope.comparison.systems[s].phenotypes.length; i++) {
+            if (scope.comparison.systems[s].phenotypes[i].hpo === datum.id) {
+              scope.comparison.systems[s].phenotypes[i].phenotypeName = datum.name;
+              scope.comparison.systems[s].phenotypes[i].phenotypeDefinition = datum.def;
+            }
+          }
+          for (let i = 0; i < scope.comparison.systems[s].compareToPhenotypes.length; i++) {
+            if (scope.comparison.systems[s].compareToPhenotypes[i].hpo === datum.id) {
+              scope.comparison.systems[s].compareToPhenotypes[i].phenotypeName = datum.name;
+              scope.comparison.systems[s].compareToPhenotypes[i].phenotypeDefinition = datum.def;
+            }
           }
         }
       }
+      scope.calculateScore();
     };
     let initializeComparison = function (data:any) {
       scope.comparison = data;
@@ -87,51 +106,30 @@ export class ComparatorComponent {
       localStorage.setItem('uaCompareTo', '' + data.compareToAnnotationID);
       if (data.systems.length === 0)
         return scope.gotoComparison(localStorage.getItem('uaAnnotation'), localStorage.getItem('uaCompareTo'));
-      let usedPhenotypes: Array<string> = [];
+      let phenotypeNames: Array<string> = [];
       for (let s = 0; s < data.systems.length; s++) {
         for (let i = 0; i < data.systems[s].phenotypes.length; i++) {
-          if (usedPhenotypes.indexOf(data.systems[s].phenotypes[i].hpo) !== -1)
+          if (phenotypeNames.indexOf(data.systems[s].phenotypes[i].hpo) !== -1)
             continue;
-          usedPhenotypes.push(data.systems[s].phenotypes[i].hpo);
-          let body = JSON.stringify({
-            'phenotypeName': data.systems[s].phenotypes[i].hpo
-          });
-          scope._http.post(globals.backendURL + '/definition', body, globals.options)
-            .map(res => res.json())
-            .subscribe(
-              data => loadedName(data),
-              err => console.log(err),
-              () => console.log('Got name')
-            );
+          phenotypeNames.push(data.systems[s].phenotypes[i].hpo);
         }
         for (let i = 0; i < data.systems[s].compareToPhenotypes.length; i++) {
-          if (usedPhenotypes.indexOf(data.systems[s].compareToPhenotypes[i].hpo) !== -1)
+          if (phenotypeNames.indexOf(data.systems[s].compareToPhenotypes[i].hpo) !== -1)
             continue;
-          usedPhenotypes.push(data.systems[s].compareToPhenotypes[i].hpo);
-          let body = JSON.stringify({
-            'phenotypeName': data.systems[s].compareToPhenotypes[i].hpo
-          });
-          scope._http.post(globals.backendURL + '/definition', body, globals.options)
-            .map(res => res.json())
-            .subscribe(
-              data => loadedName(data),
-              err => console.log(err),
-              () => console.log('Got name')
-            );
+          phenotypeNames.push(data.systems[s].compareToPhenotypes[i].hpo);
         }
-        for (let i = 0; i < data.systems.length; i++) {
-          let body = JSON.stringify({
-            'phenotypeName': data.systems[s].systemHPO
-          });
-          scope._http.post(globals.backendURL + '/definition', body, globals.options)
-            .map(res => res.json())
-            .subscribe(
-              data => loadedName(data),
-              err => console.log(err),
-              () => console.log('Got name')
-            );
-        }
+        phenotypeNames.push(data.systems[s].systemHPO);
       }
+      let body = JSON.stringify({
+        'phenotypeNames': phenotypeNames
+      });
+      scope._http.post(globals.backendURL + '/definitions', body, globals.options)
+        .map(res => res.json())
+        .subscribe(
+          data => loadedName(data),
+          err => console.log(err),
+          () => console.log('Got names')
+        );
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
@@ -184,7 +182,7 @@ export class ComparatorComponent {
     this._http.post(globals.backendURL + '/restricted/annotation/prof/score/system', body, globals.options)
       .map(res => res.json())
       .subscribe(
-        data => console.log(data),
+        data => this.calculateScore(),
         err => this.alerts.push({
           type: 'danger',
           msg: 'Cannot set system score',
@@ -213,7 +211,7 @@ export class ComparatorComponent {
     this._http.post(globals.backendURL + '/restricted/annotation/prof/score/system', body, globals.options)
       .map(res => res.json())
       .subscribe(
-        data => console.log(data),
+        data => this.calculateScore(),
         err => this.alerts.push({
           type: 'danger',
           msg: 'Cannot set system score',
@@ -230,18 +228,28 @@ export class ComparatorComponent {
         'token': localStorage.getItem('uaToken'),
         'annotationID': this.comparison.annotationID,
         'compareToAnnotationID': null,
-        'score': null
+        'score': null,
+        'memo': jQuery('#memo').val()
       });
+      jQuery('#score').val('');
     }
     if (jQuery('#auto-grade').is(':checked')) {
-      alert('Auto grade');
+      body = JSON.stringify({
+        'token': localStorage.getItem('uaToken'),
+        'annotationID': this.comparison.annotationID,
+        'compareToAnnotationID': this.comparison.compareToAnnotationID,
+        'score': this.calculatedScore,
+        'memo': jQuery('#memo').val()
+      });
+      jQuery('#score').val('');
     }
     if (jQuery('#manual-grade').is(':checked')) {
       body = JSON.stringify({
         'token': localStorage.getItem('uaToken'),
         'annotationID': this.comparison.annotationID,
         'compareToAnnotationID': null,
-        'score': Math.round(jQuery('#score').val()) / 100
+        'score': Math.round(jQuery('#score').val()) / 100,
+        'memo': jQuery('#memo').val()
       });
       jQuery('#score').val(Math.round(jQuery('#score').val()));
     }
