@@ -4,6 +4,7 @@ import {Router, ROUTER_DIRECTIVES, RouteSegment} from '@angular/router';
 import {Http} from '@angular/http';
 import globals = require('../../../globals');
 import 'rxjs/Rx';
+declare var jQuery: any;
 
 @Component({
   moduleId: module.id,
@@ -16,6 +17,7 @@ import 'rxjs/Rx';
 export class ClassProfComponent {
   classe: any;
   newExerciseName: string;
+  noExportType: boolean = false;
   routerOnActivate(curr: RouteSegment) {
     let scope = this;
     let finishGetClass = function(data: any) {
@@ -36,6 +38,9 @@ export class ClassProfComponent {
   constructor( private _router: Router, private _http: Http ) { }
   changeJoinCode() {
     let scope = this;
+    if (!confirm('The current join code for this class will be replaced with another randomly-generated join code. ' +
+        'Continue?'))
+      return;
     let finishChangeJoinCode = function(data: any) {
       scope.classe.joinCode = data.joinCode;
     };
@@ -113,5 +118,50 @@ export class ClassProfComponent {
         err => console.log(err),
         () => console.log('Made new exercise')
       );
+  }
+  exportScores() {
+    if (jQuery('input[name=export]:checked').val() && jQuery('input[name=as]:checked').val()) {
+      this.noExportType = false;
+      let finishExportScores = function (data: any){
+        var blob = new Blob([data.response], { type: 'text/' + jQuery('input[name=as]:checked').val() });
+        var url= window.URL.createObjectURL(blob);
+        window.open(url);
+      };
+      let body = JSON.stringify({
+        'token': localStorage.getItem('uaToken'),
+        'classID': parseInt(this.classe.classID),
+        'exportType': jQuery('input[name=export]:checked').val(),
+        'as': jQuery('input[name=as]:checked').val()
+      });
+      this._http.post(globals.backendURL + '/restricted/class/prof/export-scores', body, globals.options)
+        .map(res => res.json())
+        .subscribe(
+          data => finishExportScores(data),
+          err => console.log(err),
+          () => console.log('Download scores')
+        );
+    } else {
+      this.noExportType = true;
+    }
+  }
+  removeStudent(userID: number) {
+    if (!confirm('Removing a student will delete his/her exercise responses and scores. Continue?'))
+      return;
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'classID': parseInt(this.classe.classID),
+      'userID': userID
+    });
+    this._http.post(globals.backendURL + '/restricted/class/prof/remove-student', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => console.log(data),
+        err => console.log(err),
+        () => console.log('Remove student')
+      );
+    for (let i = 0; i < this.classe.students.length; i++) {
+      if (this.classe.students[i].userID)
+        this.classe.students.splice(i, 1);
+    }
   }
 }

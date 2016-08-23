@@ -164,10 +164,27 @@ export class ComparatorComponent {
   }
   setSystemScoreEvent(event: any) {
     let scope = this;
-    this.alerts = [];
-    this.comparison.standard = false;
+    if (this.comparison.standard && this.comparison.released) {
+      this.alerts = [];
+      this.alerts.push({
+        type: 'warning',
+        msg: 'You\'ve changed one or more system scores. ' +
+        'Please click on the calculated score to confirm that it is correct, then click Update.',
+        closable: true
+      });
+    } else if (this.comparison.standard) {
+      this.alerts = [];
+      this.alerts.push({
+        type: 'warning',
+        msg: 'You\'ve changed one or more system scores. ' +
+        'Please click on the calculated score to confirm that it is correct, then click Save.',
+        closable: true
+      });
+    }
     for (let i = 0; i < scope.comparison.systems.length; i++) {
       if (scope.comparison.systems[i].systemHPO === event.target.name) {
+        if (scope.comparison.systems[i].systemScore !== event.target.valueAsNumber / 100)
+          this.comparison.standard = false;
         scope.comparison.systems[i].systemScore = event.target.valueAsNumber / 100;
         scope.comparison.systems[i].systemScoreSet = true;
       }
@@ -177,26 +194,23 @@ export class ComparatorComponent {
       'annotationID': this.comparison.annotationID,
       'compareToAnnotationID': this.comparison.compareToAnnotationID,
       'hpo': event.target.name,
-      'score': event.target.valueAsNumber / 100
+      'score': event.target.valueAsNumber / 100,
+      'removeCompareToAnnotation': true
     });
     this._http.post(globals.backendURL + '/restricted/annotation/prof/score/system', body, globals.options)
       .map(res => res.json())
       .subscribe(
         data => this.calculateScore(),
-        err => this.alerts.push({
-          type: 'danger',
-          msg: 'Cannot set system score',
-          closable: true
-        }),
+        err => console.log(err),
         () => console.log('Set system score')
       );
   }
   setSystemScore(hpo: string, score: number) {
     let scope = this;
-    this.alerts = [];
-    this.comparison.standard = false;
     for (let i = 0; i < scope.comparison.systems.length; i++) {
       if (scope.comparison.systems[i].systemHPO === hpo) {
+        if (scope.comparison.systems[i].systemScore !== score)
+          this.comparison.standard = false;
         scope.comparison.systems[i].systemScore = score;
         scope.comparison.systems[i].systemScoreSet = true;
       }
@@ -206,22 +220,24 @@ export class ComparatorComponent {
       'annotationID': this.comparison.annotationID,
       'compareToAnnotationID': this.comparison.compareToAnnotationID,
       'hpo': hpo,
-      'score': score
+      'score': score,
+      'removeCompareToAnnotation': false
     });
     this._http.post(globals.backendURL + '/restricted/annotation/prof/score/system', body, globals.options)
       .map(res => res.json())
       .subscribe(
         data => this.calculateScore(),
-        err => this.alerts.push({
-          type: 'danger',
-          msg: 'Cannot set system score',
-          closable: true
-        }),
+        err => console.log(err),
         () => console.log('Set system score')
       );
   }
   saveScore() {
     this.alerts = [];
+    this.alerts.push({
+      type: 'info',
+      msg: 'Saving score…',
+      closable: true
+    });
     let body: string;
     if (jQuery('#no-grade').is(':checked')) {
       body = JSON.stringify({
@@ -242,6 +258,11 @@ export class ComparatorComponent {
         'memo': jQuery('#memo').val()
       });
       jQuery('#score').val('');
+      this.comparison.standard = true;
+      for (let i = 0; i < this.comparison.systems.length; i++) {
+        if (!this.comparison.systems[i].systemScoreSet)
+          this.setSystemScore(this.comparison.systems[i].systemHPO, this.comparison.systems[i].systemScore);
+      }
     }
     if (jQuery('#manual-grade').is(':checked')) {
       body = JSON.stringify({
@@ -256,7 +277,7 @@ export class ComparatorComponent {
     this._http.post(globals.backendURL + '/restricted/annotation/prof/score/save', body, globals.options)
       .map(res => res.json())
       .subscribe(
-        data => this.alerts.push({
+        data => this.alerts.splice(0, 1, {
           type: 'success',
           msg: 'Score saved',
           closable: true

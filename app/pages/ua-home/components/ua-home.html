@@ -58,7 +58,7 @@
                         <tr *ngFor="let exercise of dashboard.recentlyGradedExercises">
                             <td><a style="cursor: pointer" (click)="openExercise(exercise.exerciseID, exercise.classID)">{{exercise.exerciseName}}</a></td>
                             <td><a style="cursor: pointer" (click)="gotoClass(exercise.classID)">{{exercise.className}}</a></td>
-                            <td>{{exercise.sumScore}} / {{exercise.possibleScore}} ({{100 * exercise.sumScore / exercise.possibleScore}}%)</td>
+                            <td>{{exercise.sumScore}} / {{exercise.possibleScore}} ({{exercise.percentScore}}%)</td>
                         </tr>
                     </tbody>
                 </table>

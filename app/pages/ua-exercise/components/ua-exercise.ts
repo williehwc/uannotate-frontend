@@ -17,6 +17,7 @@ import {Dragula, DragulaService} from 'ng2-dragula/ng2-dragula';
 
 export class ExerciseComponent implements OnInit {
   alerts: Array<Object> = [];
+  curr: RouteSegment;
   exercise: any;
   otherExercises: any;
   reposition: boolean = true;
@@ -26,6 +27,7 @@ export class ExerciseComponent implements OnInit {
   showNumbers: boolean = false;
   routerOnActivate(curr: RouteSegment) {
     let scope = this;
+    this.curr = curr;
     let finishGetExercise = function(data: any) {
       scope.exercise = data;
       if (scope.exercise.dateStart)
@@ -446,4 +448,5 @@ export class ExerciseComponent implements OnInit {
       }
     }
   }
+
 }

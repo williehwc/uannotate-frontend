@@ -93,8 +93,40 @@
           </p>
           -->
           <ul class="list-group">
-            <li class="list-group-item" *ngFor="let student of classe.students">{{student.studentName}}</li>
+            <li class="list-group-item" *ngFor="let student of classe.students">
+              {{student.studentName}}
+              <button type="button" title="Remove" style="float:right;height:25px;padding-top:1px;" class="btn btn-sm btn-danger" (click)="removeStudent(student.userID)">
+                <i class="fa fa-times"></i>
+              </button>
+            </li>
           </ul>
+        </tab>
+        <tab>
+          <template tabHeading>
+            Export scores
+          </template>
+          <br />
+          <p>Select what to export and file format, then click Export. Be sure to allow pop-ups!</p>
+          <div class="row">
+            <div class="col-lg-6">
+              <h5>Export <span *ngIf="noExportType"><i class="fa fa-exclamation-triangle"></i></span></h5>
+              <input type="radio" name="export" value="breakdown" id="breakdown"><label for="breakdown">&nbsp;Breakdown</label><br />
+              <input type="radio" name="export" value="raw-scores" id="raw-scores"><label for="raw-scores">&nbsp;Raw scores</label><br />
+              <input type="radio" name="export" value="percentages" id="percentages"><label for="percentages">&nbsp;Percentages</label><br />
+            </div>
+            <div class="col-lg-6">
+              <h5>As</h5>
+              <input type="radio" name="as" value="html" id="html" checked><label for="html">&nbsp;HTML for viewing</label><br />
+              <input type="radio" name="as" value="tab-separated-values" id="tab-separated-values"><label for="tab-separated-values">&nbsp;TSV (tab-separated values)</label><br />
+              <input type="radio" name="as" value="csv" id="csv"><label for="csv">&nbsp;CSV (comma-separated values)</label><br />
+            </div>
+          </div>
+          <br />
+          <center>
+            <button class="btn btn-primary" (click)="exportScores()">
+              Export
+            </button>
+          </center>
         </tab>
       </tabset>
     </div>

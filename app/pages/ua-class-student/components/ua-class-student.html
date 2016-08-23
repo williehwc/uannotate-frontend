@@ -44,7 +44,7 @@
                         <td *ngIf="(!exercise.dateEnd || exercise.dateDue > dateNow) && exercise.numAnnotations > 0 && exercise.status === -1">In progress</td>
                         <td *ngIf="(exercise.dateEnd && exercise.dateDue <= dateNow) && (exercise.numAnnotations === 0 || exercise.status === -1)">Missed</td>
                         <td *ngIf="exercise.status === -2">Submitted</td>
-                        <td><span *ngIf="exercise.possibleScore > 0">{{exercise.sumScore}} / {{exercise.possibleScore}} ({{100 * exercise.sumScore / exercise.possibleScore}}%)</span></td>
+                        <td><span *ngIf="exercise.possibleScore > 0">{{exercise.sumScore}} / {{exercise.possibleScore}} ({{exercise.percentScore}}%)</span></td>
                     </tr>
                 </tbody>
             </table>

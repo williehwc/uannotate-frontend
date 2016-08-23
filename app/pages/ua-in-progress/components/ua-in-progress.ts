@@ -74,7 +74,7 @@ export class InProgressComponent implements OnInit {
     });
     dragulaService.drag.subscribe((value: any) => {
       jQuery('.ref').css('cursor', 'grabbing');
-      jQuery('.hover-box').text('Release over a phenotype.');
+      jQuery('.hover-box').text('Let go of the mouse button over a phenotype.');
       jQuery('.hover-box').show();
     });
     dragulaService.dragend.subscribe((value: any) => {

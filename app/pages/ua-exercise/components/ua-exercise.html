@@ -1,7 +1,7 @@
 <div class="container-fluid">
 
   <div class="hover-box" style="display: none">
-    Release to reposition.
+    Let go of the mouse button to reposition.
   </div>
 
   <!-- Page Heading -->
@@ -182,7 +182,7 @@
               <tr *ngFor="let submission of exercise.submissions">
                 <td><input type="checkbox" name="release" value="{{submission.annotationID}}" /></td>
                 <td><a style="cursor: pointer" (click)="gotoComparator(submission.annotationID)">{{submission.studentName}}</a></td>
-                <td><span *ngIf="submission.possibleScore > 0">{{submission.sumScore}} / {{submission.possibleScore}} ({{100 * submission.sumScore / submission.possibleScore}}%)</span></td>
+                <td><span *ngIf="submission.possibleScore > 0">{{submission.sumScore}} / {{submission.possibleScore}} ({{submission.percentScore}}%)</span></td>
                 <td>{{submission.numReleased}} / {{submission.numAnnotations}}</td>
               </tr>
               </tbody>
