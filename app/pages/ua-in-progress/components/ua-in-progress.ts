@@ -24,11 +24,13 @@ export class InProgressComponent implements OnInit {
   studentLevel: boolean = false;
   profLevel: boolean = false;
   loading: boolean = true;
+  suggestedOnsets: Array<Object> = [];
   routerOnActivate(curr: RouteSegment) {
     let scope = this;
-    if (curr.getParam('id'))
+    if (curr.getParam('id')) {
       localStorage.setItem('uaAnnotation', curr.getParam('id'));
-    if (localStorage.getItem('uaAnnotation') === null) {
+      this.gotoAnnotation(parseInt(curr.getParam('id'), 10), 0, false);
+    } else if (localStorage.getItem('uaAnnotation') === null) {
       this.alerts = [];
       this.alerts.push({
         type: 'danger',
@@ -36,8 +38,9 @@ export class InProgressComponent implements OnInit {
         closable: true
       });
       return;
+    } else {
+      this.gotoAnnotation(localStorage.getItem('uaAnnotation'), 0, false);
     }
-    this.gotoAnnotation(localStorage.getItem('uaAnnotation'), 0, false);
     let gotLevel = function (data: any) {
       if (data.level === 0) {
         scope.studentLevel = true;
@@ -98,6 +101,10 @@ export class InProgressComponent implements OnInit {
       }
       for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
         if (String(scope.annotation.phenotypes[i].phenotypeID) === element.id.match(/\d+/)[0]) {
+          for (let j = 0; j < this.annotation.phenotypes[i].citations.length; j++) {
+            if (this.annotation.phenotypes[i].citations[j].number === number)
+              return;
+          }
           scope.annotation.phenotypes[i].citations.push({refID: value[1].id.match(/\d+/)[0], number: number});
           scope.annotation.phenotypes[i].citations.sort(function(a: any, b: any) {
             return a.number - b.number;
@@ -120,6 +127,39 @@ export class InProgressComponent implements OnInit {
           () => console.log('Finish add citation')
         );
     });
+  }
+  addCitation(phenotypeID: number) {
+    let refNo = prompt('Reference number:');
+    let number = parseInt(refNo, 10);
+    if (!number || number > this.annotation.refs.length)
+      return;
+    for (let i = 0; i < this.annotation.phenotypes.length; i++) {
+      if (this.annotation.phenotypes[i].phenotypeID === phenotypeID) {
+        for (let j = 0; j < this.annotation.phenotypes[i].citations.length; j++) {
+          if (this.annotation.phenotypes[i].citations[j].number === number)
+            return;
+        }
+        this.annotation.phenotypes[i].citations.push({refID: this.annotation.refs[number - 1].refID, number: number});
+        this.annotation.phenotypes[i].citations.sort(function(a: any, b: any) {
+          return a.number - b.number;
+        });
+        this.annotation.phenotypes[i].notOK = 0;
+        break;
+      }
+    }
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'annotationID': this.annotation.annotationID,
+      'phenotypeID': phenotypeID,
+      'refID': this.annotation.refs[number - 1].refID,
+    });
+    this._http.post(globals.backendURL + '/restricted/annotation/edit/citation/add', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => console.log(data),
+        err => console.log(err),
+        () => console.log('Finish add citation')
+      );
   }
   gotoAnnotation( annotationID: number, scrollPosition: number, checkNew: boolean ) {
     let scope = this;
@@ -155,8 +195,30 @@ export class InProgressComponent implements OnInit {
             if (scope.annotation.phenotypes[i].hpo === datum.id) {
               scope.annotation.phenotypes[i].phenotypeName = datum.name;
               scope.annotation.phenotypes[i].phenotypeDefinition = datum.def;
-              // If the phenotype is not an abnormality, we should remove it
-              if (datum.term_category.indexOf('HP:0000118') === -1) {
+              let onsetHPO: string = null;
+              let onsetName: string = null;
+              for (let j = 0; j < datum.term_category.length; j++) {
+                if (scope.onsetDescription(datum.term_category[j])) {
+                  onsetHPO = datum.term_category[j];
+                  onsetName = scope.onsetDescription(datum.term_category[j]);
+                }
+              }
+              if (onsetHPO) {
+                // If the phenotype is an onset, add it to suggested onsets
+                scope.annotation.phenotypes[i].display = false;
+                scope.suggestedOnsets.push({
+                  hpo: onsetHPO,
+                  name: onsetName
+                });
+              } else if (scope.onsetDescription(scope.annotation.phenotypes[i].hpo)) {
+                // If the phenotype is an onset, add it to suggested onsets
+                scope.annotation.phenotypes[i].display = false;
+                scope.suggestedOnsets.push({
+                  hpo: scope.annotation.phenotypes[i].hpo,
+                  name: scope.onsetDescription(scope.annotation.phenotypes[i].hpo)
+                });
+              } else if (datum.term_category.indexOf('HP:0000118') === -1) {
+                // If the phenotype is not an abnormality, we should remove it
                 scope.annotation.phenotypes[i].display = false;
                 scope.removePhenotype(scope.annotation.phenotypes[i].phenotypeID);
               }
@@ -497,7 +559,8 @@ export class InProgressComponent implements OnInit {
       'token': localStorage.getItem('uaToken'),
       'annotationID': this.annotation.annotationID,
       'phenotypeID': phenotypeID,
-      'onset': onset
+      'onset': onset,
+      'setOK': true
     });
     this._http.post(globals.backendURL + '/restricted/annotation/edit/phenotype/onset', body, globals.options)
       .map(res => res.json())
@@ -721,6 +784,32 @@ export class InProgressComponent implements OnInit {
   submitExercise(exerciseID: number) {
     this._router.navigate(['/dashboard', '/submit', exerciseID]);
   }
+  applyOnset(hpo: string) {
+    let scope = this;
+    let finishApplyOnset = function(data: any) {
+      for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
+        if (scope.annotation.phenotypes[i].phenotypeID === data.phenotypeID) {
+          scope.annotation.phenotypes[i].onset = data.onset;
+        }
+      }
+    };
+    for (let i = 0; i < this.annotation.phenotypes.length; i++) {
+      let body = JSON.stringify({
+        'token': localStorage.getItem('uaToken'),
+        'annotationID': this.annotation.annotationID,
+        'phenotypeID': this.annotation.phenotypes[i].phenotypeID,
+        'onset': hpo,
+        'setOK': false
+      });
+      this._http.post(globals.backendURL + '/restricted/annotation/edit/phenotype/onset', body, globals.options)
+        .map(res => res.json())
+        .subscribe(
+          data => finishApplyOnset(data),
+          err => console.log(err),
+          () => console.log('Finish apply onset')
+        );
+    }
+  }
   onsetAbbreviation(hpo: string) {
     switch (hpo) {
       case 'HP:0030674':
@@ -737,8 +826,10 @@ export class InProgressComponent implements OnInit {
         return 'JUV';
       case 'HP:0003581':
         return 'ADU';
-      default:
+      case '-1':
         return '–––';
+      default:
+        return null;
     }
   }
   onsetDescription(hpo: string) {
@@ -757,8 +848,10 @@ export class InProgressComponent implements OnInit {
         return 'Juvenile (5 to 15 years)';
       case 'HP:0003581':
         return 'Adult (16 years or later)';
-      default:
+      case '-1':
         return 'Not sure';
+      default:
+        return null;
     }
   }
   frequencyDescription(frequency: number) {

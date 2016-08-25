@@ -24,6 +24,10 @@ body {
   background: url(/assets/img/ok-exclamation.gif);
   background-size: 33px 20px;
 }
+.suggested-onset:active {
+  background-color: #0275d8;
+  color: white;
+}
 .problem {
   cursor: grab;
 }

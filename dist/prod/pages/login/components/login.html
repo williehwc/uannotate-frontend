@@ -2,21 +2,23 @@
 	<div class="row">
 		<div class="col-lg-4 col-lg-offset-4">
         	<img src="assets/img/SB-admin.png" width="150px" class="user-avatar" />
-			<h1>SB Admin BS 4 Angular2</h1>
+			<h1>Phenotate</h1>
 			<form role="form">
 				<div class="form-content">
 					<div class="form-group">
-						<input type="text" ng-model="name" class="form-control input-underline input-lg" id="" placeholder="Email">
+						<input type="text" [(ngModel)]="email" class="form-control input-underline input-lg" id="" placeholder="Email">
 					</div>
 
 					<div class="form-group">
-						<input type="password" class="form-control input-underline input-lg" id="" placeholder="Password">
+						<input type="password" [(ngModel)]="password" (keyup.enter)="gotoDashboard()" class="form-control input-underline input-lg" id="" placeholder="Password">
 					</div>
+					<h7 *ngIf="errorBlank"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <em>All fields are required</em></h7>
+          <h7 *ngIf="errorWrongCredentials"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <em>Incorrect email and/or password</em></h7>
 				</div>
-				<a class="btn rounded-btn" [routerLink]="['/dashboard','/home']"> Log in </a>				
+				<a class="btn rounded-btn" (click)="gotoDashboard()"> Log in </a>
 				&nbsp;
-				<a type="submit" class="btn rounded-btn" [routerLink]="['/signup']">Register</a>
+				<a type="submit" class="btn rounded-btn" (click)="gotoSignup()">Registration</a>
 			</form>
-		</div>	
+		</div>
 	</div>
 </div>

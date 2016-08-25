@@ -209,9 +209,6 @@
                 <hr />
                 <div class="row">
                   <div class="col-lg-12">
-                    <span *ngIf="phenotype.citations == 0">
-                      <strong *ngIf="annotation.status != 2 && annotation.status != -2">Drag and drop references here!</strong>
-                    </span>
                     <div *ngFor="let citation of phenotype.citations">
                       <div style="float:left" class="paper" *ngIf="annotation.status == 2 || annotation.status == -2">
                         {{citation.number}}
@@ -219,6 +216,9 @@
                       <div style="float:left" class="paper paper-remove" (click)="removeCitation(phenotype.phenotypeID, citation.refID)" *ngIf="!(annotation.status == 2 || annotation.status == -2)">
                         {{citation.number}}
                       </div>
+                    </div>
+                    <div style="float:left; cursor: pointer" class="paper" (click)="addCitation(phenotype.phenotypeID)" *ngIf="!(annotation.status == 2 || annotation.status == -2)" title="Add a citation (you can also drag and drop references using a mouse)">
+                      <i class="fa fa-plus"></i>
                     </div>
                     <button type="button" class="btn btn-sm btn-danger" _ngcontent-ihs-13="" style="float:right;" (click)="removePhenotype(phenotype.phenotypeID)" *ngIf="!(annotation.status == 2 || annotation.status == -2)">
                       Remove
@@ -279,6 +279,24 @@
             </div>
 
           </div>
+
+        </tab>
+        <tab *ngIf="annotation.status == 1 && suggestedOnsets.length > 0">
+          <template tabHeading>
+            Onset ({{suggestedOnsets.length}})
+          </template>
+
+          <br />
+
+          <p>{{annotation.disease.diseaseDB.toUpperCase()}} suggested the following onset(s). Click on one of them to apply it to all phenotypes currently listed. Note that the onset you choose now will not be automatically applied to new phenotypes you add.</p>
+
+          <ul class="list-group">
+            <li class="list-group-item" *ngFor="let suggestedOnset of suggestedOnsets">
+              <a class="suggested-onset" (click)="applyOnset(suggestedOnset.hpo)" style="cursor: pointer">
+                {{suggestedOnset.name}}
+              </a>
+            </li>
+          </ul>
 
         </tab>
         <tab *ngIf="annotation.status == 2">
