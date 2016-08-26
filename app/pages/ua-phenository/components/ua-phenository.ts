@@ -235,6 +235,11 @@ export class PhenositoryComponent {
         () => console.log('Got following')
       );
   }
+  search() {
+    localStorage.setItem('uaSearch', 'true');
+    localStorage.removeItem('uaMyAnnotationsDisease');
+    this._router.navigate(['/dashboard', '/my-annotations']);
+  }
   @HostListener('document:click') onMouseEnter() {
     if (localStorage.getItem('uaAnnotationTemp')) {
       let id = localStorage.getItem('uaAnnotationTemp');

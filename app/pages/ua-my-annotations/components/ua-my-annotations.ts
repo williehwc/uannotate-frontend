@@ -90,6 +90,10 @@ export class MyAnnotationsComponent implements OnInit {
       this.newAnnotationDisease = localStorage.getItem('uaMyAnnotationsDisease');
       this.selectDisease();
     }
+    if (localStorage.getItem('uaSearch') !== null) {
+      localStorage.removeItem('uaSearch');
+      jQuery('.js-typeahead').focus();
+    }
   }
   selectDisease() {
     jQuery('.col-lg-8').attr('class', 'col-lg-5');

@@ -34,7 +34,7 @@ export class LoginComponent {
       return;
     }
     let body = JSON.stringify({
-      'email': this.email,
+      'email': this.email.toLowerCase(),
       'password': this.password
     });
     this._http.post(globals.backendURL + '/login', body, globals.options)

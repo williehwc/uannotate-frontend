@@ -205,18 +205,18 @@ export class InProgressComponent implements OnInit {
               }
               if (onsetHPO) {
                 // If the phenotype is an onset, add it to suggested onsets
-                scope.annotation.phenotypes[i].display = false;
                 scope.suggestedOnsets.push({
                   hpo: onsetHPO,
                   name: onsetName
                 });
+                scope.annotation.phenotypes.splice(i, 1);
               } else if (scope.onsetDescription(scope.annotation.phenotypes[i].hpo)) {
                 // If the phenotype is an onset, add it to suggested onsets
-                scope.annotation.phenotypes[i].display = false;
                 scope.suggestedOnsets.push({
                   hpo: scope.annotation.phenotypes[i].hpo,
                   name: scope.onsetDescription(scope.annotation.phenotypes[i].hpo)
                 });
+                scope.annotation.phenotypes.splice(i, 1);
               } else if (datum.term_category.indexOf('HP:0000118') === -1) {
                 // If the phenotype is not an abnormality, we should remove it
                 scope.annotation.phenotypes[i].display = false;

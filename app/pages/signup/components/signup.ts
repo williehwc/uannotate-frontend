@@ -46,7 +46,7 @@ export class SignupComponent {
 		}
 		let body = JSON.stringify({
 			'name': this.name,
-			'email': this.email,
+			'email': this.email.toLowerCase(),
 			'password': this.password
 		});
 		this._http.post(globals.backendURL + '/signup', body, globals.options)
