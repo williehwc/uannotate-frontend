@@ -10,6 +10,9 @@ $sidebar-background-color: #424242;
 body {
   overflow-y: scroll;
 }
+.modal-backdrop {
+  display: none;
+}
 .ok {
   background: url(/assets/img/ok-question.gif);
   width: 33px;

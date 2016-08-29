@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Router, ROUTER_DIRECTIVES, RouteSegment} from '@angular/router';
 declare var jQuery: any;
-import {DROPDOWN_DIRECTIVES, TAB_DIRECTIVES, AlertComponent} from 'ng2-bootstrap/ng2-bootstrap';
+import {DROPDOWN_DIRECTIVES, TAB_DIRECTIVES, AlertComponent, MODAL_DIRECTVES, BS_VIEW_PROVIDERS} from 'ng2-bootstrap/ng2-bootstrap';
 import {Http} from '@angular/http';
 import globals = require('../../../globals');
 import 'rxjs/Rx';
@@ -11,8 +11,8 @@ import {Dragula, DragulaService} from 'ng2-dragula/ng2-dragula';
   moduleId: module.id,
 	selector: 'ua-in-progress',
 	templateUrl: 'ua-in-progress.html',
-  directives: [[DROPDOWN_DIRECTIVES, TAB_DIRECTIVES, AlertComponent, ROUTER_DIRECTIVES, Dragula]],
-  viewProviders: [DragulaService]
+  directives: [[DROPDOWN_DIRECTIVES, TAB_DIRECTIVES, AlertComponent, ROUTER_DIRECTIVES, Dragula, MODAL_DIRECTVES]],
+  viewProviders: [DragulaService, BS_VIEW_PROVIDERS]
 })
 
 
@@ -25,6 +25,7 @@ export class InProgressComponent implements OnInit {
   profLevel: boolean = false;
   loading: boolean = true;
   suggestedOnsets: Array<Object> = [];
+  detailedPhenotype: any = null;
   routerOnActivate(curr: RouteSegment) {
     let scope = this;
     if (curr.getParam('id')) {
@@ -809,6 +810,32 @@ export class InProgressComponent implements OnInit {
           () => console.log('Finish apply onset')
         );
     }
+  }
+  openDetails(phenotype: any) {
+    this.detailedPhenotype = phenotype;
+  }
+  setDetail(detail: string, value: string) {
+    let scope = this;
+    let finishSetDetail = function(data: any) {
+      for (let i = 0; i < this.annotation.phenotypes.length; i++) {
+        if (scope.annotation.phenotypes[i].phenotypeID === scope.detailedPhenotype.phenotypeID)
+          scope.annotation.phenotypes[i] = scope.detailedPhenotype;
+      }
+    };
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'annotationID': this.annotation.annotationID,
+      'phenotypeID': this.detailedPhenotype.phenotypeID,
+      'detail': detail,
+      'value': value
+    });
+    this._http.post(globals.backendURL + '/restricted/annotation/edit/phenotype/detail', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishSetDetail(data),
+        err => console.log(err),
+        () => console.log('Finish set detail')
+      );
   }
   onsetAbbreviation(hpo: string) {
     switch (hpo) {
