@@ -1,5 +1,87 @@
 <div class="container-fluid">
 
+  <div bsModal #smModal="bs-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content" *ngIf="detailedPhenotype">
+        <br />
+        <div class="modal-header">
+          <h4 class="modal-title">{{detailedPhenotype.phenotypeName}}</h4>
+        </div>
+        <div class="modal-body">
+          <strong>Pace of progression</strong>
+          <br />
+          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.progression" (change)="setDetail('progression', $event.target.value)" disabled>
+            <option value="-1">N/A</option>
+            <option value="HP:0003680">Nonprogressive</option>
+            <option value="HP:0003677">Slow progression</option>
+            <option value="HP:0003676">Progressive</option>
+            <option value="HP:0003678">Rapidly progressive</option>
+            <option value="HP:0003682">Variable progression rate</option>
+          </select>
+          <br />
+          <strong>Severity</strong>
+          <br />
+          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.severity" (change)="setDetail('severity', $event.target.value)" disabled>
+            <option value="-1">N/A</option>
+            <option value="HP:0012827" title="Having a minor degree of severity that is considered to be on the boundary between the normal and the abnormal ranges. For quantitative traits, a deviation of that is less than two standard deviations from the appropriate population mean.">Borderline</option>
+            <option value="HP:0012825" title="Having a relatively minor degree of severity. For quantitative traits, a deviation of between two and three standard deviations from the appropriate population mean.">Mild</option>
+            <option value="HP:0012826" title="Having a medium degree of severity. For quantitative traits, a deviation of between three and four standard deviations from the appropriate population mean.">Moderate</option>
+            <option value="HP:0012828" title="Having a high degree of severity. For quantitative traits, a deviation of between four and five standard deviations from the appropriate population mean.">Severe</option>
+            <option value="HP:0012829" title="Having an extremely high degree of severity. For quantitative traits, a deviation of more than five standard deviations from the appropriate population mean.">Profound</option>
+          </select>
+          <br />
+          <strong>Temporal pattern</strong>
+          <br />
+          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.temporalPattern" (change)="setDetail('temporal_pattern', $event.target.value)" disabled>
+            <option value="-1">N/A</option>
+            <option value="HP:0003587" title="Gradual, very slow onset of disease manifestations.">Insidious onset</option>
+            <option value="HP:0011010" title="Slow, creeping onset, slow progress and long continuance of disease manifestations.">Chronic</option>
+            <option value="HP:0011011" title="Somewhat rapid onset and change of disease manifestations.">Subacute</option>
+            <option value="HP:0011009" title="Sudden appearance of disease manifestations over a short period of time.">Acute</option>
+          </select>
+          <br />
+          <strong>Spatial pattern</strong>
+          <br />
+          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.spatialPattern" (change)="setDetail('spatial_pattern', $event.target.value)" disabled>
+            <option value="-1">N/A</option>
+            <option value="HP:0012837" title="Affecting all regions without specificity of distribution.">Generalized</option>
+            <option value="HP:0012838" title="Being confined or restricted to a particular location.">Localized</option>
+            <option value="HP:0012839" title="Localized away from the central point of the body.">└ Distal</option>
+            <option value="HP:0012840" title="Localized close to the central point of the body.">└ Proximal</option>
+            <option value="HP:0030645">└ Central</option>
+          </select>
+          <br />
+          <strong>Laterality</strong>
+          <br />
+          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.laterality"  (change)="setDetail('laterality', $event.target.value)" disabled>
+            <option value="-1">N/A</option>
+            <option value="HP:0012832" title="Being present on both sides of the body.">Bilateral</option>
+            <option value="HP:0012833" title="Being present on only the left or only the right side of the body.">Unilateral</option>
+            <option value="HP:0012834" title="Being located on the right side of the body.">Right</option>
+            <option value="HP:0012835" title="Being located on the left side of the body.">Left</option>
+          </select>
+          <br />
+          <strong>Specific age of onset</strong>
+          <br />
+          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.specificOnset" (change)="setDetail('specific_onset', $event.target.value)" disabled *ngIf="detailedPhenotype.onset == 'HP:0030674'">
+            <option value="-1">N/A</option>
+            <option value="HP:0011460" title="Onset of disease at up to 8 weeks of gestation.">Embryonal onset</option>
+            <option value="HP:0011461" title="Onset prior to birth but after 8 weeks of gestation.">Fetal onset</option>
+          </select>
+          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.specificOnset" (change)="setDetail('specific_onset', $event.target.value)" disabled *ngIf="detailedPhenotype.onset == 'HP:0003581'">
+            <option value="-1">N/A</option>
+            <option value="HP:0011462" title="Onset of disease at the age of between 16 and 40 years.">Young adult onset</option>
+            <option value="HP:0003596" title="A type of adult onset with onset of symptoms at the age of 40 to 60 years.">Middle age onset</option>
+            <option value="HP:0003584" title="A type of adult onset with onset of symptoms after the age of 60 years.">Late onset</option>
+          </select>
+          <div style="margin-bottom: 10px" *ngIf="detailedPhenotype.onset != 'HP:0030674' && detailedPhenotype.onset != 'HP:0003581'">
+            <i>Only antenatal and adult onsets have more specific onsets.</i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Page Heading -->
   <div class="row">
     <div class="col-lg-12">
@@ -172,7 +254,8 @@
           <div style="white-space: nowrap;height: 30px" *ngFor="let phenotype of system.phenotypes">
             <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + phenotype.frequency.toString().split('.').join(',') + '.png)', 'color' : (phenotype.frequency == '0.75') ? 'black' : 'white'}" title="Frequency: {{frequencyDescription(phenotype.frequency)}}&#013;Onset: {{onsetDescription(phenotype.onset)}}">{{onsetAbbreviation(phenotype.onset)}}</pre>
             <pre *ngIf="phenotype.observed === 0" class="frequency-onset" [ngStyle]="{'background-image': 'none', 'color' : 'white'}" title="This phenotype is not present in all patients with this disease.">{{onsetAbbreviation(phenotype.onset)}}</pre>
-            <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1">{{phenotype.phenotypeName}}</span>
+            <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1 && phenotype.specificOnset == -1 && phenotype.progression == -1 && phenotype.severity == -1 && phenotype.temporalPattern == -1 && phenotype.spatialPattern == -1 && phenotype.laterality == -1">{{phenotype.phenotypeName}}</span>
+            <a style="cursor: pointer" (click)="openDetails(phenotype);smModal.show()" *ngIf="phenotype.observed == 1 && !(phenotype.specificOnset == -1 && phenotype.progression == -1 && phenotype.severity == -1 && phenotype.temporalPattern == -1 && phenotype.spatialPattern == -1 && phenotype.laterality == -1)"><span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}">{{phenotype.phenotypeName}}</span></a>
             <span title="{{phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through" *ngIf="phenotype.observed == 0">{{phenotype.phenotypeName}}</span>
             <img src="/assets/img/bonus.gif" style="height: 20px" *ngIf="phenotype.bonus" />
           </div>
@@ -181,7 +264,8 @@
           <div style="white-space: nowrap;height: 30px" *ngFor="let phenotype of system.compareToPhenotypes">
             <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + phenotype.frequency.toString().split('.').join(',') + '.png)', 'color' : (phenotype.frequency == '0.75') ? 'black' : 'white'}" title="Frequency: {{frequencyDescription(phenotype.frequency)}}&#013;Onset: {{onsetDescription(phenotype.onset)}}">{{onsetAbbreviation(phenotype.onset)}}</pre>
             <pre *ngIf="phenotype.observed === 0" class="frequency-onset" [ngStyle]="{'background-image': 'none', 'color' : 'white'}" title="This phenotype is not present in all patients with this disease.">{{onsetAbbreviation(phenotype.onset)}}</pre>
-            <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1"><i>{{phenotype.phenotypeName}}</i></span>
+            <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1 && phenotype.specificOnset == -1 && phenotype.progression == -1 && phenotype.severity == -1 && phenotype.temporalPattern == -1 && phenotype.spatialPattern == -1 && phenotype.laterality == -1"><i>{{phenotype.phenotypeName}}</i></span>
+            <a style="cursor: pointer" (click)="openDetails(phenotype);smModal.show()" *ngIf="phenotype.observed == 1 && !(phenotype.specificOnset == -1 && phenotype.progression == -1 && phenotype.severity == -1 && phenotype.temporalPattern == -1 && phenotype.spatialPattern == -1 && phenotype.laterality == -1)"><span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}">{{phenotype.phenotypeName}}</span></a>
             <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through" *ngIf="phenotype.observed == 0"><i>{{phenotype.phenotypeName}}</i></span>
           </div>
         </div>

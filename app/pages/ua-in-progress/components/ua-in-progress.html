@@ -31,17 +31,6 @@
           <h4 class="modal-title">{{detailedPhenotype.phenotypeName}}</h4>
         </div>
         <div class="modal-body">
-          <strong>Specific age of onset</strong>
-          <br />
-          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.specificOnset" (change)="setDetail('specific_onset', $event.target.value)" [disabled]="annotation.status === 2 || annotation.status === -2">
-            <option value="-1">N/A</option>
-            <option value="HP:0011460" title="Onset of disease at up to 8 weeks of gestation. Should be used with ANTENATAL ONSET.">Embryonal onset</option>
-            <option value="HP:0011461" title="Onset prior to birth but after 8 weeks of gestation. Should be used with ANTENATAL ONSET.">Fetal onset</option>
-            <option value="HP:0011462" title="Onset of disease at the age of between 16 and 40 years. Should be used with ADULT ONSET.">Young adult onset</option>
-            <option value="HP:0003596" title="A type of ADULT ONSET with onset of symptoms at the age of 40 to 60 years.">Middle age onset</option>
-            <option value="HP:0003584" title="A type of ADULT ONSET with onset of symptoms after the age of 60 years.">Late onset</option>
-          </select>
-          <br />
           <strong>Pace of progression</strong>
           <br />
           <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.progression" (change)="setDetail('progression', $event.target.value)" [disabled]="annotation.status === 2 || annotation.status === -2">
@@ -80,15 +69,9 @@
             <option value="-1">N/A</option>
             <option value="HP:0012837" title="Affecting all regions without specificity of distribution.">Generalized</option>
             <option value="HP:0012838" title="Being confined or restricted to a particular location.">Localized</option>
-            <option value="HP:0012839" title="Localized away from the central point of the body.">Distal</option>
-            <option value="HP:0012840" title="Localized close to the central point of the body.">Proximal</option>
-            <option value="HP:0030645">Central</option>
-            <option value="HP:0030647">Paracentral</option>
-            <option value="HP:0030649">Pericentral</option>
-            <option value="HP:0030650">Focal</option>
-            <option value="HP:0030651">Multifocal</option>
-            <option value="HP:0030646">Peripheral</option>
-            <option value="HP:0030648">Midperipheral</option>
+            <option value="HP:0012839" title="Localized away from the central point of the body.">└ Distal</option>
+            <option value="HP:0012840" title="Localized close to the central point of the body.">└ Proximal</option>
+            <option value="HP:0030645">└ Central</option>
           </select>
           <br />
           <strong>Laterality</strong>
@@ -100,6 +83,23 @@
             <option value="HP:0012834" title="Being located on the right side of the body.">Right</option>
             <option value="HP:0012835" title="Being located on the left side of the body.">Left</option>
           </select>
+          <br />
+          <strong>Specific age of onset</strong>
+          <br />
+          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.specificOnset" (change)="setDetail('specific_onset', $event.target.value)" [disabled]="annotation.status === 2 || annotation.status === -2" *ngIf="detailedPhenotype.onset == 'HP:0030674'">
+            <option value="-1">N/A</option>
+            <option value="HP:0011460" title="Onset of disease at up to 8 weeks of gestation.">Embryonal onset</option>
+            <option value="HP:0011461" title="Onset prior to birth but after 8 weeks of gestation.">Fetal onset</option>
+          </select>
+          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.specificOnset" (change)="setDetail('specific_onset', $event.target.value)" [disabled]="annotation.status === 2 || annotation.status === -2" *ngIf="detailedPhenotype.onset == 'HP:0003581'">
+            <option value="-1">N/A</option>
+            <option value="HP:0011462" title="Onset of disease at the age of between 16 and 40 years.">Young adult onset</option>
+            <option value="HP:0003596" title="A type of adult onset with onset of symptoms at the age of 40 to 60 years.">Middle age onset</option>
+            <option value="HP:0003584" title="A type of adult onset with onset of symptoms after the age of 60 years.">Late onset</option>
+          </select>
+          <div style="margin-bottom: 10px" *ngIf="detailedPhenotype.onset != 'HP:0030674' && detailedPhenotype.onset != 'HP:0003581'">
+            <i>Only antenatal and adult onsets have more specific onsets.</i>
+          </div>
         </div>
       </div>
     </div>
@@ -247,7 +247,7 @@
                   <label title="Not observed" class="btn btn-sm btn-secondary ng-untouched ng-pristine ng-valid active" btnradio="Right" _ngcontent-pyb-9="" (click)="setObserved(phenotype.phenotypeID, false)"><span style="color:#d9534f">N</span></label>
                 </div>
                 <i class="fa fa-exclamation-circle" aria-hidden="true" *ngIf="phenotype.citations.length == 0 && markUncitedPhenotypes && annotation.status != 2 && annotation.status != -2" style="float: right;margin-top: 3px; margin-right: 10px" title="No citations"></i>
-                <div class="ok" (click)="setObserved(phenotype.phenotypeID, (phenotype.observed == 1))" title="This phenotype was imported from {{annotation.disease.diseaseDB.toUpperCase()}}. Click (or edit the phenotype) to confirm that it is correct." *ngIf="phenotype.notOK == 1"></div>
+                <div class="ok" (click)="setObserved(phenotype.phenotypeID, (phenotype.observed == 1))" title="This phenotype was imported or cloned. Click (or edit the phenotype) to confirm that it is correct." *ngIf="phenotype.notOK == 1"></div>
                 <h5 title="{{phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1 && studentLevel">{{phenotype.phenotypeName}}</h5>
                 <h5 title="{{phenotype.hpo}} {{phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1 && profLevel">{{phenotype.phenotypeName}}</h5>
                 <h5 title="{{phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through" *ngIf="phenotype.observed == 0 && studentLevel">{{phenotype.phenotypeName}}</h5>

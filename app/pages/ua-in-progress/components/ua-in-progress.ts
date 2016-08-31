@@ -223,7 +223,6 @@ export class InProgressComponent implements OnInit {
                 scope.annotation.phenotypes[i].display = false;
                 scope.removePhenotype(scope.annotation.phenotypes[i].phenotypeID);
               }
-              break;
             }
           }
         }
@@ -245,7 +244,6 @@ export class InProgressComponent implements OnInit {
         }
       };
       let loadedSystem = function(datum: any) {
-        console.log(datum);
         // Add to list of systemNames
         if (scope.systemNames.indexOf(datum.systemName) === -1) {
           scope.systemNames.push(datum.systemName);
@@ -817,9 +815,11 @@ export class InProgressComponent implements OnInit {
   setDetail(detail: string, value: string) {
     let scope = this;
     let finishSetDetail = function(data: any) {
-      for (let i = 0; i < this.annotation.phenotypes.length; i++) {
-        if (scope.annotation.phenotypes[i].phenotypeID === scope.detailedPhenotype.phenotypeID)
+      for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
+        if (scope.annotation.phenotypes[i].phenotypeID === scope.detailedPhenotype.phenotypeID) {
           scope.annotation.phenotypes[i] = scope.detailedPhenotype;
+          scope.annotation.phenotypes[i].notOK = 0;
+        }
       }
     };
     let body = JSON.stringify({

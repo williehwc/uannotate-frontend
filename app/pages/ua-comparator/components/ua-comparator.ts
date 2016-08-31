@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {Router, ROUTER_DIRECTIVES} from '@angular/router';
-import {DROPDOWN_DIRECTIVES, AlertComponent} from 'ng2-bootstrap/ng2-bootstrap';
+import {DROPDOWN_DIRECTIVES, AlertComponent, MODAL_DIRECTVES, BS_VIEW_PROVIDERS} from 'ng2-bootstrap/ng2-bootstrap';
 import {Http} from '@angular/http';
 import globals = require('../../../globals');
 import 'rxjs/Rx';
@@ -10,7 +10,8 @@ declare var jQuery: any;
 	moduleId: module.id,
 	selector: 'ua-comparator',
 	templateUrl: 'ua-comparator.html',
-  directives: [[ROUTER_DIRECTIVES, DROPDOWN_DIRECTIVES, AlertComponent]]
+  directives: [[ROUTER_DIRECTIVES, DROPDOWN_DIRECTIVES, AlertComponent, MODAL_DIRECTVES]],
+  viewProviders: [BS_VIEW_PROVIDERS]
 })
 
 export class ComparatorComponent {
@@ -20,6 +21,7 @@ export class ComparatorComponent {
   studentLevel: boolean = false;
   profLevel: boolean = false;
   calculatedScore: number = 0;
+  detailedPhenotype: any = null;
   constructor( private _router: Router, private _http: Http) {
     let scope = this;
     if (localStorage.getItem('uaAnnotation') === null) {
@@ -76,13 +78,6 @@ export class ComparatorComponent {
         for (let s = 0; s < scope.comparison.systems.length; s++) {
           if (scope.comparison.systems[s].systemHPO === datum.id) {
             scope.comparison.systems[s].systemName = datum.name;
-            scope.comparison.systems.sort(function (a: any, b: any) {
-              if (b.systemName > a.systemName) {
-                return -1;
-              } else {
-                return 1;
-              }
-            });
           }
           for (let i = 0; i < scope.comparison.systems[s].phenotypes.length; i++) {
             if (scope.comparison.systems[s].phenotypes[i].hpo === datum.id) {
@@ -98,6 +93,13 @@ export class ComparatorComponent {
           }
         }
       }
+      scope.comparison.systems.sort(function (a: any, b: any) {
+        if (b.systemName > a.systemName) {
+          return -1;
+        } else {
+          return 1;
+        }
+      });
       scope.calculateScore();
     };
     let initializeComparison = function (data:any) {
@@ -329,6 +331,9 @@ export class ComparatorComponent {
         }),
         () => console.log('Unreleased score')
       );
+  }
+  openDetails(phenotype: any) {
+    this.detailedPhenotype = phenotype;
   }
   round(x: number) {
     return Math.round(x);
