@@ -136,8 +136,8 @@
               <input type="radio" name="grade" id="no-grade" value="no-grade" *ngIf="comparison.score == null" checked>
               <label for="no-grade">Do not grade</label>
               <br />
-              <input type="radio" name="grade" id="auto-grade" value="auto-grade" *ngIf="comparison.score == null || !comparison.standard">
-              <input type="radio" name="grade" id="auto-grade" value="auto-grade" *ngIf="comparison.score != null && comparison.standard" checked>
+              <input type="radio" name="grade" id="auto-grade" value="auto-grade" *ngIf="comparison.score == null || !comparison.standard" [disabled]="comparison.annotationID === comparison.compareToAnnotationID && profLevel">
+              <input type="radio" name="grade" id="auto-grade" value="auto-grade" *ngIf="comparison.score != null && comparison.standard" [disabled]="comparison.annotationID === comparison.compareToAnnotationID && profLevel" checked>
               <label for="auto-grade">Award the calculated score for this response: {{calculatedScore * 100}}%</label>
               <br />
               <input type="radio" name="grade" id="manual-grade" value="manual-grade" *ngIf="comparison.score == null || comparison.standard">
