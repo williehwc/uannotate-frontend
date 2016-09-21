@@ -335,6 +335,14 @@ export class ComparatorComponent {
   openDetails(phenotype: any) {
     this.detailedPhenotype = phenotype;
   }
+  closeAnnotation() {
+    localStorage.removeItem('uaAnnotation');
+    if (this.profLevel) {
+      this._router.navigate(['/dashboard', '/class-prof', this.comparison.classID]);
+    } else {
+      this._router.navigate(['/dashboard', '/class-student', this.comparison.classID]);
+    }
+  }
   round(x: number) {
     return Math.round(x);
   }

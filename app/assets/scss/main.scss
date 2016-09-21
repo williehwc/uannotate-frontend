@@ -13,6 +13,16 @@ body {
 .modal-backdrop {
   display: none;
 }
+#exercise-header {
+  background-color: #CFD8DC;
+  display: inline-block;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-top: -25px;
+  padding-top: 20px;
+  padding-bottom: 5px;
+  border-radius: 0.75rem;
+}
 .ok {
   background: url(/assets/img/ok-question.gif);
   width: 33px;
@@ -193,7 +203,7 @@ body {
   width: calc(100% - 225px);
   right: 0;
   bottom: 0;
-  background: rgba(241, 103, 0, 1);
+  background-color: #FF9800;
   z-index: 1000;
 }
 

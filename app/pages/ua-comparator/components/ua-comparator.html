@@ -46,9 +46,9 @@
             <option value="-1">N/A</option>
             <option value="HP:0012837" title="Affecting all regions without specificity of distribution.">Generalized</option>
             <option value="HP:0012838" title="Being confined or restricted to a particular location.">Localized</option>
-            <option value="HP:0012839" title="Localized away from the central point of the body.">└ Distal</option>
-            <option value="HP:0012840" title="Localized close to the central point of the body.">└ Proximal</option>
-            <option value="HP:0030645">└ Central</option>
+            <option value="HP:0012839" title="Localized away from the central point of the body.">– Distal</option>
+            <option value="HP:0012840" title="Localized close to the central point of the body.">– Proximal</option>
+            <option value="HP:0030645">– Central</option>
           </select>
           <br />
           <strong>Laterality</strong>
@@ -88,8 +88,11 @@
       <h2 class="page-header" *ngIf="!comparison || comparison.status > 0">
         Comparator
       </h2>
-      <h2 class="page-header" *ngIf="comparison && comparison.status <= 0">
+      <h2 class="page-header" id="exercise-header" *ngIf="comparison && comparison.status <= 0">
         {{comparison.exerciseName}}
+        <a (click)="closeAnnotation()" style="color:#455A64; cursor: pointer;">
+          <i class="fa fa-times-circle-o" title="Close" style="font-size: 20px; vertical-align: 4px;"></i>
+        </a>
       </h2>
       <ol class="breadcrumb" *ngIf="comparison">
         <li class="active">
@@ -226,6 +229,10 @@
   <div *ngIf="comparison && comparison.annotationID === comparison.compareToAnnotationID && profLevel">
     <br />
     <strong>There are no published annotations to compare to.</strong>
+  </div>
+
+  <div *ngIf="comparison && comparison.annotationID === comparison.compareToAnnotationID && profLevel && comparison.status === -2">
+    <strong>If you would like to grade this annotation anyway, you can view it in the <a (click)="goToAnnotator(comparison.annotationID)" style="cursor: pointer"> Annotator</a>.</strong>
   </div>
 
   <div *ngIf="comparison && comparison.annotationID === comparison.compareToAnnotationID && studentLevel && comparison.graded">

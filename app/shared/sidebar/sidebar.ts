@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, ROUTER_DIRECTIVES } from '@angular/router';
 import { CORE_DIRECTIVES, FORM_DIRECTIVES } from '@angular/common';
-
+declare var jQuery: any;
 import {Http} from '@angular/http';
 import globals = require('../../globals');
 import 'rxjs/Rx';
@@ -58,6 +58,9 @@ export class SidebarComponent {
       } else {
         scope.studentLevel = false;
         scope.profLevel = true;
+        let profColor = '#607D8B';
+        jQuery('.topnav').css('background-color', profColor);
+        jQuery('#toggle-sidebar').css('background-color', profColor);
       }
     };
     let body = JSON.stringify({

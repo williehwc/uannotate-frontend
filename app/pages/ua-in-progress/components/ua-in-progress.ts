@@ -26,6 +26,7 @@ export class InProgressComponent implements OnInit {
   loading: boolean = true;
   suggestedOnsets: Array<Object> = [];
   detailedPhenotype: any = null;
+  startDiscussionMessage: string = '';
   routerOnActivate(curr: RouteSegment) {
     let scope = this;
     if (curr.getParam('id')) {
@@ -78,7 +79,7 @@ export class InProgressComponent implements OnInit {
     });
     dragulaService.drag.subscribe((value: any) => {
       jQuery('.ref').css('cursor', 'grabbing');
-      jQuery('.hover-box').text('Let go of the mouse button over a phenotype.');
+      jQuery('.hover-box').text('Let go of the mouse button over a phenotype (except Safari).');
       jQuery('.hover-box').show();
     });
     dragulaService.dragend.subscribe((value: any) => {
@@ -679,10 +680,29 @@ export class InProgressComponent implements OnInit {
       );
   }
   publishAnnotation() {
-    if (!confirm('Publish this annotation to the Phenository? You will not be able to change it afterwards.'))
-      return;
     let scope = this;
     this.alerts = [];
+    // Check if all OKs have been cleared
+    for (let i = 0; i < this.annotation.phenotypes.length; i++) {
+      if (this.annotation.phenotypes[i].notOK === 1) {
+        if (this.annotation.cloneOf === null) {
+          this.alerts.push({
+            type: 'danger',
+            msg: 'Please confirm that all imported phenotypes are correct (look for the blue "OK?" labels).',
+            closable: true
+          });
+        } else {
+          this.alerts.push({
+            type: 'danger',
+            msg: 'Please confirm that all cloned phenotypes are correct (look for the blue "OK?" labels).',
+            closable: true
+          });
+        }
+        return;
+      }
+    }
+    if (!confirm('Publish this annotation to the Phenository? You will not be able to change it afterwards.'))
+      return;
     let finishPublish = function (data: any) {
       if (data.success) {
         scope.gotoAnnotation(scope.annotation.annotationID,
@@ -836,6 +856,41 @@ export class InProgressComponent implements OnInit {
         err => console.log(err),
         () => console.log('Finish set detail')
       );
+  }
+  gotoDiscussion(communityTopicID: number) {
+    window.open('http://community.phenotate.org/topic/' + communityTopicID);
+  }
+  startDiscussion() {
+    let scope = this;
+    let finishStartDiscussion = function(data: any) {
+      scope.annotation.communityTopicID = data.communityTopicID;
+      scope.gotoDiscussion(data.communityTopicID);
+    };
+    this.alerts = [];
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'annotationID': this.annotation.annotationID,
+      'message': this.startDiscussionMessage
+    });
+    this._http.post(globals.backendURL + '/restricted/annotation/prof/discuss', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishStartDiscussion(data),
+        err => this.alerts.push({
+          type: 'danger',
+          msg: 'Cannot post message. Perhaps it\'s too short or too long.',
+          closable: true
+        }),
+        () => console.log('Discussion started')
+      );
+  }
+  closeAnnotation() {
+    localStorage.removeItem('uaAnnotation');
+    if (this.profLevel) {
+      this._router.navigate(['/dashboard', '/class-prof', this.annotation.classID]);
+    } else {
+      this._router.navigate(['/dashboard', '/class-student', this.annotation.classID]);
+    }
   }
   onsetAbbreviation(hpo: string) {
     switch (hpo) {
