@@ -100,6 +100,14 @@ export class ComparatorComponent {
           return 1;
         }
       });
+      for (let s = 0; s < scope.comparison.systems.length; s++) {
+        scope.comparison.systems[s].phenotypes.sort(function(a: any, b: any) {
+          return (a.phenotypeName < b.phenotypeName) ? -1 : 1;
+        });
+        scope.comparison.systems[s].compareToPhenotypes.sort(function(a: any, b: any) {
+          return (a.phenotypeName < b.phenotypeName) ? -1 : 1;
+        });
+      }
       scope.calculateScore();
     };
     let initializeComparison = function (data:any) {

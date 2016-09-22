@@ -27,6 +27,7 @@ export class InProgressComponent implements OnInit {
   suggestedOnsets: Array<Object> = [];
   detailedPhenotype: any = null;
   startDiscussionMessage: string = '';
+  dragging: boolean = false;
   routerOnActivate(curr: RouteSegment) {
     let scope = this;
     if (curr.getParam('id')) {
@@ -81,10 +82,12 @@ export class InProgressComponent implements OnInit {
       jQuery('.ref').css('cursor', 'grabbing');
       jQuery('.hover-box').text('Let go of the mouse button over a phenotype (except Safari).');
       jQuery('.hover-box').show();
+      this.dragging = true;
     });
     dragulaService.dragend.subscribe((value: any) => {
       jQuery('.ref').css('cursor', 'grab');
       jQuery('.hover-box').hide();
+      this.dragging = false;
     });
     dragulaService.drop.subscribe((value: any) => {
       let elements = document.querySelectorAll(':hover');
@@ -172,6 +175,22 @@ export class InProgressComponent implements OnInit {
       this.systemNames = [];
     localStorage.setItem('uaAnnotation', '' + annotationID);
     jQuery('.add-bar').hide();
+    let loadedCitation = function(datum: any) {
+      for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
+        if (String(scope.annotation.phenotypes[i].phenotypeID) === datum.phenotypeID) {
+          scope.annotation.phenotypes[i].citations = datum.citations;
+          for (let j = 0; j < scope.annotation.phenotypes[i].citations.length; j++) {
+            for (let k = 0; k < scope.annotation.refs.length; k++) {
+              if (scope.annotation.refs[k].refID === scope.annotation.phenotypes[i].citations[j].refID) {
+                scope.annotation.phenotypes[i].citations[j].number = k + 1;
+                break;
+              }
+            }
+          }
+          break;
+        }
+      }
+    };
     let initializeAnnotation = function (data:any) {
       if (!checkNew) {
         scope.annotation = data;
@@ -227,21 +246,25 @@ export class InProgressComponent implements OnInit {
             }
           }
         }
-      };
-      let loadedCitation = function(datum: any) {
+        if (scope.annotation.status === 2 || scope.annotation.status === -2) {
+          scope.annotation.phenotypes.sort(function(a: any, b: any) {
+            return (a.phenotypeName < b.phenotypeName) ? -1 : 1;
+          });
+        }
+        // Get citations
         for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
-          if (String(scope.annotation.phenotypes[i].phenotypeID) === datum.phenotypeID) {
-            scope.annotation.phenotypes[i].citations = datum.citations;
-            for (let j = 0; j < scope.annotation.phenotypes[i].citations.length; j++) {
-              for (let k = 0; k < scope.annotation.refs.length; k++) {
-                if (scope.annotation.refs[k].refID === scope.annotation.phenotypes[i].citations[j].refID) {
-                  scope.annotation.phenotypes[i].citations[j].number = k + 1;
-                  break;
-                }
-              }
-            }
-            break;
-          }
+          let body = JSON.stringify({
+            'token': localStorage.getItem('uaToken'),
+            'annotationID': scope.annotation.annotationID,
+            'phenotypeID': scope.annotation.phenotypes[i].phenotypeID
+          });
+          scope._http.post(globals.backendURL + '/restricted/annotation/view/citation', body, globals.options)
+            .map(res => res.json())
+            .subscribe(
+              data => loadedCitation(data),
+              err => console.log(err),
+              () => console.log('Got citation')
+            );
         }
       };
       let loadedSystem = function(datum: any) {
@@ -255,26 +278,41 @@ export class InProgressComponent implements OnInit {
             data.phenotypes[i].systemName = datum.systemName;
           }
         }
+        // Scroll to newly added phenotype
+        // Exploit the fact that a newly added phenotype appears at the end of the list of the system it belongs to
+        if (checkNew) {
+          // Get system name of newly added phenotype
+          let systemName = scope.annotation.phenotypes[scope.annotation.phenotypes.length - 1].systemName;
+          // Get name of system immediately after the system name of newly added phenotype
+          let systemNameAfter: any = null;
+          console.log(systemName);
+          for (let i = 0; i < scope.systemNames.length - 1; i++) {
+            console.log(scope.systemNames[i]);
+            if (scope.systemNames[i] === systemName) {
+              systemNameAfter = scope.systemNames[i + 1];
+              break;
+            }
+          }
+          if (systemNameAfter) {
+            // Scroll to that system name minus a bit
+            jQuery('html, body').animate({
+              scrollTop: jQuery('#system-' + scope.idFormat(systemNameAfter)).offset().top - 180
+            }, 500);
+          } else {
+            // Scroll to end of page
+            jQuery('html, body').animate({
+              scrollTop: jQuery(document).height()
+            }, 500);
+          }
+        }
       };
       let phenotypeNames: Array<string> = [];
       for (let i = 0; i < data.phenotypes.length; i++) {
         if (checkNew)
           i = data.phenotypes.length - 1;
         phenotypeNames.push(data.phenotypes[i].hpo);
-        let body = JSON.stringify({
-          'token': localStorage.getItem('uaToken'),
-          'annotationID': data.annotationID,
-          'phenotypeID': data.phenotypes[i].phenotypeID
-        });
-        scope._http.post(globals.backendURL + '/restricted/annotation/view/citation', body, globals.options)
-          .map(res => res.json())
-          .subscribe(
-            data => loadedCitation(data),
-            err => console.log(err),
-            () => console.log('Got citation')
-          );
         if (!data.phenotypes[i].systemHPO) {
-          body = JSON.stringify({
+          let body = JSON.stringify({
             'token': localStorage.getItem('uaToken'),
             'annotationID': data.annotationID,
             'phenotypeID': data.phenotypes[i].phenotypeID
@@ -361,6 +399,10 @@ export class InProgressComponent implements OnInit {
         list: 'typeahead__list_annotator'
       },
       callback: {
+        onClickBefore: function (node: any, a: any, item: any, event: any) {
+          if (!!jQuery('.goto-browser').filter(function() { return jQuery(this).is(':hover'); }).length)
+            alert('We are hard at work on the phenotype browser. Thank you for your patience! The phenotype will now be added as normal.');
+        },
         onClickAfter: function (node: any, a: any, item: any, event: any) {
           jQuery('.js-typeahead').val('');
           jQuery('.hover-box').hide();
@@ -371,17 +413,23 @@ export class InProgressComponent implements OnInit {
           let body = JSON.stringify({
             'token': localStorage.getItem('uaToken'),
             'annotationID': scope.annotation.annotationID,
-            'phenotypeName': item.display
+            'phenotypeName': item.display.substring(0, item.display.indexOf(' <'))
           });
+          let addError = function() {
+            scope.alerts.push({
+              type: 'danger',
+              msg: 'Cannot add phenotype. Has it already been added?',
+              closable: true
+            });
+            jQuery('html, body').animate({
+              scrollTop: 0
+            }, 500);
+          };
           scope._http.post(globals.backendURL + '/restricted/annotation/edit/phenotype/add', body, globals.options)
             .map(res => res.json())
             .subscribe(
               data => addedPhenotype(),
-              err => scope.alerts.push({
-                type: 'danger',
-                msg: 'Cannot add phenotype. Has it already been added?',
-                closable: true
-              }),
+              err => addError(),
               () => console.log('Added phenotype')
             );
         },
@@ -396,9 +444,9 @@ export class InProgressComponent implements OnInit {
             }
           };
           let body = JSON.stringify({
-            'phenotypeName': item.display
+            'phenotypeName': item.display.substring(0, item.display.indexOf(' <'))
           });
-          display = item.display;
+          display = item.display.substring(0, item.display.indexOf(' <'));
           scope._http.post(globals.backendURL + '/definition', body, globals.options)
             .map(res => res.json())
             .subscribe(
@@ -489,6 +537,17 @@ export class InProgressComponent implements OnInit {
         left:   e.clientX - 320,
         bottom: window.innerHeight - e.clientY
       });
+      if (scope.dragging) {
+        let mousePosition = e.pageY - jQuery(document).scrollTop();
+        let topRegion = 50;
+        let bottomRegion = window.innerHeight - 50;
+        if (mousePosition < topRegion || mousePosition > bottomRegion) {    // e.wich = 1 => click down !
+          let distance = e.clientY - window.innerHeight / 2;
+          console.log(distance);
+          distance = distance * 0.1; // <- velocity
+          jQuery(document).scrollTop(distance + jQuery(document).scrollTop());
+        }
+      }
     });
   }
   setObserved(phenotypeID: number, observed: boolean) {
@@ -961,5 +1020,8 @@ export class InProgressComponent implements OnInit {
       default:
         return 'Not sure';
     }
+  }
+  idFormat(s: string) {
+    return s.replace(/\s+/g, '-').toLowerCase();
   }
 }
