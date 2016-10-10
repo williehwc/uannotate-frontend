@@ -20,6 +20,7 @@ export class HomeComponent {
   profLevel: boolean = false;
   dashboard: any;
   alerts: Array<Object> = [];
+  phenotateEmail: string = 'support-phenotate.org'.replace('-', '@');
   constructor(private _router: Router, private _http: Http) {
     let scope = this;
     let gotName = function (data: any) {

@@ -19,6 +19,7 @@ export class AccountComponent {
   newPassword: string;
   confirmNewPassword: string;
   alerts: Array<Object> = [];
+  phenotateEmail: string = 'support-phenotate.org'.replace('-', '@');
   constructor(private _http: Http) {
     let scope = this;
     let gotLevel = function (data: any) {
