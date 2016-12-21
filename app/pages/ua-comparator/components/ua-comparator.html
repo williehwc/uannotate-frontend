@@ -231,6 +231,10 @@
     <strong><i class="fa fa-exclamation-triangle" aria-hidden="true" *ngIf="comparison.annotationID === comparison.compareToAnnotationID && profLevel && comparison.status === -2"></i> There are no published annotations to compare to.</strong>
   </div>
 
+  <div *ngIf="comparison && comparison.annotationID === comparison.compareToAnnotationID && profLevel && comparison.status === -2">
+    <strong>If you would like to grade this annotation anyway, you can view it in the <a (click)="goToAnnotator(comparison.annotationID)" style="cursor: pointer"> Annotator</a>.</strong>
+  </div>
+
   <div *ngIf="comparison && comparison.annotationID === comparison.compareToAnnotationID && studentLevel && comparison.graded">
     <br />
     <strong>Your professor or teaching assistant has not released a standard to which you can compare your annotation. Please contact him/her if you have questions about your score.</strong>
