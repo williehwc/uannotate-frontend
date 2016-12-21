@@ -27,14 +27,16 @@ export class TopNavComponent {
 	constructor(private _router: Router, private _http: Http) {
     // Get name; redirect to Login if failed
     let scope = this;
-    if (localStorage.getItem('uaToken') === null) {
-      scope._router.navigate(['/']);
-    }
     let gotName = function (data: any) {
       scope.name = data.name;
     };
     let invalidUser = function () {
-      scope.logOut();
+      if (localStorage.getItem('uaAnnotation') !== null) {
+        localStorage.setItem('uaAnnotationLink', localStorage.getItem('uaAnnotation'));
+      }
+      if (localStorage.getItem('uaShareLink') === null) {
+        scope.logOut();
+      }
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken')
@@ -50,13 +52,6 @@ export class TopNavComponent {
   logOut() {
     Cookie.set('token', '', 0, '/', globals.domainName);
     localStorage.removeItem('uaToken');
-    localStorage.removeItem('uaAnnotation');
-    localStorage.removeItem('uaMyAnnotationsDisease');
-    localStorage.removeItem('uaPhenositoryDisease');
-    localStorage.removeItem('uaPhenositoryDiseaseDB');
-    localStorage.removeItem('uaPhenositoryFilter');
-    localStorage.removeItem('uaPhenositoryOffset');
-    localStorage.removeItem('uaPhenositoryFollowing');
     this._router.navigate(['/']);
   }
 	gotoLogin() {

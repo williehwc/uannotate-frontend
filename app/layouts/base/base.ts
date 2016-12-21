@@ -15,6 +15,7 @@ import {DashboardComponent} from '../dashboard/components/dashboard';
 
 //noinspection TypeScriptValidateTypes
 @Routes([
+    { path: '/share/:link', component: LoginComponent },
     { path: '/', component: LoginComponent },
     { path: '/signup', component: SignupComponent },
     { path: 'dashboard', component: DashboardComponent }

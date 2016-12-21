@@ -6,7 +6,7 @@
             <li class="nav-item buy-now">
                 <a href="http://community.phenotate.org/" target="_blank" class="btn btn-default-outline buy-now-btn" role="button" style="padding: .375rem 1rem !important; border-color: rgba(255, 255, 255, .5);">Community</a>
             </li>
-            <li class="dropdown nav-item" dropdown>
+            <li class="dropdown nav-item" dropdown *ngIf="name">
                 <a href="javascript:;" id="single-button" class="nav-link dropdown-toggle" dropdownToggle><i class="fa fa-user"></i> <span>{{name}}</span> <b class="caret"></b></a>
                 <ul class="dropdown-menu" aria-labelledby="single-button">
                     <li>

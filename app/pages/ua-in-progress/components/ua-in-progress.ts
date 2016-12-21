@@ -1,7 +1,8 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {Router, ROUTER_DIRECTIVES, RouteSegment} from '@angular/router';
 declare var jQuery: any;
 import {DROPDOWN_DIRECTIVES, TAB_DIRECTIVES, AlertComponent, MODAL_DIRECTVES, BS_VIEW_PROVIDERS} from 'ng2-bootstrap/ng2-bootstrap';
+import {ModalDirective} from 'ng2-bootstrap/components/modal/modal.component';
 import {Http} from '@angular/http';
 import globals = require('../../../globals');
 import 'rxjs/Rx';
@@ -26,14 +27,27 @@ export class InProgressComponent implements OnInit {
   loading: boolean = true;
   suggestedOnsets: Array<Object> = [];
   detailedPhenotype: any = null;
+  currentPhenotype: any = null;
   startDiscussionMessage: string = '';
   dragging: boolean = false;
+  addingBrowser: boolean = false;
+  shareLink: string = null;
+  shareLinkCopied: boolean = false;
+
+  @ViewChild('browser') public browser:ModalDirective;
+
   routerOnActivate(curr: RouteSegment) {
     let scope = this;
     if (curr.getParam('id')) {
+      localStorage.removeItem('uaShareLink');
       localStorage.setItem('uaAnnotation', curr.getParam('id'));
-      this.gotoAnnotation(parseInt(curr.getParam('id'), 10), 0, false);
-    } else if (localStorage.getItem('uaAnnotation') === null) {
+      this.gotoAnnotation(parseInt(curr.getParam('id'), 10), 0, false, false);
+    } else if (localStorage.getItem('uaAnnotation') !== null) {
+      localStorage.removeItem('uaShareLink');
+      this.gotoAnnotation(localStorage.getItem('uaAnnotation'), 0, false, false);
+    } else if (localStorage.getItem('uaShareLink') !== null) {
+      this.gotoAnnotation(localStorage.getItem('uaShareLink'), 0, false, true);
+    } else {
       this.alerts = [];
       this.alerts.push({
         type: 'danger',
@@ -41,8 +55,6 @@ export class InProgressComponent implements OnInit {
         closable: true
       });
       return;
-    } else {
-      this.gotoAnnotation(localStorage.getItem('uaAnnotation'), 0, false);
     }
     let gotLevel = function (data: any) {
       if (data.level === 0) {
@@ -53,6 +65,12 @@ export class InProgressComponent implements OnInit {
         scope.profLevel = true;
       }
     };
+    let noLevel = function (err: any) {
+      if (localStorage.getItem('uaShareLink') !== null) {
+        scope.profLevel = true;
+        scope.studentLevel = true;
+      }
+    };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken')
     });
@@ -60,12 +78,21 @@ export class InProgressComponent implements OnInit {
       .map(res => res.json())
       .subscribe(
         data => gotLevel(data),
-        err => console.log(err),
+        err => noLevel(err),
         () => console.log('Got level')
       );
   }
   jumpToAnnotation( annotationID: number ) {
-    this._router.navigate(['/dashboard', '/in-progress', annotationID]);
+    if (this.profLevel && this.studentLevel) {
+      this.alerts = [];
+      this.alerts.push({
+        type: 'danger',
+        msg: 'Viewing other annotations requires a Phenotate account.',
+        closable: true
+      });
+    } else {
+      this._router.navigate(['/dashboard', '/in-progress', annotationID]);
+    }
   }
   constructor( private _router: Router, private _http: Http, private dragulaService: DragulaService) {
     let scope = this;
@@ -166,14 +193,15 @@ export class InProgressComponent implements OnInit {
         () => console.log('Finish add citation')
       );
   }
-  gotoAnnotation( annotationID: number, scrollPosition: number, checkNew: boolean ) {
+  gotoAnnotation( annotationID: number, scrollPosition: number, checkNew: boolean, share: boolean ) {
     let scope = this;
     if (annotationID === null)
       return;
     this.alerts = [];
     if (!checkNew)
       this.systemNames = [];
-    localStorage.setItem('uaAnnotation', '' + annotationID);
+    if (!share)
+      localStorage.setItem('uaAnnotation', '' + annotationID);
     jQuery('.add-bar').hide();
     let loadedCitation = function(datum: any) {
       for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
@@ -215,19 +243,38 @@ export class InProgressComponent implements OnInit {
             }
             if (scope.annotation.phenotypes[i].hpo === datum.id) {
               scope.annotation.phenotypes[i].phenotypeName = datum.name;
-              scope.annotation.phenotypes[i].phenotypeDefinition = datum.def;
+			  let definition = '';
+			  definition += datum.def;
+              if (datum.synonym) {
+			  	definition += ' (Also known as ';
+				for (let i = 0; i < datum.synonym.length; i++) {
+				  if (i !== 0 && i !== datum.synonym.length - 1)
+					definition += ', ';
+				  if (i !== 0 && i === datum.synonym.length - 1)
+				  	definition += ' and ';
+				  definition += '"' + datum.synonym[i] + '"';
+				}
+				definition += ')';
+			  }
+			  if (datum.comment) {
+    		  definition += ' [' + datum.comment + ']';
+  		  }
+              scope.annotation.phenotypes[i].phenotypeDefinition = definition;
               let onsetHPO: string = null;
+              let specificOnsetHPO: string = null;
               let onsetName: string = null;
               for (let j = 0; j < datum.term_category.length; j++) {
                 if (scope.onsetDescription(datum.term_category[j])) {
                   onsetHPO = datum.term_category[j];
-                  onsetName = scope.onsetDescription(datum.term_category[j]);
+                  specificOnsetHPO = scope.annotation.phenotypes[i].hpo;
+                  onsetName = scope.specificOnsetDescription(scope.annotation.phenotypes[i].hpo);
                 }
               }
               if (onsetHPO) {
                 // If the phenotype is an onset, add it to suggested onsets
                 scope.suggestedOnsets.push({
                   hpo: onsetHPO,
+                  specificHPO: specificOnsetHPO,
                   name: onsetName
                 });
                 scope.annotation.phenotypes.splice(i, 1);
@@ -235,6 +282,7 @@ export class InProgressComponent implements OnInit {
                 // If the phenotype is an onset, add it to suggested onsets
                 scope.suggestedOnsets.push({
                   hpo: scope.annotation.phenotypes[i].hpo,
+                  specificHPO: null,
                   name: scope.onsetDescription(scope.annotation.phenotypes[i].hpo)
                 });
                 scope.annotation.phenotypes.splice(i, 1);
@@ -369,6 +417,11 @@ export class InProgressComponent implements OnInit {
       'token': localStorage.getItem('uaToken'),
       'annotationID': annotationID
     });
+    if (localStorage.getItem('uaShareLink') !== null) {
+      body = JSON.stringify({
+        'link': localStorage.getItem('uaShareLink')
+      });
+    }
     this._http.post(globals.backendURL + '/restricted/annotation/view/full', body, globals.options)
       .map(res => res.json())
       .subscribe(
@@ -400,47 +453,51 @@ export class InProgressComponent implements OnInit {
       },
       callback: {
         onClickBefore: function (node: any, a: any, item: any, event: any) {
-          if (!!jQuery('.goto-browser').filter(function() { return jQuery(this).is(':hover'); }).length)
-            alert('We are hard at work on the phenotype browser. Thank you for your patience! The phenotype will now be added as normal.');
+          if (!!jQuery('.goto-browser').filter(function() { return jQuery(this).is(':hover'); }).length) {
+            scope.addingBrowser = true;
+          } else {
+            scope.addingBrowser = false;
+          }
         },
         onClickAfter: function (node: any, a: any, item: any, event: any) {
           jQuery('.js-typeahead').val('');
           jQuery('.hover-box').hide();
           scope.alerts = [];
-          let addedPhenotype = function() {
-            scope.gotoAnnotation(scope.annotation.annotationID, document.documentElement.scrollTop || document.body.scrollTop, true);
-          };
-          let body = JSON.stringify({
-            'token': localStorage.getItem('uaToken'),
-            'annotationID': scope.annotation.annotationID,
-            'phenotypeName': item.display.substring(0, item.display.indexOf(' <'))
-          });
-          let addError = function() {
-            scope.alerts.push({
-              type: 'danger',
-              msg: 'Cannot add phenotype. Has it already been added?',
-              closable: true
+          if (scope.addingBrowser) {
+            scope.browser.show();
+            console.log(item.display.substring(0, item.display.indexOf(' <')));
+            scope.gotoPhenotype({
+              name: item.display.substring(0, item.display.indexOf(' <'))
             });
-            jQuery('html, body').animate({
-              scrollTop: 0
-            }, 500);
-          };
-          scope._http.post(globals.backendURL + '/restricted/annotation/edit/phenotype/add', body, globals.options)
-            .map(res => res.json())
-            .subscribe(
-              data => addedPhenotype(),
-              err => addError(),
-              () => console.log('Added phenotype')
-            );
+          } else {
+            scope.addPhenotype(item.display.substring(0, item.display.indexOf(' <')));
+          }
         },
         onMouseEnter: function (node: any, a: any, item: any, event: any) {
           jQuery('.hover-box').text('Loading definition…');
           jQuery('.hover-box').show();
           let loadedDefinition = function(data: any) {
-            if (data.name === display && scope.studentLevel) {
-              jQuery('.hover-box').html(data.def);
-            } else if (data.name === display) {
-              jQuery('.hover-box').html('<strong>' + data.id + '</strong><br />' + data.def);
+            if (data.name === display) {
+			  let definition = '';
+			  if (!scope.studentLevel) {
+			  	definition += '<strong>' + data.id + '</strong><br />';
+			  }
+			  definition += data.def;
+              if (data.synonym) {
+			  	definition += ' (Also known as ';
+				for (let i = 0; i < data.synonym.length; i++) {
+				  if (i !== 0 && i !== data.synonym.length - 1)
+					definition += ', ';
+				  if (i !== 0 && i === data.synonym.length - 1)
+				  	definition += ' and ';
+				  definition += '"' + data.synonym[i] + '"';
+				}
+				definition += ')';
+			  }
+			  if (data.comment) {
+    		  definition += ' [' + data.comment + ']';
+  		  }
+			  jQuery('.hover-box').html(definition);
             }
           };
           let body = JSON.stringify({
@@ -668,7 +725,12 @@ export class InProgressComponent implements OnInit {
   removeRef(refID: number) {
     let scope = this;
     let finishRemoveRef = function(data: any) {
-      scope.gotoAnnotation(localStorage.getItem('uaAnnotation'), document.documentElement.scrollTop || document.body.scrollTop, false);
+      scope.gotoAnnotation(
+      localStorage.getItem('uaAnnotation'),
+      document.documentElement.scrollTop || document.body.scrollTop,
+      false,
+      false
+      );
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
@@ -711,6 +773,9 @@ export class InProgressComponent implements OnInit {
     localStorage.setItem('uaPhenositoryDisease', diseaseName);
     localStorage.setItem('uaPhenositoryDiseaseDB', diseaseDB);
     this._router.navigate(['/dashboard', '/phenository']);
+  }
+  gotoComparator() {
+    this._router.navigate(['/dashboard', '/comparator']);
   }
   lookUpDisease(diseaseName: string) {
     window.open(globals.omimURL + diseaseName.substr(0, diseaseName.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
@@ -765,7 +830,7 @@ export class InProgressComponent implements OnInit {
     let finishPublish = function (data: any) {
       if (data.success) {
         scope.gotoAnnotation(scope.annotation.annotationID,
-          document.documentElement.scrollTop || document.body.scrollTop, false);
+          document.documentElement.scrollTop || document.body.scrollTop, false, false);
         scope.loading = true;
         scope.alerts.push({
           type: 'success',
@@ -862,7 +927,15 @@ export class InProgressComponent implements OnInit {
   submitExercise(exerciseID: number) {
     this._router.navigate(['/dashboard', '/submit', exerciseID]);
   }
-  applyOnset(hpo: string) {
+  applyAllOnset(value: string) {
+    if (value.includes('|')) {
+      let valueArray = value.split('|');
+      this.applyOnset(valueArray[0], valueArray[1]);
+    } else {
+      this.applyOnset(value, null);
+    }
+  }
+  applyOnset(hpo: string, specificHPO: string) {
     let scope = this;
     let finishApplyOnset = function(data: any) {
       for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
@@ -872,6 +945,23 @@ export class InProgressComponent implements OnInit {
       }
     };
     for (let i = 0; i < this.annotation.phenotypes.length; i++) {
+    	if (specificHPO) {
+    		this.annotation.phenotypes[i].specificOnset = specificHPO;
+    		let body = JSON.stringify({
+      		'token': localStorage.getItem('uaToken'),
+      		'annotationID': this.annotation.annotationID,
+      		'phenotypeID': this.annotation.phenotypes[i].phenotypeID,
+      		'detail': 'specific_onset',
+      		'value': specificHPO
+    		});
+    		this._http.post(globals.backendURL + '/restricted/annotation/edit/phenotype/detail', body, globals.options)
+      		.map(res => res.json())
+      		.subscribe(
+        		data => console.log(data),
+        		err => console.log(err),
+        		() => console.log('Finish set specific onset')
+      		);
+    	}
       let body = JSON.stringify({
         'token': localStorage.getItem('uaToken'),
         'annotationID': this.annotation.annotationID,
@@ -890,6 +980,106 @@ export class InProgressComponent implements OnInit {
   }
   openDetails(phenotype: any) {
     this.detailedPhenotype = phenotype;
+  }
+  openBrowser(phenotype: any) {
+    this.addingBrowser = false;
+    this.detailedPhenotype = phenotype;
+    this.gotoPhenotype(phenotype);
+  }
+  gotoPhenotype(nextPhenotype: any) {
+    let scope = this;
+    if (this.currentPhenotype)
+      this.currentPhenotype.name = 'Loading…';
+    let finishGotoPhenotype = function(data: any) {
+      scope.currentPhenotype = data;
+      if (data.synonym) {
+		  	scope.currentPhenotype.definition += ' (Also known as ';
+  			for (let i = 0; i < data.synonym.length; i++) {
+  			  if (i !== 0 && i !== data.synonym.length - 1)
+  				scope.currentPhenotype.definition += ', ';
+  			  if (i !== 0 && i === data.synonym.length - 1)
+  			  	scope.currentPhenotype.definition += ' and ';
+  			  scope.currentPhenotype.definition += '"' + data.synonym[i] + '"';
+  			}
+  			scope.currentPhenotype.definition += ')';
+		  }
+		  if (data.comment) {
+  		  scope.currentPhenotype.definition += ' [' + data.comment + ']';
+		  }
+    };
+    let body = JSON.stringify(nextPhenotype);
+    this._http.post(globals.backendURL + '/browse', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishGotoPhenotype(data),
+        err => console.log(err),
+        () => console.log('Went to phenotype')
+      );
+  }
+  selectPhenotype() {
+    let scope = this;
+    this.alerts = [];
+    if (!this.addingBrowser) {
+      // Change phenotype
+      let body = JSON.stringify({
+        'token': localStorage.getItem('uaToken'),
+        'annotationID': scope.annotation.annotationID,
+        'phenotypeID': scope.detailedPhenotype.phenotypeID,
+        'phenotypeName': this.currentPhenotype.name
+      });
+      let changedPhenotype = function() {
+        scope.removePhenotype(scope.detailedPhenotype.phenotypeID);
+        scope.gotoAnnotation(scope.annotation.annotationID, document.documentElement.scrollTop || document.body.scrollTop, true, false);
+      };
+      let changeError = function() {
+        scope.alerts.push({
+          type: 'danger',
+          msg: 'Cannot change phenotype. Is it already in the annotation?',
+          closable: true
+        });
+        jQuery('html, body').animate({
+          scrollTop: 0
+        }, 500);
+      };
+      scope._http.post(globals.backendURL + '/restricted/annotation/edit/phenotype/add', body, globals.options)
+        .map(res => res.json())
+        .subscribe(
+          data => changedPhenotype(),
+          err => changeError(),
+          () => console.log('Changed phenotype')
+        );
+    } else {
+      // Add phenotype
+      this.addPhenotype(this.currentPhenotype.name);
+    }
+  }
+  addPhenotype(name: string) {
+    let scope = this;
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'annotationID': scope.annotation.annotationID,
+      'phenotypeName': name
+    });
+    let addedPhenotype = function() {
+      scope.gotoAnnotation(scope.annotation.annotationID, document.documentElement.scrollTop || document.body.scrollTop, true, false);
+    };
+    let addError = function() {
+      scope.alerts.push({
+        type: 'danger',
+        msg: 'Cannot add phenotype. Has it already been added?',
+        closable: true
+      });
+      jQuery('html, body').animate({
+        scrollTop: 0
+      }, 500);
+    };
+    scope._http.post(globals.backendURL + '/restricted/annotation/edit/phenotype/add', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => addedPhenotype(),
+        err => addError(),
+        () => console.log('Added phenotype')
+      );
   }
   setDetail(detail: string, value: string) {
     let scope = this;
@@ -951,6 +1141,51 @@ export class InProgressComponent implements OnInit {
       this._router.navigate(['/dashboard', '/class-student', this.annotation.classID]);
     }
   }
+  shareAnnotation() {
+    let scope = this;
+    this.alerts = [];
+    this.shareLinkCopied = false;
+    this.shareLink = null;
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'annotationID': this.annotation.annotationID
+    });
+    let finishShareAnnotation = function(data: any) {
+      scope.shareLink = data.link;
+    };
+    this._http.post(globals.backendURL + '/restricted/annotation/prof/share', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishShareAnnotation(data),
+        err => console.log(err),
+        () => console.log('Discussion started')
+      );
+  }
+  unshareAnnotation() {
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'annotationID': this.annotation.annotationID
+    });
+    this._http.post(globals.backendURL + '/restricted/annotation/prof/unshare', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => this.alerts.push({
+          type: 'success',
+          msg: 'The link has been revoked.',
+          closable: true
+        }),
+        err => console.log(err),
+        () => console.log('Discussion started')
+      );
+  }
+  signUp() {
+    localStorage.setItem('uaAnnotationShareLink', localStorage.getItem('uaShareLink'));
+    this._router.navigate(['/signup']);
+  }
+  logIn() {
+    localStorage.setItem('uaAnnotationShareLink', localStorage.getItem('uaShareLink'));
+    this._router.navigate(['/']);
+  }
   onsetAbbreviation(hpo: string) {
     switch (hpo) {
       case 'HP:0030674':
@@ -992,6 +1227,22 @@ export class InProgressComponent implements OnInit {
       case '-1':
         return 'Not sure';
       default:
+        return null;
+    }
+  }
+  specificOnsetDescription(hpo: string) {
+    switch (hpo) {
+    	case 'HP:0011460':
+    		return 'Embryonal onset (up to 8 weeks of gestation)';
+    	case 'HP:0011461':
+    		return 'Fetal onset (after 8 weeks of gestation)';
+    	case 'HP:0011462':
+    		return 'Young adult onset (16 to 40 years)';
+    	case 'HP:0003596':
+    		return 'Middle age onset (40 to 60 years)';
+    	case 'HP:0003584':
+    		return 'Late onset (60 years or later)';
+    	default:
         return null;
     }
   }

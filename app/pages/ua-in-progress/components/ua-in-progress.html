@@ -43,6 +43,81 @@
     </div>
   </div>
 
+  <div bsModal #share="bs-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <br />
+        <div class="modal-header">
+          <h4 class="modal-title">Share link</h4>
+        </div>
+        <div class="modal-body">
+          Anyone with the address below can view this annotation.
+          <br />
+          Click on the address to copy it to the clipboard.
+          <form role="form" style="margin-top: 10px;">
+            <fieldset class="form-group">
+              <input class="form-control" [(ngModel)]="shareLink" onfocus="this.select();document.execCommand('copy');" (click)="shareLinkCopied = true" readonly>
+            </fieldset>
+            <button class="btn btn-primary" (click)="share.hide();">Close</button>
+            <button class="btn btn-danger" (click)="share.hide();unshareAnnotation()">Revoke</button>
+            <span *ngIf="shareLinkCopied" style="margin-left: 10px;"><i class="fa fa-check" aria-hidden="true"></i> Copied to clipboard</span>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div bsModal #browser="bs-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content" *ngIf="currentPhenotype">
+        <br />
+        <div class="modal-header">
+          <h4 class="modal-title">{{currentPhenotype.name}}</h4>
+        </div>
+        <div class="modal-body">
+          <p *ngIf="currentPhenotype.hpo != 'HP:0000118'">
+            <strong *ngIf="profLevel">
+              {{currentPhenotype.hpo}}
+            </strong>
+            {{currentPhenotype.definition}}
+          </p>
+          <div class="row">
+            <div class="col-lg-6">
+              <h5>More general phenotypes</h5>
+              <ul class="list-group">
+                <li class="list-group-item" *ngFor="let generalPhenotype of currentPhenotype.generalPhenotypes">
+                  <a (click)="gotoPhenotype(generalPhenotype)" style="cursor: pointer">
+                    {{generalPhenotype.name}}
+                  </a>
+                </li>
+                <li class="list-group-item" *ngIf="currentPhenotype.generalPhenotypes.length == 0">
+                  <strong>No more</strong>
+                </li>
+              </ul>
+            </div>
+            <div class="col-lg-6">
+              <h5>More specific phenotypes</h5>
+              <ul class="list-group">
+                <li class="list-group-item" *ngFor="let specificPhenotype of currentPhenotype.specificPhenotypes">
+                  <a (click)="gotoPhenotype(specificPhenotype)" style="cursor: pointer">
+                    {{specificPhenotype.name}}
+                  </a>
+                </li>
+                <li class="list-group-item" *ngIf="currentPhenotype.specificPhenotypes.length == 0">
+                  <strong>No more</strong>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <br />
+          <button class="btn btn-primary" (click)="browser.hide();selectPhenotype()" *ngIf="addingBrowser" [disabled]="currentPhenotype.hpo == 'HP:0000118'">Add this phenotype</button>
+          <button class="btn btn-primary" (click)="browser.hide();selectPhenotype()" *ngIf="!addingBrowser" [disabled]="currentPhenotype.hpo == 'HP:0000118'">Change to this phenotype</button>
+          <button class="btn btn-secondary" (click)="browser.hide()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div bsModal #smModal="bs-modal" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-sm">
       <div class="modal-content" *ngIf="detailedPhenotype">
@@ -174,36 +249,49 @@
         <button class="btn btn-primary" (click)="submitExercise(annotation.exerciseID)" *ngIf="annotation.status == -1">
           Submit
         </button>
-        <button class="btn btn-secondary" (click)="gotoPhenository(annotation.disease.diseaseDB, annotation.disease.diseaseName)" *ngIf="profLevel" style="color:#0275d8" title="View in Phenository">
+        <button class="btn btn-secondary" (click)="gotoPhenository(annotation.disease.diseaseDB, annotation.disease.diseaseName)" *ngIf="!studentLevel && profLevel" style="color:#0275d8" title="View in Phenository">
           <i class="fa fa-cloud"></i>
         </button>
         <button class="btn btn-info" (click)="lookUpDisease(annotation.disease.diseaseName)" *ngIf="profLevel" style="margin-right: 10px" title="Look up">
           <i class="fa fa-book"></i>
         </button>
-        <button class="btn btn-info" *ngIf="profLevel && annotation.communityTopicID && annotation.status == 2" title="Phenotate Community" (click)="gotoDiscussion(annotation.communityTopicID)">
-          <i class="fa fa-comments" aria-hidden="true"></i> Go to discussion
+        <button class="btn btn-info" *ngIf="!studentLevel && profLevel && annotation.communityTopicID && annotation.status == 2" title="Phenotate Community" (click)="gotoDiscussion(annotation.communityTopicID)" title="Go to discussion">
+          <i class="fa fa-comments"></i>
         </button>
-        <button class="btn btn-info" *ngIf="profLevel && !annotation.communityTopicID && annotation.status == 2" title="Phenotate Community" (click)="lgModal.show()">
-          <i class="fa fa-comments" aria-hidden="true"></i> Start discussion
+        <button class="btn btn-info" *ngIf="!studentLevel && profLevel && !annotation.communityTopicID && annotation.status == 2" title="Phenotate Community" (click)="lgModal.show()" title="Start discussion">
+          <i class="fa fa-comments"></i>
         </button>
-        <button class="btn btn-secondary" (click)="cloneAnnotation()" *ngIf="annotation.status == 2">
+        <button class="btn btn-secondary" (click)="share.show(); shareAnnotation()" *ngIf="!studentLevel && profLevel && annotation.status == 2" style="margin-right: 10px">
+          <i class="fa fa-share" aria-hidden="true"></i> Share
+        </button>
+        <button class="btn btn-secondary" (click)="cloneAnnotation()" *ngIf="!studentLevel && profLevel && annotation.status == 2">
           <i class="fa fa-clone" aria-hidden="true"></i> Clone
         </button>
-        <button class="btn btn-secondary" (click)="likeAnnotation(true)"  *ngIf="annotation.status == 2 && !annotation.liked">
+        <button class="btn btn-secondary" (click)="likeAnnotation(true)"  *ngIf="!studentLevel && profLevel && annotation.status == 2 && !annotation.liked">
           <i class="fa fa-thumbs-o-up" aria-hidden="true"></i> Recommend ({{annotation.likes}})
         </button>
-        <button class="btn btn-warning" (click)="likeAnnotation(false)"  *ngIf="annotation.status == 2 && annotation.liked">
+        <button class="btn btn-warning" (click)="likeAnnotation(false)"  *ngIf="!studentLevel && profLevel && annotation.status == 2 && annotation.liked">
           <i class="fa fa-thumbs-up" aria-hidden="true"></i> Recommend ({{annotation.likes}})
         </button>
-        <span style="opacity: 0.5" *ngIf="annotation.status == 2 && !annotation.liked">
+        <span style="opacity: 0.5" *ngIf="!studentLevel && profLevel && annotation.status == 2 && !annotation.liked">
           <i>&emsp;You can recommend one annotation for each disease.</i>
         </span>
-        <span style="opacity: 0.5" *ngIf="annotation.status == 2 && annotation.liked">
+        <span style="opacity: 0.5" *ngIf="!studentLevel && profLevel && annotation.status == 2 && annotation.liked">
           <i>&emsp;You recommend this annotation for this disease.</i>
+        </span>
+        <button class="btn btn-primary" (click)="signUp()" *ngIf="studentLevel && profLevel">
+          <i class="fa fa-pencil-square-o fa-fw" aria-hidden="true"></i> Sign up for Phenotate
+        </button>
+        <button class="btn btn-secondary" (click)="logIn()" *ngIf="studentLevel && profLevel">
+          <i class="fa fa-sign-in fa-fw" aria-hidden="true"></i> Log in
+        </button>
+        <span style="opacity: 0.5" *ngIf="studentLevel && profLevel">
+          <i>&emsp;An account lets you clone and improve this annotation!</i>
         </span>
         <div class="card card-block" *ngIf="annotation.status == -2 && annotation.released" style="margin-top: 10px;">
           <p><strong>Score (out of 1; blank means "not graded")</strong>: {{annotation.score}}</p>
-          <p *ngIf="annotation.memo"><strong>Comment</strong>: {{annotation.memo}}</p>
+          <p *ngIf="annotation.memo"><strong>Overall comments</strong>: {{annotation.memo}}</p>
+          <p *ngIf="annotation.compareToAnnotationID"><strong>Breakdown and additional scores/comments are available in the <a style="cursor: pointer" (click)="gotoComparator()">Comparator</a>.</strong></p>
         </div>
       </div>
     </div>
@@ -341,6 +429,9 @@
                     <button type="button" class="btn btn-sm btn-danger" _ngcontent-ihs-13="" style="float:right;" (click)="removePhenotype(phenotype.phenotypeID)" *ngIf="!(annotation.status == 2 || annotation.status == -2)">
                       Remove
                     </button>
+                    <button class="btn btn-sm btn-secondary" (click)="openBrowser(phenotype);browser.show()" style="float:right; margin-right: 5px">
+                      <i class="fa fa-info-circle" aria-hidden="true"></i> Browse
+                    </button>
                     <button class="btn btn-sm btn-secondary" (click)="openDetails(phenotype);smModal.show()" *ngIf="phenotype.observed == 1" style="float:right; margin-right: 5px">Details</button>
                   </div>
                 </div>
@@ -400,25 +491,47 @@
           </div>
 
         </tab>
-        <tab *ngIf="annotation.status == 1 && suggestedOnsets.length > 0">
+        <tab *ngIf="annotation.status == 1 || annotation.status == -1">
           <template tabHeading>
-            Onset ({{suggestedOnsets.length}})
+            Onset <span *ngIf="suggestedOnsets.length > 0">({{suggestedOnsets.length}})</span>
           </template>
 
           <br />
 
-          <p>{{annotation.disease.diseaseDB.toUpperCase()}} suggested the following onset(s). Click on one of them to apply it to all phenotypes currently listed. Note that the onset you choose now will not be automatically applied to new phenotypes you add.</p>
+          <p>Choose an onset to apply it to all phenotypes currently listed. Note that the onset you choose now will not be automatically applied to new phenotypes you add later.</p>
+
+          <h4 *ngIf="suggestedOnsets.length > 0">{{annotation.disease.diseaseDB.toUpperCase()}} suggestions</h4>
 
           <ul class="list-group">
             <li class="list-group-item" *ngFor="let suggestedOnset of suggestedOnsets">
-              <a class="suggested-onset" (click)="applyOnset(suggestedOnset.hpo)" style="cursor: pointer">
+              <a class="suggested-onset" (click)="applyOnset(suggestedOnset.hpo, suggestedOnset.specificHPO)" style="cursor: pointer">
                 {{suggestedOnset.name}}
               </a>
             </li>
           </ul>
 
+          <br />
+
+          <h4 *ngIf="suggestedOnsets.length > 0">All onsets</h4>
+
+          <select class="form-control" (change)="applyAllOnset($event.target.value)" style="color:black">
+            <option value="-1">Select…</option>
+            <option value="HP:0030674">Antenatal (before birth)</option>
+            <option value="HP:0030674|HP:0011460">- Embryonal (up to 8 weeks of gestation)</option>
+            <option value="HP:0030674|HP:0011461">- Fetal (after 8 weeks of gestation)</option>
+            <option value="HP:0003577">Congenital (at birth)</option>
+            <option value="HP:0003623">Neonatal (0 to 28 days)</option>
+            <option value="HP:0003593">Infantile (28 days to 1 year)</option>
+            <option value="HP:0011463">Childhood (1 to 5 years)</option>
+            <option value="HP:0003621">Juvenile (5 to 15 years)</option>
+            <option value="HP:0003581">Adult (16 years or later)</option>
+            <option value="HP:0003581|HP:0011462">- Young adult (16 to 40 years)</option>
+            <option value="HP:0003581|HP:0003596">- Middle age (40 to 60 years)</option>
+            <option value="HP:0003581|HP:0003584">- Late (after 60 years)</option>
+          </select>
+
         </tab>
-        <tab *ngIf="annotation.status == 2">
+        <tab *ngIf="profLevel && annotation.status == 2">
           <template tabHeading>
             <i class="fa fa-clone" title="Clones"></i> ({{annotation.clones.length}})
           </template>

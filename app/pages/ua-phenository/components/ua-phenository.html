@@ -8,7 +8,7 @@
       </h2>
       <ol class="breadcrumb">
         <li class="active">
-          <i class="fa fa-info-circle"></i> A central repository of published annotations
+          <i class="fa fa-info-circle"></i> A central repository of published annotations. <a href="http://community.phenotate.org/topic/41/frequently-asked-question-how-do-i-add-a-disease" target="_blank">How do I add a disease?</a>
         </li>
       </ol>
     </div>
@@ -48,7 +48,8 @@
               <td>
                 <i class="fa fa-check" *ngIf="disease.following"></i>
               </td>
-              <td>{{disease.name}}</td>
+              <td *ngIf="diseaseName === null || !diseaseName.includes(disease.name)">{{disease.name}}</td>
+              <td *ngIf="diseaseName !== null && diseaseName.includes(disease.name)"><strong>{{disease.name}}</strong></td>
               <td style="text-align:right">{{disease.quantity}}</td>
             </tr>
           </tbody>

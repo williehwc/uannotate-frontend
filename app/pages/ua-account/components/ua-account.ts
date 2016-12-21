@@ -19,17 +19,24 @@ export class AccountComponent {
   newPassword: string;
   confirmNewPassword: string;
   alerts: Array<Object> = [];
+  emailFollow: boolean = true;
+  emailLike: boolean = true;
+  showEmailPrefs: boolean = false;
+  savedEmailPrefs: boolean = false;
   phenotateEmail: string = 'support-phenotate.org'.replace('-', '@');
   constructor(private _http: Http) {
     let scope = this;
-    let gotLevel = function (data: any) {
-      console.log(data.level);
+    let gotLevelAndEmail = function (data: any) {
       if (data.level === 0) {
         scope.levelString = 'student';
         scope.upgradeAccount = true;
       } else {
         scope.levelString = 'professor/researcher';
         scope.upgradeAccount = false;
+        if (data.emailFollow === 0)
+          scope.emailFollow = false;
+        if (data.emailLike === 0)
+          scope.emailLike = false;
       }
     };
     let body = JSON.stringify({
@@ -38,9 +45,9 @@ export class AccountComponent {
     this._http.post(globals.backendURL + '/restricted/user', body, globals.options)
       .map(res => res.json())
       .subscribe(
-        data => gotLevel(data),
+        data => gotLevelAndEmail(data),
         err => console.log(err),
-        () => console.log('Got level')
+        () => console.log('Got level and email')
       );
   }
   closeAlert(i: number) {
@@ -94,6 +101,30 @@ export class AccountComponent {
         data => finishChangePassword(data),
         err => console.log(err),
         () => console.log('Changed password')
+      );
+  }
+  updateEmailPrefs(emailFollow: number, emailLike: number) {
+    this.showEmailPrefs = false;
+    this.savedEmailPrefs = true;
+    if (emailFollow === 1)
+      this.emailFollow = true;
+    if (emailFollow === 0)
+      this.emailFollow = false;
+    if (emailLike === 1)
+      this.emailLike = true;
+    if (emailLike === 0)
+      this.emailLike = false;
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'emailFollow': emailFollow,
+      'emailLike': emailLike
+    });
+    this._http.post(globals.backendURL + '/restricted/email-prefs', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => console.log(data),
+        err => console.log(err),
+        () => console.log('Changed email prefs')
       );
   }
 }

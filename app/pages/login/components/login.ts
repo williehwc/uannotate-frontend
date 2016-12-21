@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {Router, ROUTER_DIRECTIVES } from '@angular/router';
+import {Router, ROUTER_DIRECTIVES, RouteSegment} from '@angular/router';
 import {Http} from '@angular/http';
 import {Cookie} from 'ng2-cookies/ng2-cookies';
 import globals = require('../../../globals');
@@ -17,6 +17,13 @@ export class LoginComponent {
   errorWrongCredentials: boolean;
   errorBlank: boolean;
 	constructor( private _router: Router, private _http: Http) { }
+	routerOnActivate(curr: RouteSegment) {
+  	if (curr.getParam('link')) {
+      localStorage.setItem('uaShareLink', curr.getParam('link'));
+      localStorage.removeItem('uaAnnotation');
+      this._router.navigate(['/dashboard', '/in-progress']);
+    }
+  }
 	gotoDashboard() {
     let scope = this;
     let finishLogin = function (data: any) {
@@ -26,6 +33,14 @@ export class LoginComponent {
         return;
       }
       localStorage.setItem('uaToken', data.token);
+      localStorage.removeItem('uaAnnotation');
+      localStorage.removeItem('uaShareLink');
+      localStorage.removeItem('uaMyAnnotationsDisease');
+      localStorage.removeItem('uaPhenositoryDisease');
+      localStorage.removeItem('uaPhenositoryDiseaseDB');
+      localStorage.removeItem('uaPhenositoryFilter');
+      localStorage.removeItem('uaPhenositoryOffset');
+      localStorage.removeItem('uaPhenositoryFollowing');
       Cookie.set('token', data.cookie, 30, '/', globals.domainName);
       scope._router.navigate(['/dashboard', '/home']);
     };

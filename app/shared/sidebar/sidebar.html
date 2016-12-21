@@ -2,7 +2,7 @@
     &#9776;
 </button>
 <nav class="sidebar" [ngClass]="{sidebarPushRight: isActive}">
-    <ul class="list-group">
+    <ul class="list-group" *ngIf="studentLevel || profLevel">
         <a [routerLink]="['/dashboard', '/home']" class="list-group-item">
             <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-dashboard"></i></span> Dashboard
         </a>

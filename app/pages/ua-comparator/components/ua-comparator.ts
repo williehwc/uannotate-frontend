@@ -21,7 +21,11 @@ export class ComparatorComponent {
   studentLevel: boolean = false;
   profLevel: boolean = false;
   calculatedScore: number = 0;
+  calculatedScorePercent: number = 0;
   detailedPhenotype: any = null;
+  hpoOfSystemComment: string = null;
+  nameOfSystemComment: string = null;
+  currentSystemComment: string = null;
   constructor( private _router: Router, private _http: Http) {
     let scope = this;
     if (localStorage.getItem('uaAnnotation') === null) {
@@ -68,6 +72,7 @@ export class ComparatorComponent {
         totalNumPhenotypesInclDuplicates;
     }
     this.calculatedScore = Math.ceil(this.calculatedScore * 100) / 100;
+    this.calculatedScorePercent = Math.round(this.calculatedScore * 100);
   }
   gotoComparison(annotationID: number, compareToAnnotationID: number) {
     let scope = this;
@@ -82,13 +87,43 @@ export class ComparatorComponent {
           for (let i = 0; i < scope.comparison.systems[s].phenotypes.length; i++) {
             if (scope.comparison.systems[s].phenotypes[i].hpo === datum.id) {
               scope.comparison.systems[s].phenotypes[i].phenotypeName = datum.name;
-              scope.comparison.systems[s].phenotypes[i].phenotypeDefinition = datum.def;
+              let definition = datum.def;
+              if (datum.synonym) {
+      			  	definition += ' (Also known as ';
+        				for (let i = 0; i < datum.synonym.length; i++) {
+        				  if (i !== 0 && i !== datum.synonym.length - 1)
+        					definition += ', ';
+        				  if (i !== 0 && i === datum.synonym.length - 1)
+        				  	definition += ' and ';
+        				  definition += '"' + datum.synonym[i] + '"';
+        				}
+                definition += ')';
+      			  }
+      			  if (datum.comment) {
+          		  definition += ' [' + datum.comment + ']';
+        		  }
+      			  scope.comparison.systems[s].phenotypes[i].phenotypeDefinition = definition;
             }
           }
           for (let i = 0; i < scope.comparison.systems[s].compareToPhenotypes.length; i++) {
             if (scope.comparison.systems[s].compareToPhenotypes[i].hpo === datum.id) {
               scope.comparison.systems[s].compareToPhenotypes[i].phenotypeName = datum.name;
-              scope.comparison.systems[s].compareToPhenotypes[i].phenotypeDefinition = datum.def;
+              let definition = datum.def;
+              if (datum.synonym) {
+      			  	definition += ' (Also known as ';
+        				for (let i = 0; i < datum.synonym.length; i++) {
+        				  if (i !== 0 && i !== datum.synonym.length - 1)
+        					definition += ', ';
+        				  if (i !== 0 && i === datum.synonym.length - 1)
+        				  	definition += ' and ';
+        				  definition += '"' + datum.synonym[i] + '"';
+        				}
+                definition += ')';
+      			  }
+      			  if (datum.comment) {
+          		  definition += ' [' + datum.comment + ']';
+        		  }
+              scope.comparison.systems[s].compareToPhenotypes[i].phenotypeDefinition = definition;
             }
           }
         }
@@ -174,20 +209,22 @@ export class ComparatorComponent {
   }
   setSystemScoreEvent(event: any) {
     let scope = this;
+    if (this.comparison.standard) {
+      this.alerts = [];
+      this.alerts.push({
+        type: 'warning',
+        msg: 'You\'ve changed one or more system scores. ' +
+        'Please click on the calculated score to confirm that it is correct, then click Save.',
+        closable: true
+      });
+      this.comparison.score = this.calculatedScore;
+    }
     if (this.comparison.standard && this.comparison.released) {
       this.alerts = [];
       this.alerts.push({
         type: 'warning',
         msg: 'You\'ve changed one or more system scores. ' +
         'Please click on the calculated score to confirm that it is correct, then click Update.',
-        closable: true
-      });
-    } else if (this.comparison.standard) {
-      this.alerts = [];
-      this.alerts.push({
-        type: 'warning',
-        msg: 'You\'ve changed one or more system scores. ' +
-        'Please click on the calculated score to confirm that it is correct, then click Save.',
         closable: true
       });
     }
@@ -350,6 +387,36 @@ export class ComparatorComponent {
     } else {
       this._router.navigate(['/dashboard', '/class-student', this.comparison.classID]);
     }
+  }
+  editSystemComment(system: any) {
+    this.hpoOfSystemComment = system.systemHPO;
+    this.nameOfSystemComment = system.systemName;
+    this.currentSystemComment = system.systemComment;
+  }
+  saveSystemComment() {
+    for (let i = 0; i < this.comparison.systems.length; i++) {
+      if (this.comparison.systems[i].systemHPO === this.hpoOfSystemComment) {
+        if (this.currentSystemComment.length > 0) {
+          this.comparison.systems[i].systemComment = this.currentSystemComment;
+        } else {
+          this.comparison.systems[i].systemComment = null;
+        }
+      }
+    }
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'annotationID': this.comparison.annotationID,
+      'compareToAnnotationID': this.comparison.compareToAnnotationID,
+      'hpo': this.hpoOfSystemComment,
+      'comment': this.currentSystemComment
+    });
+    this._http.post(globals.backendURL + '/restricted/annotation/prof/comment/system', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => console.log(data),
+        err => console.log(err),
+        () => console.log('Set system comment')
+      );
   }
   round(x: number) {
     return Math.round(x);

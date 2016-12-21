@@ -23,8 +23,22 @@ export class HomeComponent {
   phenotateEmail: string = 'support-phenotate.org'.replace('-', '@');
   constructor(private _router: Router, private _http: Http) {
     let scope = this;
+    if (localStorage.getItem('uaAnnotationLink') !== null) {
+      let annotationID = localStorage.getItem('uaAnnotationLink');
+      localStorage.removeItem('uaAnnotationLink');
+      this._router.navigate(['/dashboard', '/in-progress', annotationID]);
+    }
+    if (localStorage.getItem('uaAnnotationShareLink') !== null) {
+      // uaAnnotationShareLink is a temporary item that will help redirect the user to the
+      // annotator if he is coming from a "sign up" for "log in" button from a shared annotation.
+      localStorage.setItem('uaShareLink', localStorage.getItem('uaAnnotationShareLink'));
+      localStorage.removeItem('uaAnnotationShareLink');
+      this._router.navigate(['/dashboard', '/in-progress']);
+    }
     let gotName = function (data: any) {
       scope.name = data.name.substr(0, data.name.indexOf(' '));
+      if (!scope.name)
+        scope.name = data.name;
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken')
