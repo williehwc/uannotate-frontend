@@ -50,7 +50,7 @@ export class TopNavComponent {
       );
   }
   logOut() {
-    Cookie.set('token', '', 0, '/', globals.domainName);
+    Cookie.set('token', '', -1, '/', globals.domainName);
     localStorage.removeItem('uaToken');
     this._router.navigate(['/']);
   }
