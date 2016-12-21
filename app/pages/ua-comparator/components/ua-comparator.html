@@ -46,9 +46,9 @@
             <option value="-1">N/A</option>
             <option value="HP:0012837" title="Affecting all regions without specificity of distribution.">Generalized</option>
             <option value="HP:0012838" title="Being confined or restricted to a particular location.">Localized</option>
-            <option value="HP:0012839" title="Localized away from the central point of the body.">└ Distal</option>
-            <option value="HP:0012840" title="Localized close to the central point of the body.">└ Proximal</option>
-            <option value="HP:0030645">└ Central</option>
+            <option value="HP:0012839" title="Localized away from the central point of the body.">– Distal</option>
+            <option value="HP:0012840" title="Localized close to the central point of the body.">– Proximal</option>
+            <option value="HP:0030645">– Central</option>
           </select>
           <br />
           <strong>Laterality</strong>
@@ -88,8 +88,11 @@
       <h2 class="page-header" *ngIf="!comparison || comparison.status > 0">
         Comparator
       </h2>
-      <h2 class="page-header" *ngIf="comparison && comparison.status <= 0">
+      <h2 class="page-header" id="exercise-header" *ngIf="comparison && comparison.status <= 0">
         {{comparison.exerciseName}}
+        <a (click)="closeAnnotation()" style="color:#455A64; cursor: pointer;">
+          <i class="fa fa-times-circle-o" title="Close" style="font-size: 20px; vertical-align: 4px;"></i>
+        </a>
       </h2>
       <ol class="breadcrumb" *ngIf="comparison">
         <li class="active">
@@ -136,8 +139,8 @@
               <input type="radio" name="grade" id="no-grade" value="no-grade" *ngIf="comparison.score == null" checked>
               <label for="no-grade">Do not grade</label>
               <br />
-              <input type="radio" name="grade" id="auto-grade" value="auto-grade" *ngIf="comparison.score == null || !comparison.standard">
-              <input type="radio" name="grade" id="auto-grade" value="auto-grade" *ngIf="comparison.score != null && comparison.standard" checked>
+              <input type="radio" name="grade" id="auto-grade" value="auto-grade" *ngIf="comparison.score == null || !comparison.standard" [disabled]="comparison.annotationID === comparison.compareToAnnotationID && profLevel">
+              <input type="radio" name="grade" id="auto-grade" value="auto-grade" *ngIf="comparison.score != null && comparison.standard" [disabled]="comparison.annotationID === comparison.compareToAnnotationID && profLevel" checked>
               <label for="auto-grade">Award the calculated score for this response: {{calculatedScore * 100}}%</label>
               <br />
               <input type="radio" name="grade" id="manual-grade" value="manual-grade" *ngIf="comparison.score == null || comparison.standard">
@@ -225,7 +228,7 @@
 
   <div *ngIf="comparison && comparison.annotationID === comparison.compareToAnnotationID && profLevel">
     <br />
-    <strong>There are no published annotations to compare to.</strong>
+    <strong><i class="fa fa-exclamation-triangle" aria-hidden="true" *ngIf="comparison.annotationID === comparison.compareToAnnotationID && profLevel && comparison.status === -2"></i> There are no published annotations to compare to.</strong>
   </div>
 
   <div *ngIf="comparison && comparison.annotationID === comparison.compareToAnnotationID && studentLevel && comparison.graded">
@@ -238,16 +241,18 @@
     <strong>There are currently no annotations to compare to.</strong>
   </div>
 
-  <div class="row" *ngIf="comparison && comparison.annotationID !== comparison.compareToAnnotationID">
+  <div class="row" *ngIf="comparison && (comparison.annotationID !== comparison.compareToAnnotationID || (comparison.annotationID === comparison.compareToAnnotationID && profLevel && comparison.status === -2))">
     <div class="col-lg-12" *ngFor="let system of comparison.systems">
       <br />
       <div class="card card-block card-header">
         <strong>
           {{system.systemName}}
         </strong>
-        <input type="range" name="{{system.systemHPO}}" min="0" max="100" style="float: right; margin-left: 10px" value="{{system.systemScore * 100}}" *ngIf="profLevel && comparison.status === -2" (mouseup)="setSystemScoreEvent($event)" />
-        <span style="float: right">{{round(system.systemScore * 100)}}%</span>
-        <div class="ok" (click)="setSystemScore(system.systemHPO, system.systemScore)" title="This system score was automatically calculated. Click (or edit the system score) to confirm that it is correct." *ngIf="!system.systemScoreSet && comparison.status <= 0"></div>
+        <span *ngIf="!(comparison.annotationID === comparison.compareToAnnotationID && profLevel && comparison.status === -2)">
+          <input type="range" name="{{system.systemHPO}}" min="0" max="100" style="float: right; margin-left: 10px" value="{{system.systemScore * 100}}" *ngIf="profLevel && comparison.status === -2" (mouseup)="setSystemScoreEvent($event)" />
+          <span style="float: right">{{round(system.systemScore * 100)}}%</span>
+          <div class="ok" (click)="setSystemScore(system.systemHPO, system.systemScore)" title="This system score was automatically calculated. Click (or edit the system score) to confirm that it is correct." *ngIf="!system.systemScoreSet && comparison.status <= 0"></div>
+        </span>
       </div>
       <div class="row">
         <div class="col-lg-6">
@@ -260,7 +265,7 @@
             <img src="/assets/img/bonus.gif" style="height: 20px" *ngIf="phenotype.bonus" />
           </div>
         </div>
-        <div class="col-lg-6">
+        <div class="col-lg-6" *ngIf="!(comparison.annotationID === comparison.compareToAnnotationID && profLevel && comparison.status === -2)">
           <div style="white-space: nowrap;height: 30px" *ngFor="let phenotype of system.compareToPhenotypes">
             <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + phenotype.frequency.toString().split('.').join(',') + '.png)', 'color' : (phenotype.frequency == '0.75') ? 'black' : 'white'}" title="Frequency: {{frequencyDescription(phenotype.frequency)}}&#013;Onset: {{onsetDescription(phenotype.onset)}}">{{onsetAbbreviation(phenotype.onset)}}</pre>
             <pre *ngIf="phenotype.observed === 0" class="frequency-onset" [ngStyle]="{'background-image': 'none', 'color' : 'white'}" title="This phenotype is not present in all patients with this disease.">{{onsetAbbreviation(phenotype.onset)}}</pre>

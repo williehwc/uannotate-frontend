@@ -25,6 +25,7 @@ export class ExerciseComponent implements OnInit {
   dateStart: Date = null;
   dateEnd: Date = null;
   showNumbers: boolean = false;
+  dragging: boolean = false;
   routerOnActivate(curr: RouteSegment) {
     let scope = this;
     this.curr = curr;
@@ -88,6 +89,17 @@ export class ExerciseComponent implements OnInit {
         left:   e.clientX - 320,
         bottom: window.innerHeight - e.clientY
       });
+      if (scope.dragging) {
+        let mousePosition = e.pageY - jQuery(document).scrollTop();
+        let topRegion = 50;
+        let bottomRegion = window.innerHeight - 50;
+        if (mousePosition < topRegion || mousePosition > bottomRegion) {    // e.wich = 1 => click down !
+          let distance = e.clientY - window.innerHeight / 2;
+          console.log(distance);
+          distance = distance * 0.1; // <- velocity
+          jQuery(document).scrollTop(distance + jQuery(document).scrollTop());
+        }
+      }
     });
   }
   addProblem(diseaseName: string) {
@@ -128,8 +140,10 @@ export class ExerciseComponent implements OnInit {
     dragulaService.drag.subscribe((value: any) => {
       jQuery('.problem').css('cursor', 'grabbing');
       jQuery('.hover-box').show();
+      this.dragging = true;
     });
     dragulaService.dragend.subscribe((value: any) => {
+      this.dragging = false;
       jQuery('.hover-box').hide();
     });
     dragulaService.cancel.subscribe((value: any) => {
@@ -141,7 +155,7 @@ export class ExerciseComponent implements OnInit {
         jQuery('.problem').css('cursor', 'grab');
       };
       this.reposition = false;
-      jQuery('.problem').css('cursor', 'wait');
+      //jQuery('.problem').css('cursor', 'wait');
       let body = JSON.stringify({
         'token': localStorage.getItem('uaToken'),
         'exerciseID': parseInt(this.exercise.exerciseID),

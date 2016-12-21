@@ -22,7 +22,7 @@
 					</div>
 					<h7 *ngIf="errorBlank"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <em>All fields are required</em></h7>
 					<h7 *ngIf="errorPasswordMatch"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <em>Passwords don't match</em></h7>
-					<h7 *ngIf="errorEmailTaken"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <em>An account already exists with this email</em></h7>
+					<h7 *ngIf="errorEmailTaken"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <em>Please use another email address</em></h7>
 				</div>
 				<a type="submit" class="btn rounded-btn" (click)="gotoDashboard()"> Register </a>&nbsp;
 				<a type="submit" class="btn rounded-btn" (click)="gotoLogin()"> Login page </a>

@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import {Router, ROUTER_DIRECTIVES } from '@angular/router';
 import {Http} from '@angular/http';
+import {Cookie} from 'ng2-cookies/ng2-cookies';
 import globals = require('../../../globals');
 import 'rxjs/Rx';
 
@@ -31,6 +32,7 @@ export class SignupComponent {
 				return;
 			}
       localStorage.setItem('uaToken', data.token);
+      Cookie.set('token', data.cookie, 30, '/', globals.domainName);
       scope._router.navigate(['/dashboard','/home']);
 		};
 		this.errorBlank = false;

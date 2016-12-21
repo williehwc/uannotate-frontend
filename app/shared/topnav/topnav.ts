@@ -4,6 +4,7 @@ import {CORE_DIRECTIVES} from '@angular/common';
 import {DROPDOWN_DIRECTIVES} from 'ng2-bootstrap/ng2-bootstrap';
 import {Router} from '@angular/router';
 import {Http} from '@angular/http';
+import {Cookie} from 'ng2-cookies/ng2-cookies';
 import globals = require('../../globals');
 import 'rxjs/Rx';
 
@@ -47,6 +48,7 @@ export class TopNavComponent {
       );
   }
   logOut() {
+    Cookie.set('token', '', -1, '/', globals.domainName);
     localStorage.removeItem('uaToken');
     localStorage.removeItem('uaAnnotation');
     localStorage.removeItem('uaMyAnnotationsDisease');

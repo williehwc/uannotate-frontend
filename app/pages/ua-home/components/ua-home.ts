@@ -20,10 +20,13 @@ export class HomeComponent {
   profLevel: boolean = false;
   dashboard: any;
   alerts: Array<Object> = [];
+  phenotateEmail: string = 'support-phenotate.org'.replace('-', '@');
   constructor(private _router: Router, private _http: Http) {
     let scope = this;
     let gotName = function (data: any) {
       scope.name = data.name.substr(0, data.name.indexOf(' '));
+      if (!scope.name)
+        scope.name = data.name;
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken')

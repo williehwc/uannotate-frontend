@@ -157,15 +157,17 @@
           </template>
           <br />
           <strong *ngIf="exercise.submissions.length === 0">No submissions yet</strong>
-          <button class="btn btn-secondary" (click)="selectAll()">
-            <i class="fa fa-check-square-o" aria-hidden="true"></i> All
-          </button>
-          <button class="btn btn-primary" (click)="releaseAll(true)">
-            Release scores
-          </button>
-          <button class="btn btn-danger" (click)="releaseAll(false)">
-            Unrelease scores
-          </button>
+          <span *ngIf="exercise.submissions.length > 0">
+            <button class="btn btn-secondary" (click)="selectAll()">
+              <i class="fa fa-check-square-o" aria-hidden="true"></i> All
+            </button>
+            <button class="btn btn-primary" (click)="releaseAll(true)">
+              Release scores
+            </button>
+            <button class="btn btn-danger" (click)="releaseAll(false)">
+              Unrelease scores
+            </button>
+          </span>
           <br />
           <br />
           <div class="table-responsive" *ngIf="exercise.submissions.length > 0">

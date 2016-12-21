@@ -7,4 +7,6 @@ import {Component} from '@angular/core';
 })
 
 
-export class HelpProfComponent { }
+export class HelpProfComponent {
+  phenotateEmail: string = 'support-phenotate.org'.replace('-', '@');
+}

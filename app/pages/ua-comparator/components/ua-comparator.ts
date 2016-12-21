@@ -100,6 +100,14 @@ export class ComparatorComponent {
           return 1;
         }
       });
+      for (let s = 0; s < scope.comparison.systems.length; s++) {
+        scope.comparison.systems[s].phenotypes.sort(function(a: any, b: any) {
+          return (a.phenotypeName < b.phenotypeName) ? -1 : 1;
+        });
+        scope.comparison.systems[s].compareToPhenotypes.sort(function(a: any, b: any) {
+          return (a.phenotypeName < b.phenotypeName) ? -1 : 1;
+        });
+      }
       scope.calculateScore();
     };
     let initializeComparison = function (data:any) {
@@ -334,6 +342,14 @@ export class ComparatorComponent {
   }
   openDetails(phenotype: any) {
     this.detailedPhenotype = phenotype;
+  }
+  closeAnnotation() {
+    localStorage.removeItem('uaAnnotation');
+    if (this.profLevel) {
+      this._router.navigate(['/dashboard', '/class-prof', this.comparison.classID]);
+    } else {
+      this._router.navigate(['/dashboard', '/class-student', this.comparison.classID]);
+    }
   }
   round(x: number) {
     return Math.round(x);
