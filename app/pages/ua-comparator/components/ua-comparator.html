@@ -83,18 +83,29 @@
           <br />
           <strong>Specific age of onset</strong>
           <br />
-          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.specificOnset" (change)="setDetail('specific_onset', $event.target.value)" disabled *ngIf="detailedPhenotype.onset == 'HP:0030674'">
+          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.specificOnset" (change)="setDetail('specific_onset', $event.target.value)" disabled>
             <option value="-1">N/A</option>
-            <option value="HP:0011460" title="Onset of disease at up to 8 weeks of gestation.">Embryonal onset</option>
-            <option value="HP:0011461" title="Onset prior to birth but after 8 weeks of gestation.">Fetal onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' || detailedPhenotype.onsetTo == 'HP:0030674'" value="HP:0011460" title="Onset of disease at up to 8 weeks of gestation.">Embryonal onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' || detailedPhenotype.onsetTo == 'HP:0030674'" value="HP:0011461" title="Onset prior to birth but after 8 weeks of gestation.">Fetal onset</option>
+
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' && detailedPhenotype.onsetTo == '-1'" value="HP:9999990" title="Onset of disease any time prior to birth.">Embryonal / Fetal onset</option>
+
+            <option *ngIf="detailedPhenotype.onset == 'HP:0003581' || detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:0011462" title="Onset of disease at the age of between 16 and 40 years.">Young adult onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0003581' || detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:0003596" title="A type of adult onset with onset of symptoms at the age of 40 to 60 years.">Middle age onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0003581' || detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:0003584" title="A type of adult onset with onset of symptoms after the age of 60 years.">Late onset</option>
+
+            <option *ngIf="detailedPhenotype.onset == 'HP:0003581' && detailedPhenotype.onsetTo == '-1'" value="HP:9999991" title="Onset of disease at the age of between 16 and 60 years.">Young adult / middle age onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0003581' && detailedPhenotype.onsetTo == '-1'" value="HP:9999992" title="A type of adult onset with onset of symptoms after the age of 40 years.">Middle age / late onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0003581' && detailedPhenotype.onsetTo == '-1'" value="HP:9999993" title="A type of adult onset with onset of symptoms after the age of 16 years.">Young adult – late onset</option>
+
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' && detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:9999994" title="Onset of disease up to the age of 40 years.">Embryonal – young adult onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' && detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:9999995" title="Onset of disease up to the age of 60 years.">Embryonal – middle age onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' && detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:9999996" title="Onset of disease at any time.">Embryonal – late onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' && detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:9999997" title="Onset of disease after 8 weeks of gestation up to the age of 40 years.">Fetal – young adult onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' && detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:9999998" title="Onset of disease after 8 weeks of gestation up to the age of 60 years.">Fetal – middle age onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' && detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:9999999" title="Onset of disease at any time after 8 weeks of gestation.">Fetal – late onset</option>
           </select>
-          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.specificOnset" (change)="setDetail('specific_onset', $event.target.value)" disabled *ngIf="detailedPhenotype.onset == 'HP:0003581'">
-            <option value="-1">N/A</option>
-            <option value="HP:0011462" title="Onset of disease at the age of between 16 and 40 years.">Young adult onset</option>
-            <option value="HP:0003596" title="A type of adult onset with onset of symptoms at the age of 40 to 60 years.">Middle age onset</option>
-            <option value="HP:0003584" title="A type of adult onset with onset of symptoms after the age of 60 years.">Late onset</option>
-          </select>
-          <div style="margin-bottom: 10px" *ngIf="detailedPhenotype.onset != 'HP:0030674' && detailedPhenotype.onset != 'HP:0003581'">
+          <div style="margin-bottom: 10px" *ngIf="detailedPhenotype.onset != 'HP:0030674' && detailedPhenotype.onset != 'HP:0003581' && detailedPhenotype.onsetTo != 'HP:0030674' && detailedPhenotype.onsetTo != 'HP:0003581'">
             <i>Only antenatal and adult onsets have more specific onsets.</i>
           </div>
         </div>
@@ -291,21 +302,21 @@
       <div class="row">
         <div class="col-lg-6">
           <div style="white-space: nowrap;height: 30px" *ngFor="let phenotype of system.phenotypes">
-            <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + phenotype.frequency.toString().split('.').join(',') + '.png)', 'color' : (phenotype.frequency == '0.75') ? 'black' : 'white'}" title="Frequency: {{frequencyDescription(phenotype.frequency)}}&#013;Onset: {{onsetDescription(phenotype.onset)}}">{{onsetAbbreviation(phenotype.onset)}}</pre>
-            <pre *ngIf="phenotype.observed === 0" class="frequency-onset" [ngStyle]="{'background-image': 'none', 'color' : 'white'}" title="This phenotype is not present in all patients with this disease.">{{onsetAbbreviation(phenotype.onset)}}</pre>
-            <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1 && phenotype.specificOnset == -1 && phenotype.progression == -1 && phenotype.severity == -1 && phenotype.temporalPattern == -1 && phenotype.spatialPattern == -1 && phenotype.laterality == -1">{{phenotype.phenotypeName}}</span>
-            <a style="cursor: pointer" (click)="openDetails(phenotype);smModal.show()" *ngIf="phenotype.observed == 1 && !(phenotype.specificOnset == -1 && phenotype.progression == -1 && phenotype.severity == -1 && phenotype.temporalPattern == -1 && phenotype.spatialPattern == -1 && phenotype.laterality == -1)"><span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}">{{phenotype.phenotypeName}}</span></a>
-            <span title="{{phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through" *ngIf="phenotype.observed == 0">{{phenotype.phenotypeName}}</span>
+            <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + roundToPercent(phenotype.frequency) + '.png)'}">{{onsetAbbreviation(phenotype.onset, phenotype.onsetTo)}}</pre>
+            <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + roundToPercent(phenotype.frequencyTo) + '.png)', 'opacity' : (roundToPercent(phenotype.frequencyTo) === -1) ? '0' : '0.5'}" title="Frequency: {{frequencyDescription(phenotype.frequency, phenotype.frequencyTo)}}&#013;Onset: {{onsetDescription(phenotype.onset, phenotype.onsetTo)}}">{{onsetAbbreviation(phenotype.onset, phenotype.onsetTo)}}</pre>
+            <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help; margin-left:85px" *ngIf="phenotype.observed == 1 && phenotype.specificOnset == -1 && phenotype.progression == -1 && phenotype.severity == -1 && phenotype.temporalPattern == -1 && phenotype.spatialPattern == -1 && phenotype.laterality == -1">{{phenotype.phenotypeName}}</span>
+            <a style="cursor: pointer; margin-left:85px" (click)="openDetails(phenotype);smModal.show()" *ngIf="phenotype.observed == 1 && !(phenotype.specificOnset == -1 && phenotype.progression == -1 && phenotype.severity == -1 && phenotype.temporalPattern == -1 && phenotype.spatialPattern == -1 && phenotype.laterality == -1)"><span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}">{{phenotype.phenotypeName}}</span></a>
+            <span title="{{phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through; margin-left:85px" *ngIf="phenotype.observed == 0">{{phenotype.phenotypeName}}</span>
             <img src="/assets/img/bonus.gif" style="height: 20px" *ngIf="phenotype.bonus" />
           </div>
         </div>
         <div class="col-lg-6" *ngIf="!(comparison.annotationID === comparison.compareToAnnotationID && comparison.status === -2)">
           <div style="white-space: nowrap;height: 30px" *ngFor="let phenotype of system.compareToPhenotypes">
-            <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + phenotype.frequency.toString().split('.').join(',') + '.png)', 'color' : (phenotype.frequency == '0.75') ? 'black' : 'white'}" title="Frequency: {{frequencyDescription(phenotype.frequency)}}&#013;Onset: {{onsetDescription(phenotype.onset)}}">{{onsetAbbreviation(phenotype.onset)}}</pre>
-            <pre *ngIf="phenotype.observed === 0" class="frequency-onset" [ngStyle]="{'background-image': 'none', 'color' : 'white'}" title="This phenotype is not present in all patients with this disease.">{{onsetAbbreviation(phenotype.onset)}}</pre>
-            <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1 && phenotype.specificOnset == -1 && phenotype.progression == -1 && phenotype.severity == -1 && phenotype.temporalPattern == -1 && phenotype.spatialPattern == -1 && phenotype.laterality == -1"><i>{{phenotype.phenotypeName}}</i></span>
-            <a style="cursor: pointer" (click)="openDetails(phenotype);smModal.show()" *ngIf="phenotype.observed == 1 && !(phenotype.specificOnset == -1 && phenotype.progression == -1 && phenotype.severity == -1 && phenotype.temporalPattern == -1 && phenotype.spatialPattern == -1 && phenotype.laterality == -1)"><span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}">{{phenotype.phenotypeName}}</span></a>
-            <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through" *ngIf="phenotype.observed == 0"><i>{{phenotype.phenotypeName}}</i></span>
+            <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + roundToPercent(phenotype.frequency) + '.png)'}">{{onsetAbbreviation(phenotype.onset, phenotype.onsetTo)}}</pre>
+            <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + roundToPercent(phenotype.frequencyTo) + '.png)', 'opacity' : (roundToPercent(phenotype.frequencyTo) === -1) ? '0' : '0.5'}" title="Frequency: {{frequencyDescription(phenotype.frequency, phenotype.frequencyTo)}}&#013;Onset: {{onsetDescription(phenotype.onset, phenotype.onsetTo)}}">{{onsetAbbreviation(phenotype.onset, phenotype.onsetTo)}}</pre>
+            <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help; margin-left:85px" *ngIf="phenotype.observed == 1 && phenotype.specificOnset == -1 && phenotype.progression == -1 && phenotype.severity == -1 && phenotype.temporalPattern == -1 && phenotype.spatialPattern == -1 && phenotype.laterality == -1"><i>{{phenotype.phenotypeName}}</i></span>
+            <a style="cursor: pointer; margin-left:85px" (click)="openDetails(phenotype);smModal.show()" *ngIf="phenotype.observed == 1 && !(phenotype.specificOnset == -1 && phenotype.progression == -1 && phenotype.severity == -1 && phenotype.temporalPattern == -1 && phenotype.spatialPattern == -1 && phenotype.laterality == -1)"><span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}">{{phenotype.phenotypeName}}</span></a>
+            <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through; margin-left:85px" *ngIf="phenotype.observed == 0"><i>{{phenotype.phenotypeName}}</i></span>
           </div>
         </div>
       </div>

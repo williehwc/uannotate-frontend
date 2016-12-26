@@ -67,7 +67,7 @@
         <div class="col-lg-12" *ngIf="dashboard.exercisesToDo.length == 0 && dashboard.recentlyGradedExercises.length == 0">
           <p>
             <strong>Welcome! You don't have exercises to do yet.</strong><br />
-            Have you joined your class? Click on Join Class on the left to get started!<br />
+            Have you joined your class? Click on <a style="cursor: pointer" (click)="gotoJoinClass()">Join Class</a> to get started!<br />
             Are you a professor or researcher? Please email us at <a href="mailto:{{phenotateEmail}}">{{phenotateEmail}}</a> to upgrade your account.
           </p>
         </div>

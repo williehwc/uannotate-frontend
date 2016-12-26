@@ -421,70 +421,104 @@ export class ComparatorComponent {
   round(x: number) {
     return Math.round(x);
   }
-  onsetAbbreviation(hpo: string) {
-    switch (hpo) {
-      case 'HP:0030674':
-        return 'ANT';
-      case 'HP:0003577':
-        return 'CON';
-      case 'HP:0003623':
-        return 'NEO';
-      case 'HP:0003593':
-        return 'INF';
-      case 'HP:0011463':
-        return 'CHI';
-      case 'HP:0003621':
-        return 'JUV';
-      case 'HP:0003581':
-        return 'ADU';
-      default:
-        return '–––';
+  roundToPercent(dec: number) {
+    if (dec === -1)
+      return -1;
+    return Math.round(dec * 100);
+  }
+  roundToPercentDec(dec: number) {
+    if ((dec * 100).toFixed(1).slice(-1) === '0') {
+      return this.roundToPercent(dec).toString();
+    } else {
+      return (dec * 100).toFixed(1);
     }
   }
-  onsetDescription(hpo: string) {
-    switch (hpo) {
-      case 'HP:0030674':
-        return 'Antenatal (before birth)';
-      case 'HP:0003577':
-        return 'Congenital (at birth)';
-      case 'HP:0003623':
-        return 'Neonatal (0 to 28 days)';
-      case 'HP:0003593':
-        return 'Infantile (28 days to 1 year)';
-      case 'HP:0011463':
-        return 'Childhood (1 to 5 years)';
-      case 'HP:0003621':
-        return 'Juvenile (5 to 15 years)';
-      case 'HP:0003581':
-        return 'Adult (16 years or later)';
-      default:
-        return 'Not sure';
+  onsetAbbreviation(hpo: string, hpoTo: string) {
+    if (hpoTo === '-1') {
+      switch (hpo) {
+        case 'HP:0030674':
+          return 'ANT';
+        case 'HP:0003577':
+          return 'CON';
+        case 'HP:0003623':
+          return 'NEO';
+        case 'HP:0003593':
+          return 'INF';
+        case 'HP:0011463':
+          return 'CHI';
+        case 'HP:0003621':
+          return 'JUV';
+        case 'HP:0003581':
+          return 'ADU';
+        case '-1':
+          return '–––';
+        default:
+          return null;
+      }
+    } else {
+      let abbreviation : string = this.onsetAbbreviation(hpo, '-1');
+      let abbreviationTo : string = this.onsetAbbreviation(hpoTo, '-1');
+      return abbreviation.charAt(0) + '-' + abbreviationTo.charAt(0);
     }
   }
-  frequencyDescription(frequency: number) {
-    switch (frequency) {
-      case -1:
-        return 'Not sure';
-      case 0:
-        return 'Variable (prob. 30% to 70%)';
-      case 0.01:
-        return 'Very rare (1%)';
-      case 0.05:
-        return 'Rare (5%)';
-      case 0.075:
-        return 'Occasional (7.5%)';
-      case 0.33:
-        return 'Frequent (33%)';
-      case 0.5:
-        return 'Typical (50%)';
-      case 0.75:
-        return 'Common (75%)';
-      case 0.9:
-        return 'Hallmark (90%)';
-      case 1:
-        return 'Obligate (100%)';
-      default:
-        return 'Not sure';
+  onsetDescription(hpo: string, hpoTo: string) {
+    if (hpoTo === '-1') {
+      switch (hpo) {
+        case 'HP:0030674':
+          return 'Antenatal (before birth)';
+        case 'HP:0003577':
+          return 'Congenital (at birth)';
+        case 'HP:0003623':
+          return 'Neonatal (0 to 28 days)';
+        case 'HP:0003593':
+          return 'Infantile (28 days to 1 year)';
+        case 'HP:0011463':
+          return 'Childhood (1 to 5 years)';
+        case 'HP:0003621':
+          return 'Juvenile (5 to 15 years)';
+        case 'HP:0003581':
+          return 'Adult (16 years or later)';
+        case '-1':
+          return 'Not sure';
+        default:
+          return null;
+      }
+    } else {
+      let description : string = this.onsetDescription(hpo, '-1');
+      let descriptionTo : string = this.onsetDescription(hpoTo, '-1');
+      return description + ' to ' + descriptionTo.toLowerCase();
+    }
+  }
+  frequencyDescription(frequency: number, frequencyTo: number) {
+    if (frequencyTo === -1) {
+      switch (frequency) {
+        case -1:
+          return 'Not sure';
+        case 0:
+          return 'Variable (prob. 30% to 70%)';
+        case 0.01:
+          return 'Very rare (1%)';
+        case 0.05:
+          return 'Rare (5%)';
+        case 0.075:
+          return 'Occasional (7.5%)';
+        case 0.33:
+          return 'Frequent (33%)';
+        case 0.5:
+          return 'Typical (50%)';
+        case 0.75:
+          return 'Common (75%)';
+        case 0.9:
+          return 'Hallmark (90%)';
+        case 1:
+          return 'Obligate (100%)';
+        default:
+          return this.roundToPercentDec(frequency) + '%';
+      }
+    } else {
+      let description : string = this.frequencyDescription(frequency, -1);
+      let descriptionTo : string = this.frequencyDescription(frequencyTo, -1);
+      return description + ' to ' + descriptionTo.toLowerCase();
     }
   }
 }

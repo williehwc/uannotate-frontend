@@ -419,6 +419,7 @@ export class ExerciseComponent implements OnInit {
   }
   gotoComparator(annotationID: number) {
     localStorage.setItem('uaAnnotation', '' + annotationID);
+    localStorage.removeItem('uaCompareTo');
     this._router.navigate(['/dashboard', '/comparator']);
   }
   selectAll() {

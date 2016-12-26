@@ -33,6 +33,9 @@ export class InProgressComponent implements OnInit {
   addingBrowser: boolean = false;
   shareLink: string = null;
   shareLinkCopied: boolean = false;
+  applyAllOnsetFrom: string = '-1';
+  applyAllOnsetToVar: string = '-1';
+  applyAllOnsetRange: boolean = false;
 
   @ViewChild('browser') public browser:ModalDirective;
 
@@ -264,7 +267,7 @@ export class InProgressComponent implements OnInit {
               let specificOnsetHPO: string = null;
               let onsetName: string = null;
               for (let j = 0; j < datum.term_category.length; j++) {
-                if (scope.onsetDescription(datum.term_category[j])) {
+                if (scope.onsetDescription(datum.term_category[j] , '-1')) {
                   onsetHPO = datum.term_category[j];
                   specificOnsetHPO = scope.annotation.phenotypes[i].hpo;
                   onsetName = scope.specificOnsetDescription(scope.annotation.phenotypes[i].hpo);
@@ -278,12 +281,12 @@ export class InProgressComponent implements OnInit {
                   name: onsetName
                 });
                 scope.annotation.phenotypes.splice(i, 1);
-              } else if (scope.onsetDescription(scope.annotation.phenotypes[i].hpo)) {
+              } else if (scope.onsetDescription(scope.annotation.phenotypes[i].hpo, '-1')) {
                 // If the phenotype is an onset, add it to suggested onsets
                 scope.suggestedOnsets.push({
                   hpo: scope.annotation.phenotypes[i].hpo,
-                  specificHPO: null,
-                  name: scope.onsetDescription(scope.annotation.phenotypes[i].hpo)
+                  specificHPO: '-1',
+                  name: scope.onsetDescription(scope.annotation.phenotypes[i].hpo, '-1')
                 });
                 scope.annotation.phenotypes.splice(i, 1);
               } else if (datum.term_category.indexOf('HP:0000118') === -1) {
@@ -637,21 +640,48 @@ export class InProgressComponent implements OnInit {
         () => console.log('Finish set observed')
       );
   }
-  setFrequency(phenotypeID: number, frequency: number) {
+  setFrequency(phenotypeID: number, frequency: any, frequencyTo: any) {
+    frequency = parseFloat(frequency);
+    frequencyTo = parseFloat(frequencyTo);
+    if (frequency === 0) {
+      frequency = prompt('Enter frequency in percentage (1 to 100)');
+      frequency = Math.round(frequency) / 100;
+      if (frequency === 0) {
+        this.setObserved(phenotypeID, false);
+      }
+      if (frequency > 1) {
+        frequency = 1;
+      } else if (frequency <= 0) {
+        frequency = -1;
+      }
+    }
+    if (frequencyTo === 0) {
+      frequencyTo = prompt('Enter frequency in percentage (1 to 100)');
+      frequencyTo = Math.round(frequencyTo) / 100;
+      if (frequency > 1) {
+        frequency = 1;
+      } else if (frequency <= 0) {
+        frequency = -1;
+      }
+    }
     let scope = this;
     let finishSetObserved = function(data: any) {
       for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
         if (scope.annotation.phenotypes[i].phenotypeID === data.phenotypeID) {
           scope.annotation.phenotypes[i].frequency = data.frequency;
+          scope.annotation.phenotypes[i].frequencyTo = data.frequencyTo;
           scope.annotation.phenotypes[i].notOK = 0;
         }
       }
     };
+    if ((frequencyTo !== -1 && frequency >= frequencyTo) || frequency === -1)
+      frequencyTo = -1;
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
       'annotationID': this.annotation.annotationID,
       'phenotypeID': phenotypeID,
-      'frequency': frequency
+      'frequency': frequency,
+      'frequencyTo': frequencyTo
     });
     this._http.post(globals.backendURL + '/restricted/annotation/edit/phenotype/frequency', body, globals.options)
       .map(res => res.json())
@@ -661,21 +691,26 @@ export class InProgressComponent implements OnInit {
         () => console.log('Finish set frequency')
       );
   }
-  setOnset(phenotypeID: number, onset: string) {
+  setOnset(phenotypeID: number, onset: string, onsetTo: string) {
     let scope = this;
+    let onsets = ['HP:0030674', 'HP:0003577', 'HP:0003623', 'HP:0003593', 'HP:0011463', 'HP:0003621', 'HP:0003581'];
     let finishSetOnset = function(data: any) {
       for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
         if (scope.annotation.phenotypes[i].phenotypeID === data.phenotypeID) {
           scope.annotation.phenotypes[i].onset = data.onset;
+          scope.annotation.phenotypes[i].onsetTo = data.onsetTo;
           scope.annotation.phenotypes[i].notOK = 0;
         }
       }
     };
+    if ((onsetTo !== '-1' && onsets.indexOf(onset) >= onsets.indexOf(onsetTo)) || onset === '-1')
+      onsetTo = '-1';
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
       'annotationID': this.annotation.annotationID,
       'phenotypeID': phenotypeID,
       'onset': onset,
+      'onsetTo': onsetTo,
       'setOK': true
     });
     this._http.post(globals.backendURL + '/restricted/annotation/edit/phenotype/onset', body, globals.options)
@@ -930,43 +965,59 @@ export class InProgressComponent implements OnInit {
   applyAllOnset(value: string) {
     if (value.includes('|')) {
       let valueArray = value.split('|');
-      this.applyOnset(valueArray[0], valueArray[1]);
+      this.applyOnset(valueArray[0], '-1', valueArray[1]);
     } else {
-      this.applyOnset(value, null);
+      this.applyOnset(value, '-1', '-1');
+    }
+    this.applyAllOnsetToVar = '-1';
+    this.applyAllOnsetRange = false;
+  }
+  applyAllOnsetTo(value: string) {
+    if (value.includes('|')) {
+      let valueArrayFrom = this.applyAllOnsetFrom.split('|');
+      let valueArrayTo = value.split('|');
+      this.applyOnset(valueArrayFrom[0], valueArrayTo[0], valueArrayTo[1]);
+    } else {
+      if (this.applyAllOnsetFrom.includes('|')) {
+        let valueArrayFrom = this.applyAllOnsetFrom.split('|');
+        this.applyOnset(valueArrayFrom[0], value, valueArrayFrom[1]);
+      } else {
+        this.applyOnset(this.applyAllOnsetFrom, value, '-1');
+      }
     }
   }
-  applyOnset(hpo: string, specificHPO: string) {
+  applyOnset(hpo: string, hpoTo: string, specificHPO: string) {
     let scope = this;
     let finishApplyOnset = function(data: any) {
       for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
         if (scope.annotation.phenotypes[i].phenotypeID === data.phenotypeID) {
           scope.annotation.phenotypes[i].onset = data.onset;
+          scope.annotation.phenotypes[i].onsetTo = data.onsetTo;
         }
       }
     };
     for (let i = 0; i < this.annotation.phenotypes.length; i++) {
-    	if (specificHPO) {
-    		this.annotation.phenotypes[i].specificOnset = specificHPO;
-    		let body = JSON.stringify({
-      		'token': localStorage.getItem('uaToken'),
-      		'annotationID': this.annotation.annotationID,
-      		'phenotypeID': this.annotation.phenotypes[i].phenotypeID,
-      		'detail': 'specific_onset',
-      		'value': specificHPO
-    		});
-    		this._http.post(globals.backendURL + '/restricted/annotation/edit/phenotype/detail', body, globals.options)
-      		.map(res => res.json())
-      		.subscribe(
-        		data => console.log(data),
-        		err => console.log(err),
-        		() => console.log('Finish set specific onset')
-      		);
-    	}
-      let body = JSON.stringify({
+  		this.annotation.phenotypes[i].specificOnset = specificHPO;
+  		let body = JSON.stringify({
+    		'token': localStorage.getItem('uaToken'),
+    		'annotationID': this.annotation.annotationID,
+    		'phenotypeID': this.annotation.phenotypes[i].phenotypeID,
+    		'detail': 'specific_onset',
+    		'value': specificHPO
+  		});
+  		this._http.post(globals.backendURL + '/restricted/annotation/edit/phenotype/detail', body, globals.options)
+    		.map(res => res.json())
+    		.subscribe(
+      		data => console.log(data),
+      		err => console.log(err),
+      		() => console.log('Finish set specific onset')
+    		);
+      body = JSON.stringify({
         'token': localStorage.getItem('uaToken'),
         'annotationID': this.annotation.annotationID,
         'phenotypeID': this.annotation.phenotypes[i].phenotypeID,
         'onset': hpo,
+        'onsetTo': hpoTo,
         'setOK': false
       });
       this._http.post(globals.backendURL + '/restricted/annotation/edit/phenotype/onset', body, globals.options)
@@ -1186,48 +1237,72 @@ export class InProgressComponent implements OnInit {
     localStorage.setItem('uaAnnotationShareLink', localStorage.getItem('uaShareLink'));
     this._router.navigate(['/']);
   }
-  onsetAbbreviation(hpo: string) {
-    switch (hpo) {
-      case 'HP:0030674':
-        return 'ANT';
-      case 'HP:0003577':
-        return 'CON';
-      case 'HP:0003623':
-        return 'NEO';
-      case 'HP:0003593':
-        return 'INF';
-      case 'HP:0011463':
-        return 'CHI';
-      case 'HP:0003621':
-        return 'JUV';
-      case 'HP:0003581':
-        return 'ADU';
-      case '-1':
-        return '–––';
-      default:
-        return null;
+  roundToPercent(dec: number) {
+    if (dec === -1)
+      return -1;
+    return Math.round(dec * 100);
+  }
+  roundToPercentDec(dec: number) {
+    if ((dec * 100).toFixed(1).slice(-1) === '0') {
+      return this.roundToPercent(dec).toString();
+    } else {
+      return (dec * 100).toFixed(1);
     }
   }
-  onsetDescription(hpo: string) {
-    switch (hpo) {
-      case 'HP:0030674':
-        return 'Antenatal (before birth)';
-      case 'HP:0003577':
-        return 'Congenital (at birth)';
-      case 'HP:0003623':
-        return 'Neonatal (0 to 28 days)';
-      case 'HP:0003593':
-        return 'Infantile (28 days to 1 year)';
-      case 'HP:0011463':
-        return 'Childhood (1 to 5 years)';
-      case 'HP:0003621':
-        return 'Juvenile (5 to 15 years)';
-      case 'HP:0003581':
-        return 'Adult (16 years or later)';
-      case '-1':
-        return 'Not sure';
-      default:
-        return null;
+  onsetAbbreviation(hpo: string, hpoTo: string) {
+    if (hpoTo === '-1') {
+      switch (hpo) {
+        case 'HP:0030674':
+          return 'ANT';
+        case 'HP:0003577':
+          return 'CON';
+        case 'HP:0003623':
+          return 'NEO';
+        case 'HP:0003593':
+          return 'INF';
+        case 'HP:0011463':
+          return 'CHI';
+        case 'HP:0003621':
+          return 'JUV';
+        case 'HP:0003581':
+          return 'ADU';
+        case '-1':
+          return '–––';
+        default:
+          return null;
+      }
+    } else {
+      let abbreviation : string = this.onsetAbbreviation(hpo, '-1');
+      let abbreviationTo : string = this.onsetAbbreviation(hpoTo, '-1');
+      return abbreviation.charAt(0) + '-' + abbreviationTo.charAt(0);
+    }
+  }
+  onsetDescription(hpo: string, hpoTo: string) {
+    if (hpoTo === '-1') {
+      switch (hpo) {
+        case 'HP:0030674':
+          return 'Antenatal (before birth)';
+        case 'HP:0003577':
+          return 'Congenital (at birth)';
+        case 'HP:0003623':
+          return 'Neonatal (0 to 28 days)';
+        case 'HP:0003593':
+          return 'Infantile (28 days to 1 year)';
+        case 'HP:0011463':
+          return 'Childhood (1 to 5 years)';
+        case 'HP:0003621':
+          return 'Juvenile (5 to 15 years)';
+        case 'HP:0003581':
+          return 'Adult (16 years or later)';
+        case '-1':
+          return 'Not sure';
+        default:
+          return null;
+      }
+    } else {
+      let description : string = this.onsetDescription(hpo, '-1');
+      let descriptionTo : string = this.onsetDescription(hpoTo, '-1');
+      return description + ' to ' + descriptionTo.toLowerCase();
     }
   }
   specificOnsetDescription(hpo: string) {
@@ -1246,30 +1321,36 @@ export class InProgressComponent implements OnInit {
         return null;
     }
   }
-  frequencyDescription(frequency: number) {
-    switch (frequency) {
-      case -1:
-        return 'Not sure';
-      case 0:
-        return 'Variable (prob. 30% to 70%)';
-      case 0.01:
-        return 'Very rare (1%)';
-      case 0.05:
-        return 'Rare (5%)';
-      case 0.075:
-        return 'Occasional (7.5%)';
-      case 0.33:
-        return 'Frequent (33%)';
-      case 0.5:
-        return 'Typical (50%)';
-      case 0.75:
-        return 'Common (75%)';
-      case 0.9:
-        return 'Hallmark (90%)';
-      case 1:
-        return 'Obligate (100%)';
-      default:
-        return 'Not sure';
+  frequencyDescription(frequency: number, frequencyTo: number) {
+    if (frequencyTo === -1) {
+      switch (frequency) {
+        case -1:
+          return 'Not sure';
+        case 0:
+          return 'Variable (prob. 30% to 70%)';
+        case 0.01:
+          return 'Very rare (1%)';
+        case 0.05:
+          return 'Rare (5%)';
+        case 0.075:
+          return 'Occasional (7.5%)';
+        case 0.33:
+          return 'Frequent (33%)';
+        case 0.5:
+          return 'Typical (50%)';
+        case 0.75:
+          return 'Common (75%)';
+        case 0.9:
+          return 'Hallmark (90%)';
+        case 1:
+          return 'Obligate (100%)';
+        default:
+          return this.roundToPercentDec(frequency) + '%';
+      }
+    } else {
+      let description : string = this.frequencyDescription(frequency, -1);
+      let descriptionTo : string = this.frequencyDescription(frequencyTo, -1);
+      return description + ' to ' + descriptionTo.toLowerCase();
     }
   }
   idFormat(s: string) {

@@ -181,18 +181,29 @@
           <br />
           <strong>Specific age of onset</strong>
           <br />
-          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.specificOnset" (change)="setDetail('specific_onset', $event.target.value)" [disabled]="annotation.status === 2 || annotation.status === -2" *ngIf="detailedPhenotype.onset == 'HP:0030674'">
+          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.specificOnset" (change)="setDetail('specific_onset', $event.target.value)" [disabled]="annotation.status === 2 || annotation.status === -2">
             <option value="-1">N/A</option>
-            <option value="HP:0011460" title="Onset of disease at up to 8 weeks of gestation.">Embryonal onset</option>
-            <option value="HP:0011461" title="Onset prior to birth but after 8 weeks of gestation.">Fetal onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' || detailedPhenotype.onsetTo == 'HP:0030674'" value="HP:0011460" title="Onset of disease at up to 8 weeks of gestation.">Embryonal onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' || detailedPhenotype.onsetTo == 'HP:0030674'" value="HP:0011461" title="Onset prior to birth but after 8 weeks of gestation.">Fetal onset</option>
+
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' && detailedPhenotype.onsetTo == '-1'" value="HP:9999990" title="Onset of disease any time prior to birth.">Embryonal / Fetal onset</option>
+
+            <option *ngIf="detailedPhenotype.onset == 'HP:0003581' || detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:0011462" title="Onset of disease at the age of between 16 and 40 years.">Young adult onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0003581' || detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:0003596" title="A type of adult onset with onset of symptoms at the age of 40 to 60 years.">Middle age onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0003581' || detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:0003584" title="A type of adult onset with onset of symptoms after the age of 60 years.">Late onset</option>
+
+            <option *ngIf="detailedPhenotype.onset == 'HP:0003581' && detailedPhenotype.onsetTo == '-1'" value="HP:9999991" title="Onset of disease at the age of between 16 and 60 years.">Young adult / middle age onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0003581' && detailedPhenotype.onsetTo == '-1'" value="HP:9999992" title="A type of adult onset with onset of symptoms after the age of 40 years.">Middle age / late onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0003581' && detailedPhenotype.onsetTo == '-1'" value="HP:9999993" title="A type of adult onset with onset of symptoms after the age of 16 years.">Young adult – late onset</option>
+
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' && detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:9999994" title="Onset of disease up to the age of 40 years.">Embryonal – young adult onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' && detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:9999995" title="Onset of disease up to the age of 60 years.">Embryonal – middle age onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' && detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:9999996" title="Onset of disease at any time.">Embryonal – late onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' && detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:9999997" title="Onset of disease after 8 weeks of gestation up to the age of 40 years.">Fetal – young adult onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' && detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:9999998" title="Onset of disease after 8 weeks of gestation up to the age of 60 years.">Fetal – middle age onset</option>
+            <option *ngIf="detailedPhenotype.onset == 'HP:0030674' && detailedPhenotype.onsetTo == 'HP:0003581'" value="HP:9999999" title="Onset of disease at any time after 8 weeks of gestation.">Fetal – late onset</option>
           </select>
-          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.specificOnset" (change)="setDetail('specific_onset', $event.target.value)" [disabled]="annotation.status === 2 || annotation.status === -2" *ngIf="detailedPhenotype.onset == 'HP:0003581'">
-            <option value="-1">N/A</option>
-            <option value="HP:0011462" title="Onset of disease at the age of between 16 and 40 years.">Young adult onset</option>
-            <option value="HP:0003596" title="A type of adult onset with onset of symptoms at the age of 40 to 60 years.">Middle age onset</option>
-            <option value="HP:0003584" title="A type of adult onset with onset of symptoms after the age of 60 years.">Late onset</option>
-          </select>
-          <div style="margin-bottom: 10px" *ngIf="detailedPhenotype.onset != 'HP:0030674' && detailedPhenotype.onset != 'HP:0003581'">
+          <div style="margin-bottom: 10px" *ngIf="detailedPhenotype.onset != 'HP:0030674' && detailedPhenotype.onset != 'HP:0003581' && detailedPhenotype.onsetTo != 'HP:0030674' && detailedPhenotype.onsetTo != 'HP:0003581'">
             <i>Only antenatal and adult onsets have more specific onsets.</i>
           </div>
         </div>
@@ -350,11 +361,11 @@
             <div *ngFor="let phenotype of annotation.phenotypes" class="phenotypes" id="phenotype-{{phenotype.phenotypeID}}">
 
               <div style="white-space: nowrap;height: 30px" *ngIf="phenotype.systemName === systemName && (annotation.status === 2 || annotation.status === -2)">
-                <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + phenotype.frequency.toString().split('.').join(',') + '.png)', 'color' : (phenotype.frequency == '0.75') ? 'black' : 'white'}" title="Frequency: {{frequencyDescription(phenotype.frequency)}}&#013;Onset: {{onsetDescription(phenotype.onset)}}">{{onsetAbbreviation(phenotype.onset)}}</pre>
-                <pre *ngIf="phenotype.observed === 0" class="frequency-onset" [ngStyle]="{'background-image': 'none', 'color' : 'white'}" title="This phenotype is not present in all patients with this disease.">{{onsetAbbreviation(phenotype.onset)}}</pre>
-                <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1 && phenotype.specificOnset == -1 && phenotype.progression == -1 && phenotype.severity == -1 && phenotype.temporalPattern == -1 && phenotype.spatialPattern == -1 && phenotype.laterality == -1">{{phenotype.phenotypeName}}</span>
-                <a style="cursor: pointer" (click)="openDetails(phenotype);smModal.show()" *ngIf="phenotype.observed == 1 && !(phenotype.specificOnset == -1 && phenotype.progression == -1 && phenotype.severity == -1 && phenotype.temporalPattern == -1 && phenotype.spatialPattern == -1 && phenotype.laterality == -1)"><span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}">{{phenotype.phenotypeName}} <img src="/assets/img/details.gif" style="height: 20px" /></span></a>
-                <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through" *ngIf="phenotype.observed == 0">{{phenotype.phenotypeName}}</span>
+                <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + roundToPercent(phenotype.frequency) + '.png)'}">{{onsetAbbreviation(phenotype.onset, phenotype.onsetTo)}}</pre>
+                <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + roundToPercent(phenotype.frequencyTo) + '.png)', 'opacity' : (roundToPercent(phenotype.frequencyTo) === -1) ? '0' : '0.5'}" title="Frequency: {{frequencyDescription(phenotype.frequency, phenotype.frequencyTo)}}&#013;Onset: {{onsetDescription(phenotype.onset, phenotype.onsetTo)}}">{{onsetAbbreviation(phenotype.onset, phenotype.onsetTo)}}</pre>
+                <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help; margin-left:85px" *ngIf="phenotype.observed == 1 && phenotype.specificOnset == -1 && phenotype.progression == -1 && phenotype.severity == -1 && phenotype.temporalPattern == -1 && phenotype.spatialPattern == -1 && phenotype.laterality == -1">{{phenotype.phenotypeName}}</span>
+                <a style="cursor: pointer; margin-left:85px" (click)="openDetails(phenotype);smModal.show()" *ngIf="phenotype.observed == 1 && !(phenotype.specificOnset == -1 && phenotype.progression == -1 && phenotype.severity == -1 && phenotype.temporalPattern == -1 && phenotype.spatialPattern == -1 && phenotype.laterality == -1)"><span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}">{{phenotype.phenotypeName}} <img src="/assets/img/details.gif" style="height: 20px" /></span></a>
+                <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through; margin-left:85px" *ngIf="phenotype.observed == 0">{{phenotype.phenotypeName}}</span>
                 <sup>
                 <span *ngFor="let citation of phenotype.citations; let i = index">{{(i > 0) ? ', ' : ''}}{{citation.number}}</span>
                 </sup>
@@ -371,18 +382,16 @@
                 </div>
                 <i class="fa fa-exclamation-circle" aria-hidden="true" *ngIf="phenotype.citations.length == 0 && markUncitedPhenotypes && annotation.status != 2 && annotation.status != -2" style="float: right;margin-top: 3px; margin-right: 10px" title="No citations"></i>
                 <div class="ok" (click)="setObserved(phenotype.phenotypeID, (phenotype.observed == 1))" title="This phenotype was imported. Click (or edit the phenotype) to confirm that it is correct." *ngIf="phenotype.notOK == 1 && annotation.cloneOf == null"></div>
-                <div class="ok" (click)="setObserved(phenotype.phenotypeID, (phenotype.observed == 1))" title="This phenotype was cloned. Click (or edit the phenotype) to confirm that it is correct." *ngIf="phenotype.notOK == 1 && annotation.cloneOf != null"></div>                <h5 title="{{phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1 && studentLevel">{{phenotype.phenotypeName}}</h5>
-                <h5 title="{{phenotype.hpo}} {{phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1 && profLevel">{{phenotype.phenotypeName}}</h5>
-                <h5 title="{{phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through" *ngIf="phenotype.observed == 0 && studentLevel">{{phenotype.phenotypeName}}</h5>
-                <h5 title="{{phenotype.hpo}} {{phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through" *ngIf="phenotype.observed == 0 && profLevel">{{phenotype.phenotypeName}}</h5>
-                <div class="row" style="margin-top: 20px" *ngIf="phenotype.observed == 1">
-                  <div class="col-lg-2">
-                    <label>Frequency:</label>
-                  </div>
-                  <div class="col-lg-4">
-                    <select class="form-control" [(ngModel)]="phenotype.frequency" (change)="setFrequency(phenotype.phenotypeID, $event.target.value)" [disabled]="annotation.status == 2 || annotation.status == -2" style="color:black">
-                      <option value="-1">Not sure</option>
-                      <option value="0">Variable (prob. 30% to 70%)</option>
+                <div class="ok" (click)="setObserved(phenotype.phenotypeID, (phenotype.observed == 1))" title="This phenotype was cloned. Click (or edit the phenotype) to confirm that it is correct." *ngIf="phenotype.notOK == 1 && annotation.cloneOf != null"></div>                <h6 title="{{phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1 && studentLevel">{{phenotype.phenotypeName}}</h6>
+                <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + roundToPercent(phenotype.frequency) + '.png)', 'margin-top' : '-1px'}">{{onsetAbbreviation(phenotype.onset, phenotype.onsetTo)}}</pre>
+                <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + roundToPercent(phenotype.frequencyTo) + '.png)', 'opacity' : (roundToPercent(phenotype.frequencyTo) === -1) ? '0' : '0.5', 'margin-top' : '-1px'}" title="Frequency: {{frequencyDescription(phenotype.frequency, phenotype.frequencyTo)}}&#013;Onset: {{onsetDescription(phenotype.onset, phenotype.onsetTo)}}">{{onsetAbbreviation(phenotype.onset, phenotype.onsetTo)}}</pre>
+                <h6 title="{{phenotype.hpo}} {{phenotype.phenotypeDefinition}}" style="cursor:help; margin-top:3px; margin-left: 85px" *ngIf="phenotype.observed == 1 && profLevel">{{phenotype.phenotypeName}}</h6>
+                <h6 title="{{phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through; margin-top:3px; margin-left: 85px" *ngIf="phenotype.observed == 0 && studentLevel">{{phenotype.phenotypeName}}</h6>
+                <h6 title="{{phenotype.hpo}} {{phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through; margin-top:3px; margin-left: 85px" *ngIf="phenotype.observed == 0 && profLevel">{{phenotype.phenotypeName}}</h6>
+                <div class="row" style="margin-top: 22px" *ngIf="phenotype.observed == 1">
+                  <div [class]="(phenotype.frequency != -1 && phenotype.frequency != 1) ? 'col-lg-3' : 'col-lg-6'">
+                    <select class="form-control" [(ngModel)]="phenotype.frequency" (change)="setFrequency(phenotype.phenotypeID, $event.target.value, phenotype.frequencyTo)" style="color:black">
+                      <option value="-1">Frequency unsure</option>
                       <option value="0.01">Very rare (1%)</option>
                       <option value="0.05">Rare (5%)</option>
                       <option value="0.075">Occasional (7.5%)</option>
@@ -391,14 +400,27 @@
                       <option value="0.75">Common (75%)</option>
                       <option value="0.9">Hallmark (90%)</option>
                       <option value="1">Obligate (100%)</option>
+                      <option value="{{phenotype.frequency}}" *ngIf="phenotype.frequency != -1 && phenotype.frequency != 0.01 && phenotype.frequency != 0.05 && phenotype.frequency != 0.075 && phenotype.frequency != 0.33 && phenotype.frequency != 0.5 && phenotype.frequency != 0.75 && phenotype.frequency != 0.9 && phenotype.frequency != 1">{{roundToPercentDec(phenotype.frequency)}}%</option>
+                      <option value="0">Other…</option>
                     </select>
                   </div>
-                  <div class="col-lg-2">
-                    <label>Onset:</label>
+                  <div class="col-lg-3" *ngIf="phenotype.frequency != -1 && phenotype.frequency != 1">
+                    <select class="form-control" [(ngModel)]="phenotype.frequencyTo" (change)="setFrequency(phenotype.phenotypeID, phenotype.frequency, $event.target.value)" style="color:black">
+                      <option value="-1">No range</option>
+                      <option *ngIf="phenotype.frequency < 0.05" value="0.05">to rare (5%)</option>
+                      <option *ngIf="phenotype.frequency < 0.075" value="0.075">to occasional (7.5%)</option>
+                      <option *ngIf="phenotype.frequency < 0.33" value="0.33">to frequent (33%)</option>
+                      <option *ngIf="phenotype.frequency < 0.5" value="0.5">to typical (50%)</option>
+                      <option *ngIf="phenotype.frequency < 0.75" value="0.75">to common (75%)</option>
+                      <option *ngIf="phenotype.frequency < 0.9" value="0.9">to hallmark (90%)</option>
+                      <option value="1">to obligate (100%)</option>
+                      <option value="{{phenotype.frequencyTo}}" *ngIf="phenotype.frequencyTo != -1 && phenotype.frequencyTo != 0.01 && phenotype.frequencyTo != 0.05 && phenotype.frequencyTo != 0.075 && phenotype.frequencyTo != 0.33 && phenotype.frequencyTo != 0.5 && phenotype.frequencyTo != 0.75 && phenotype.frequencyTo != 0.9 && phenotype.frequencyTo != 1">{{roundToPercentDec(phenotype.frequencyTo)}}%</option>
+                      <option value="0">to other…</option>
+                    </select>
                   </div>
-                  <div class="col-lg-4">
-                    <select class="form-control" [(ngModel)]="phenotype.onset" (change)="setOnset(phenotype.phenotypeID, $event.target.value)" [disabled]="annotation.status == 2 || annotation.status == -2" style="color:black">
-                      <option value="-1">Not sure</option>
+                  <div [class]="(phenotype.onset != '-1' && phenotype.onset != 'HP:0003581') ? 'col-lg-3' : 'col-lg-6'">
+                    <select class="form-control" [(ngModel)]="phenotype.onset" (change)="setOnset(phenotype.phenotypeID, $event.target.value, phenotype.onsetTo)" style="color:black">
+                      <option value="-1">Onset unsure</option>
                       <option value="HP:0030674">Antenatal (before birth)</option>
                       <option value="HP:0003577">Congenital (at birth)</option>
                       <option value="HP:0003623">Neonatal (0 to 28 days)</option>
@@ -406,6 +428,17 @@
                       <option value="HP:0011463">Childhood (1 to 5 years)</option>
                       <option value="HP:0003621">Juvenile (5 to 15 years)</option>
                       <option value="HP:0003581">Adult (16 years or later)</option>
+                    </select>
+                  </div>
+                  <div class="col-lg-3" *ngIf="phenotype.onset != '-1' && phenotype.onset != 'HP:0003581'" style="color:black">
+                    <select class="form-control" [(ngModel)]="phenotype.onsetTo" (change)="setOnset(phenotype.phenotypeID, phenotype.onset, $event.target.value)">
+                      <option value="-1">No range</option>
+                      <option *ngIf="phenotype.onset == 'HP:0030674'" value="HP:0003577">to congenital (at birth)</option>
+                      <option *ngIf="phenotype.onset == 'HP:0030674' || phenotype.onset == 'HP:0003577'" value="HP:0003623">to neonatal (0 to 28 days)</option>
+                      <option *ngIf="phenotype.onset == 'HP:0030674' || phenotype.onset == 'HP:0003577' || phenotype.onset == 'HP:0003623'" value="HP:0003593">to infantile (28 days to 1 year)</option>
+                      <option *ngIf="phenotype.onset == 'HP:0030674' || phenotype.onset == 'HP:0003577' || phenotype.onset == 'HP:0003623' || phenotype.onset == 'HP:0003593'" value="HP:0011463">to childhood (1 to 5 years)</option>
+                      <option *ngIf="phenotype.onset == 'HP:0030674' || phenotype.onset == 'HP:0003577' || phenotype.onset == 'HP:0003623' || phenotype.onset == 'HP:0003593' || phenotype.onset == 'HP:0011463'" value="HP:0003621">to juvenile (5 to 15 years)</option>
+                      <option *ngIf="phenotype.onset == 'HP:0030674' || phenotype.onset == 'HP:0003577' || phenotype.onset == 'HP:0003623' || phenotype.onset == 'HP:0003593' || phenotype.onset == 'HP:0011463' || phenotype.onset == 'HP:0003621'" value="HP:0003581">to adult (16 years or later)</option>
                     </select>
                   </div>
                 </div>
@@ -504,7 +537,7 @@
 
           <ul class="list-group">
             <li class="list-group-item" *ngFor="let suggestedOnset of suggestedOnsets">
-              <a class="suggested-onset" (click)="applyOnset(suggestedOnset.hpo, suggestedOnset.specificHPO)" style="cursor: pointer">
+              <a class="suggested-onset" (click)="applyOnset(suggestedOnset.hpo, '-1', suggestedOnset.specificHPO)" style="cursor: pointer">
                 {{suggestedOnset.name}}
               </a>
             </li>
@@ -514,7 +547,7 @@
 
           <h4 *ngIf="suggestedOnsets.length > 0">All onsets</h4>
 
-          <select class="form-control" (change)="applyAllOnset($event.target.value)" style="color:black">
+          <select class="form-control" (change)="applyAllOnset($event.target.value)" style="color:black" [(ngModel)]="applyAllOnsetFrom">
             <option value="-1">Select…</option>
             <option value="HP:0030674">Antenatal (before birth)</option>
             <option value="HP:0030674|HP:0011460">- Embryonal (up to 8 weeks of gestation)</option>
@@ -528,6 +561,33 @@
             <option value="HP:0003581|HP:0011462">- Young adult (16 to 40 years)</option>
             <option value="HP:0003581|HP:0003596">- Middle age (40 to 60 years)</option>
             <option value="HP:0003581|HP:0003584">- Late (after 60 years)</option>
+          </select>
+
+          <button class="btn btn-secondary btn-sm" (click)="applyAllOnsetRange = true" *ngIf="!applyAllOnsetRange && applyAllOnsetFrom != 'HP:0003581' && applyAllOnsetFrom != 'HP:0003581|HP:0003584' && applyAllOnsetFrom != '-1'" style="margin-top:10px">Range…</button>
+
+          <select class="form-control" (change)="applyAllOnsetTo($event.target.value)" style="color:black; margin-top:10px" *ngIf="applyAllOnsetRange" [(ngModel)]="applyAllOnsetToVar">
+            <option value="-1">Select…</option>
+            <option *ngIf="applyAllOnsetFrom == 'HP:0030674|HP:0011460'" disabled>to antenatal (before birth)</option>
+            <option *ngIf="applyAllOnsetFrom == 'HP:0030674|HP:0011460'" value="HP:0030674|HP:9999990">- to fetal (after 8 weeks of gestation)</option>
+            <option *ngIf="applyAllOnsetFrom.startsWith('HP:0030674')" value="HP:0003577">to congenital (at birth)</option>
+            <option *ngIf="applyAllOnsetFrom.startsWith('HP:0030674') || applyAllOnsetFrom == 'HP:0003577'" value="HP:0003623">to neonatal (0 to 28 days)</option>
+            <option *ngIf="applyAllOnsetFrom.startsWith('HP:0030674') || applyAllOnsetFrom == 'HP:0003577' || applyAllOnsetFrom == 'HP:0003623'" value="HP:0003593">to infantile (28 days to 1 year)</option>
+            <option *ngIf="applyAllOnsetFrom.startsWith('HP:0030674') || applyAllOnsetFrom == 'HP:0003577' || applyAllOnsetFrom == 'HP:0003623' || applyAllOnsetFrom == 'HP:0003593'" value="HP:0011463">to childhood (1 to 5 years)</option>
+            <option *ngIf="applyAllOnsetFrom.startsWith('HP:0030674') || applyAllOnsetFrom == 'HP:0003577' || applyAllOnsetFrom == 'HP:0003623' || applyAllOnsetFrom == 'HP:0003593' || applyAllOnsetFrom == 'HP:0011463'" value="HP:0003621">to juvenile (5 to 15 years)</option>
+            <option *ngIf="applyAllOnsetFrom.startsWith('HP:0030674') || applyAllOnsetFrom == 'HP:0003577' || applyAllOnsetFrom == 'HP:0003623' || applyAllOnsetFrom == 'HP:0003593' || applyAllOnsetFrom == 'HP:0011463' || applyAllOnsetFrom == 'HP:0003621'" value="HP:0003581">to adult (16 years or later)</option>
+            <option *ngIf="applyAllOnsetFrom == 'HP:0003581|HP:0011462' || applyAllOnsetFrom == 'HP:0003581|HP:0003596'" disabled>to adult (16 years or later)</option>
+            <option *ngIf="applyAllOnsetFrom == 'HP:0030674' || applyAllOnsetFrom == 'HP:0003577' || applyAllOnsetFrom == 'HP:0003623' || applyAllOnsetFrom == 'HP:0003593' || applyAllOnsetFrom == 'HP:0011463' || applyAllOnsetFrom == 'HP:0003621'" value="HP:0003581|HP:0011462">- to young adult (16 to 40 years)</option>
+            <option *ngIf="applyAllOnsetFrom == 'HP:0030674' || applyAllOnsetFrom == 'HP:0003577' || applyAllOnsetFrom == 'HP:0003623' || applyAllOnsetFrom == 'HP:0003593' || applyAllOnsetFrom == 'HP:0011463' || applyAllOnsetFrom == 'HP:0003621'" value="HP:0003581|HP:0003596">- to middle age (40 to 60 years)</option>
+            <option *ngIf="applyAllOnsetFrom == 'HP:0030674' || applyAllOnsetFrom == 'HP:0003577' || applyAllOnsetFrom == 'HP:0003623' || applyAllOnsetFrom == 'HP:0003593' || applyAllOnsetFrom == 'HP:0011463' || applyAllOnsetFrom == 'HP:0003621'" value="HP:0003581|HP:0003584">- to late (after 60 years)</option>
+            <option *ngIf="applyAllOnsetFrom == 'HP:0003581|HP:0011462'" value="HP:0003581|HP:9999991">- to middle age (40 to 60 years)</option>
+            <option *ngIf="applyAllOnsetFrom == 'HP:0003581|HP:0003596'" value="HP:0003581|HP:9999992">- to late (after 60 years)</option>
+            <option *ngIf="applyAllOnsetFrom == 'HP:0003581|HP:0011462'" value="HP:0003581|HP:9999993">- to late (after 60 years)</option>
+            <option *ngIf="applyAllOnsetFrom == 'HP:0030674|HP:0011460'" value="HP:0003581|HP:9999994">- to young adult (16 to 40 years)</option>
+            <option *ngIf="applyAllOnsetFrom == 'HP:0030674|HP:0011460'" value="HP:0003581|HP:9999995">- to middle age (40 to 60 years)</option>
+            <option *ngIf="applyAllOnsetFrom == 'HP:0030674|HP:0011460'" value="HP:0003581|HP:9999996">- to late (after 60 years)</option>
+            <option *ngIf="applyAllOnsetFrom == 'HP:0030674|HP:0011461'" value="HP:0003581|HP:9999997">- to young adult (16 to 40 years)</option>
+            <option *ngIf="applyAllOnsetFrom == 'HP:0030674|HP:0011461'" value="HP:0003581|HP:9999998">- to middle age (40 to 60 years)</option>
+            <option *ngIf="applyAllOnsetFrom == 'HP:0030674|HP:0011461'" value="HP:0003581|HP:9999999">- to late (after 60 years)</option>
           </select>
 
         </tab>

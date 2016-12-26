@@ -138,4 +138,7 @@ export class HomeComponent {
     localStorage.setItem('uaPhenositoryDiseaseDB', diseaseDB);
     this._router.navigate(['/dashboard', '/phenository']);
   }
+  gotoJoinClass() {
+    this._router.navigate(['/dashboard', '/join-class']);
+  }
 }

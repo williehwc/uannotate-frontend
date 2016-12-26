@@ -34,6 +34,7 @@ export class LoginComponent {
       }
       localStorage.setItem('uaToken', data.token);
       localStorage.removeItem('uaAnnotation');
+      localStorage.removeItem('uaCompareTo');
       localStorage.removeItem('uaShareLink');
       localStorage.removeItem('uaMyAnnotationsDisease');
       localStorage.removeItem('uaPhenositoryDisease');
