@@ -383,8 +383,8 @@
                 <i class="fa fa-exclamation-circle" aria-hidden="true" *ngIf="phenotype.citations.length == 0 && markUncitedPhenotypes && annotation.status != 2 && annotation.status != -2" style="float: right;margin-top: 3px; margin-right: 10px" title="No citations"></i>
                 <div class="ok" (click)="setObserved(phenotype.phenotypeID, (phenotype.observed == 1))" title="This phenotype was imported. Click (or edit the phenotype) to confirm that it is correct." *ngIf="phenotype.notOK == 1 && annotation.cloneOf == null"></div>
                 <div class="ok" (click)="setObserved(phenotype.phenotypeID, (phenotype.observed == 1))" title="This phenotype was cloned. Click (or edit the phenotype) to confirm that it is correct." *ngIf="phenotype.notOK == 1 && annotation.cloneOf != null"></div>                <h6 title="{{phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1 && studentLevel">{{phenotype.phenotypeName}}</h6>
-                <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + roundToPercent(phenotype.frequency) + '.png)', 'margin-top' : '-1px'}">{{onsetAbbreviation(phenotype.onset, phenotype.onsetTo)}}</pre>
-                <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + roundToPercent(phenotype.frequencyTo) + '.png)', 'opacity' : (roundToPercent(phenotype.frequencyTo) === -1) ? '0' : '0.5', 'margin-top' : '-1px'}" title="Frequency: {{frequencyDescription(phenotype.frequency, phenotype.frequencyTo)}}&#013;Onset: {{onsetDescription(phenotype.onset, phenotype.onsetTo)}}">{{onsetAbbreviation(phenotype.onset, phenotype.onsetTo)}}</pre>
+                <pre *ngIf="phenotype.observed == 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + roundToPercent(phenotype.frequency) + '.png)', 'margin-top' : '-1px'}">{{onsetAbbreviation(phenotype.onset, phenotype.onsetTo)}}</pre>
+                <pre *ngIf="phenotype.observed == 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + roundToPercent(phenotype.frequencyTo) + '.png)', 'opacity' : (roundToPercent(phenotype.frequencyTo) === -1) ? '0' : '0.5', 'margin-top' : '-1px'}" title="Frequency: {{frequencyDescription(phenotype.frequency, phenotype.frequencyTo)}}&#013;Onset: {{onsetDescription(phenotype.onset, phenotype.onsetTo)}}">{{onsetAbbreviation(phenotype.onset, phenotype.onsetTo)}}</pre>
                 <h6 title="{{phenotype.hpo}} {{phenotype.phenotypeDefinition}}" style="cursor:help; margin-top:3px; margin-left: 85px" *ngIf="phenotype.observed == 1 && profLevel">{{phenotype.phenotypeName}}</h6>
                 <h6 title="{{phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through; margin-top:3px; margin-left: 85px" *ngIf="phenotype.observed == 0 && studentLevel">{{phenotype.phenotypeName}}</h6>
                 <h6 title="{{phenotype.hpo}} {{phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through; margin-top:3px; margin-left: 85px" *ngIf="phenotype.observed == 0 && profLevel">{{phenotype.phenotypeName}}</h6>
@@ -442,7 +442,7 @@
                     </select>
                   </div>
                 </div>
-                <div *ngIf="phenotype.observed == 0" style="margin-top: 15px">
+                <div *ngIf="phenotype.observed == 0" style="margin-top: 22px">
                   This phenotype is not present in <strong>all</strong> patients with this disease.
                 </div>
                 <hr />
