@@ -651,17 +651,19 @@ export class InProgressComponent implements OnInit {
       }
       if (frequency > 1) {
         frequency = 1;
-      } else if (frequency <= 0) {
+      }
+      if (!(frequency > 0 && frequency <= 1)) {
         frequency = -1;
       }
     }
     if (frequencyTo === 0) {
       frequencyTo = prompt('Enter frequency in percentage (1 to 100)');
       frequencyTo = Math.round(frequencyTo) / 100;
-      if (frequency > 1) {
-        frequency = 1;
-      } else if (frequency <= 0) {
-        frequency = -1;
+      if (frequencyTo > 1) {
+        frequencyTo = 1;
+      }
+      if (!(frequencyTo > 0 && frequencyTo <= 1)) {
+        frequencyTo = -1;
       }
     }
     let scope = this;
