@@ -63,6 +63,7 @@ export class InviteComponent {
       if (this.inviteCodes[i].inviteCodeID === inviteCodeID)
         this.inviteCodes.splice(i, 1);
     }
+    this.alerts = [];
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
       'inviteCodeID': inviteCodeID
