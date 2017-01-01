@@ -1,0 +1,49 @@
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="row">
+        <div class="col-lg-12">
+            <h2 class="page-header">
+                Invite colleagues
+            </h2>
+            <ol class="breadcrumb">
+                <li class="active">
+                    <i class="fa fa-info-circle"></i> Invite your colleagues to come help build the Phenository.
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-lg-12">
+          <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true">
+            {{ alert?.msg }}
+          </alert>
+          <p>Users with invite codes can get instant access to professor/researcher accounts. Here, you can generate up to 10 invite codes to send to your colleagues. Please email us at <a href="mailto:{{phenotateEmail}}">{{phenotateEmail}}</a> if you need more.</p>
+          <div class="table-responsive" *ngIf="inviteCodes.length > 0">
+            <table class="table table-hover table-sm">
+              <thead class="thead-inverse">
+                <tr>
+                    <th>Invite code</th>
+                    <th>Date created</th>
+                    <th>Redeemed by</th>
+                    <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let inviteCode of inviteCodes">
+                    <td [ngStyle]="{'text-decoration': (inviteCode.redeemedByName) ? 'line-through' : 'none', 'font-weight': (inviteCode.redeemedByName) ? 'normal' : 'bold'}">{{inviteCode.inviteCode}}</td>
+                    <td>{{inviteCode.dateCreated}}</td>
+                    <td>{{inviteCode.redeemedByName}}<span *ngIf="inviteCode.redeemedByEmail"> &lt;{{inviteCode.redeemedByEmail}}&gt;</span></td>
+                    <td><a style="color: red; cursor: pointer" title="Remove" (click)="removeInviteCode(inviteCode.inviteCodeID)" *ngIf="!inviteCode.redeemedByName"><i class="fa fa-trash-o"></i></a></td>
+                </tr>
+              </tbody>
+            </table>
+            </div>
+          <button type="submit" class="btn btn-primary" (click)="generateInviteCode()">Generate an invite code</button>
+        </div>
+
+    </div>
+
+</div>
