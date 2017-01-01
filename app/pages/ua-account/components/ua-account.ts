@@ -24,6 +24,8 @@ export class AccountComponent {
   showEmailPrefs: boolean = false;
   savedEmailPrefs: boolean = false;
   phenotateEmail: string = 'support-phenotate.org'.replace('-', '@');
+  classes: Array<Object> = [];
+  inviteCode: string;
   constructor(private _http: Http) {
     let scope = this;
     let gotLevelAndEmail = function (data: any) {
@@ -39,6 +41,9 @@ export class AccountComponent {
           scope.emailLike = false;
       }
     };
+    let gotClasses = function (data: any) {
+      scope.classes = data.classes;
+    };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken')
     });
@@ -48,6 +53,13 @@ export class AccountComponent {
         data => gotLevelAndEmail(data),
         err => console.log(err),
         () => console.log('Got level and email')
+      );
+    this._http.post(globals.backendURL + '/restricted/classes/list', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => gotClasses(data),
+        err => console.log(err),
+        () => console.log('Got classes')
       );
   }
   closeAlert(i: number) {
@@ -124,6 +136,41 @@ export class AccountComponent {
       .subscribe(
         data => console.log(data),
         err => console.log(err),
+        () => console.log('Changed email prefs')
+      );
+  }
+  accountUpgrade() {
+    let scope = this;
+    let finishUpgradeAccount = function (data:any) {
+      scope.alerts.push({
+        type: 'success',
+        msg: 'Account upgraded; reloading app…',
+        closable: true
+      });
+      location.reload(true);
+    };
+    this.alerts = [];
+    if (!this.inviteCode) {
+      this.alerts.push({
+        type: 'danger',
+        msg: 'No invite code entered',
+        closable: true
+      });
+      return;
+    }
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'inviteCode': this.inviteCode
+    });
+    this._http.post(globals.backendURL + '/restricted/student/upgrade-account', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishUpgradeAccount(data),
+        err => this.alerts.push({
+          type: 'danger',
+          msg: 'Invalid invite code. It may have already been used.',
+          closable: true
+        }),
         () => console.log('Changed email prefs')
       );
   }

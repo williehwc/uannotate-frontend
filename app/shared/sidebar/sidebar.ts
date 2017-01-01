@@ -18,7 +18,7 @@ export class SidebarComponent {
 	studentLevel: boolean;
   profLevel: boolean;
 	showMenu: string = '';
-  classes: Array<Object> = [];
+  classes: Array<any> = [];
 	eventCalled() {
 		this.isActive = !this.isActive;
 	}
@@ -48,6 +48,9 @@ export class SidebarComponent {
         err => console.log(err),
         () => console.log('Got classes')
       );
+  }
+  gotoFirstClass() {
+    this._router.navigate(['/dashboard', '/class-student', this.classes[0].id]);
   }
   constructor( private _router: Router, private _http: Http ) {
     let scope = this;

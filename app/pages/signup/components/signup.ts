@@ -20,6 +20,8 @@ export class SignupComponent {
 	errorBlank: boolean;
 	errorPasswordMatch: boolean;
 	errorEmailTaken: boolean;
+	errorInvalidCode: boolean;
+	inviteJoinCode: string;
 	constructor( private _router: Router, private _http: Http) {}
 	gotoLogin() {
 		this._router.navigate(['/']);
@@ -27,8 +29,11 @@ export class SignupComponent {
 	gotoDashboard() {
 		let scope = this;
 		let finishSignup = function (data: any) {
-			if (!data.loginValid) {
-				scope.errorEmailTaken = true;
+			if (!data.loginValid && data.invalidInviteJoinCode) {
+				scope.errorInvalidCode = true;
+				return;
+			} else if (!data.loginValid) {
+  			scope.errorEmailTaken = true;
 				return;
 			}
       localStorage.setItem('uaToken', data.token);
@@ -38,6 +43,7 @@ export class SignupComponent {
 		this.errorBlank = false;
 		this.errorPasswordMatch = false;
 		this.errorEmailTaken = false;
+		this.errorInvalidCode = false;
 		if (!(this.name && this.email && this.password && this.confirmPassword)) {
 			this.errorBlank = true;
 			return;
@@ -49,7 +55,8 @@ export class SignupComponent {
 		let body = JSON.stringify({
 			'name': this.name,
 			'email': this.email.toLowerCase(),
-			'password': this.password
+			'password': this.password,
+			'inviteJoinCode': this.inviteJoinCode
 		});
 		this._http.post(globals.backendURL + '/signup', body, globals.options)
 			.map(res => res.json())

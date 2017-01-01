@@ -16,6 +16,7 @@ import {HelpProfComponent} from '../../../pages/ua-help-prof/components/ua-help-
 import {AccountComponent} from '../../../pages/ua-account/components/ua-account';
 import {PhenositoryReloadComponent} from '../../../pages/ua-phenository-reload/components/ua-phenository-reload';
 import {SubmitComponent} from '../../../pages/ua-submit/components/ua-submit';
+import {InviteComponent} from '../../../pages/ua-invite/components/ua-invite';
 
 import {TopNavComponent} from '../../../shared/topnav/topnav';
 import {SidebarComponent} from '../../../shared/sidebar/sidebar';
@@ -45,7 +46,8 @@ import {SidebarComponent} from '../../../shared/sidebar/sidebar';
   { path: '/help-prof', component: HelpProfComponent},
   { path: '/account', component: AccountComponent},
   { path: '/phenository-reload', component: PhenositoryReloadComponent},
-  { path: '/submit/:id', component: SubmitComponent}
+  { path: '/submit/:id', component: SubmitComponent},
+  { path: '/invite', component: InviteComponent}
 ])
 
 export class DashboardComponent { }

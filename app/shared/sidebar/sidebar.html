@@ -22,9 +22,10 @@
           <span style="display: inline-block;width: 20px;"><i class="fa fa-cloud" aria-hidden="true"></i></span> Phenository
         </a>
         <!-- dropDown item -->
-        <div class="nested-menu">
+        <div class="nested-menu" *ngIf="profLevel || classes.length > 1">
             <a class="list-group-item" (click)="addExpandClass('pages')">
-                <span><span style="display: inline-block;width: 20px;"><i class="fa fa-users"></i></span> &#8201;My classes &#9662;</span>
+                <span *ngIf="studentLevel"><span style="display: inline-block;width: 20px;"><i class="fa fa-files-o"></i></span> Exercises &#9662;</span>
+                <span *ngIf="profLevel"><span style="display: inline-block;width: 20px;"><i class="fa fa-users"></i></span> My classes &#9662;</span>
             </a>
             <li class="nested" [ngClass]="{'expand' : showMenu === 'pages' }">
                 <ul class="submenu" *ngFor="let class of classes">
@@ -35,6 +36,9 @@
                 </ul>
             </li>
         </div>
+        <a *ngIf="studentLevel && classes.length == 1" (click)="gotoFirstClass()" class="list-group-item" style="cursor: pointer">
+          <span style="display: inline-block;width: 20px;"><i class="fa fa-files-o"></i></span> Exercises
+        </a>
         <a *ngIf="studentLevel" [routerLink]="['/dashboard', '/join-class']" class="list-group-item">
             <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-plus"></i></span> Join class
         </a>
@@ -43,6 +47,9 @@
         </a>
         <a *ngIf="profLevel" [routerLink]="['/dashboard', '/new-class']" class="list-group-item">
           <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-plus"></i></span> New class
+        </a>
+        <a *ngIf="profLevel" [routerLink]="['/dashboard', '/invite']" class="list-group-item">
+          <span style="display: inline-block;width: 20px;"><i class="fa fa-share" aria-hidden="true"></i></span> Invite colleagues
         </a>
         <a *ngIf="profLevel" [routerLink]="['/dashboard', '/help-prof']" class="list-group-item">
           <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-question"></i></span> Help

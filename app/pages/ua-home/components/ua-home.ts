@@ -21,6 +21,8 @@ export class HomeComponent {
   dashboard: any;
   alerts: Array<Object> = [];
   phenotateEmail: string = 'support-phenotate.org'.replace('-', '@');
+  expandJumbotron: boolean = false;
+  classes: Array<any> = [];
   constructor(private _router: Router, private _http: Http) {
     let scope = this;
     if (localStorage.getItem('uaAnnotationLink') !== null) {
@@ -40,16 +42,9 @@ export class HomeComponent {
       if (!scope.name)
         scope.name = data.name;
     };
-    let body = JSON.stringify({
-      'token': localStorage.getItem('uaToken')
-    });
-    this._http.post(globals.backendURL + '/restricted/user', body, globals.options)
-      .map(res => res.json())
-      .subscribe(
-        data => gotName(data),
-        err => console.log(err),
-        () => console.log('Got name')
-      );
+    let gotClasses = function (data: any) {
+      scope.classes = data.classes;
+    };
     let gotLevel = function (data: any) {
       if (data.level === 0) {
         scope.studentLevel = true;
@@ -60,9 +55,23 @@ export class HomeComponent {
       }
       scope.loadDashboard();
     };
-    body = JSON.stringify({
+    let body = JSON.stringify({
       'token': localStorage.getItem('uaToken')
     });
+    this._http.post(globals.backendURL + '/restricted/user', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => gotName(data),
+        err => console.log(err),
+        () => console.log('Got name')
+      );
+    this._http.post(globals.backendURL + '/restricted/classes/list', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => gotClasses(data),
+        err => console.log(err),
+        () => console.log('Got classes')
+      );
     this._http.post(globals.backendURL + '/restricted/user', body, globals.options)
       .map(res => res.json())
       .subscribe(
@@ -78,7 +87,8 @@ export class HomeComponent {
     });
     let finishLoadDashboard = function (data: any) {
       scope.dashboard = data;
-      console.log(scope.dashboard);
+      if (scope.profLevel && scope.dashboard.cloneAnnotations.length === 0 && scope.dashboard.exercises.length === 0)
+        scope.expandJumbotron = true;
     };
     if (this.studentLevel) {
       this._http.post(globals.backendURL + '/restricted/student/dashboard', body, globals.options)
@@ -134,11 +144,19 @@ export class HomeComponent {
     this._router.navigate(['/dashboard', '/in-progress', annotationID]);
   }
   gotoPhenository(diseaseDB: string, diseaseName: string) {
-    localStorage.setItem('uaPhenositoryDisease', diseaseName);
-    localStorage.setItem('uaPhenositoryDiseaseDB', diseaseDB);
+    if (diseaseName)
+      localStorage.setItem('uaPhenositoryDisease', diseaseName);
+    if (diseaseDB)
+      localStorage.setItem('uaPhenositoryDiseaseDB', diseaseDB);
     this._router.navigate(['/dashboard', '/phenository']);
   }
   gotoJoinClass() {
     this._router.navigate(['/dashboard', '/join-class']);
+  }
+  gotoMyAnnotations() {
+    this._router.navigate(['/dashboard', '/my-annotations']);
+  }
+  gotoAccount() {
+    this._router.navigate(['/dashboard', '/account']);
   }
 }
