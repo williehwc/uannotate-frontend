@@ -17,6 +17,7 @@ import {DashboardComponent} from '../dashboard/components/dashboard';
 @Routes([
     { path: '/share/:link', component: LoginComponent },
     { path: '/', component: LoginComponent },
+    { path: '/signup/:invite', component: SignupComponent },
     { path: '/signup', component: SignupComponent },
     { path: 'dashboard', component: DashboardComponent }
 ])

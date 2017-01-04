@@ -1,5 +1,6 @@
-import {Component} from '@angular/core';
-import {AlertComponent} from 'ng2-bootstrap/ng2-bootstrap';
+import {Component, ViewChild} from '@angular/core';
+import {AlertComponent, MODAL_DIRECTVES, BS_VIEW_PROVIDERS} from 'ng2-bootstrap/ng2-bootstrap';
+import {ModalDirective} from 'ng2-bootstrap/components/modal/modal.component';
 import {Http} from '@angular/http';
 import globals = require('../../../globals');
 import 'rxjs/Rx';
@@ -8,7 +9,8 @@ import 'rxjs/Rx';
   moduleId: module.id,
 	selector: 'ua-invite',
 	templateUrl: 'ua-invite.html',
-  directives: [[AlertComponent]]
+  directives: [[AlertComponent, MODAL_DIRECTVES]],
+  viewProviders: [BS_VIEW_PROVIDERS]
 })
 
 
@@ -16,6 +18,12 @@ export class InviteComponent {
   alerts: Array<Object> = [];
   phenotateEmail: string = 'support-phenotate.org'.replace('-', '@');
   inviteCodes: Array<any> = [];
+  inviteCode: string = null;
+  inviteCodeID: number = null;
+  inviteLinkCopied: boolean = false;
+
+  @ViewChild('lgModal') public lgModal:ModalDirective;
+
   constructor(private _http: Http) {
     let scope = this;
     let finishListInviteCodes = function (data:any) {
@@ -36,11 +44,14 @@ export class InviteComponent {
     let scope = this;
     let finishGenerateInviteCode = function (data:any) {
       scope.inviteCodes.push(data);
-      scope.alerts.push({
+      /*scope.alerts.push({
         type: 'success',
         msg: 'Share this invite code with a colleague: ' + data.inviteCode,
         closable: true
-      });
+      });*/
+      scope.inviteCode = data.inviteCode;
+      scope.inviteCodeID = data.inviteCodeID;
+      scope.lgModal.show();
     };
     this.alerts = [];
     let body = JSON.stringify({
@@ -75,5 +86,9 @@ export class InviteComponent {
         err => console.log(err),
         () => console.log('Generated invite code')
       );
+  }
+  assignInviteCode(inviteCode: string, inviteCodeID: number) {
+    this.inviteCode = inviteCode;
+    this.inviteCodeID = inviteCodeID;
   }
 }

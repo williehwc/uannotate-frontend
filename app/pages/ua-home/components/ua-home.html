@@ -3,8 +3,9 @@
     <!-- Jumbotron -->
     <div class="jumbotron" *ngIf="studentLevel && classes.length == 0" style="background: linear-gradient(to bottom, #014f8e 0%,#0275d8 100%); color:white;">
       <h1 style="margin-bottom: 15px">Welcome to Phenotate</h1>
-      <p style="cursor: pointer" (click)="gotoJoinClass()"><button class="btn btn-secondary" style="margin-right: 10px; width: 145px">Join a class</button>if you're a student.</p>
-      <p style="cursor: pointer" (click)="gotoAccount()"><button class="btn btn-secondary" style="margin-right: 10px; width: 145px">Upgrade account</button>if you're a professor/researcher.</p>
+      <p style="cursor: pointer; display: inline-block;" (click)="gotoJoinClass()"><button class="btn btn-secondary" style="margin-right: 10px; width: 145px">Join a class</button>if you're a student.</p>
+      <br />
+      <p style="cursor: pointer; display: inline-block;" (click)="gotoAccount()"><button class="btn btn-secondary" style="margin-right: 10px; width: 145px">Upgrade account</button>if you're a professor/researcher.</p>
     </div>
     
     <div class="jumbotron" *ngIf="studentLevel && classes.length > 0" style="background: linear-gradient(to bottom, #014f8e 0%,#0275d8 100%); color:white;">
@@ -83,8 +84,9 @@
   
   <div class="jumbotron" *ngIf="expandJumbotron" style="background: linear-gradient(to bottom, #014f8e 0%,#0275d8 100%); color:white;">
     <h1 style="margin-bottom: 15px">Getting started</h1>
-    <p style="cursor: pointer" (click)="gotoPhenository(null, null)"><button class="btn btn-secondary" style="margin-right: 10px; width: 160px"><i class="fa fa-cloud" aria-hidden="true"></i> Phenository</button>Browse, recommend, and clone annotations</p>
-    <p style="cursor: pointer" (click)="gotoMyAnnotations()"><button class="btn btn-secondary" style="margin-right: 10px; width: 160px"><i class="fa fa-fw fa-folder" aria-hidden="true"></i> My annotations</button>Create an annotation for any disease</p>
+    <p style="cursor: pointer; display: inline-block;" (click)="gotoPhenository(null, null)"><button class="btn btn-secondary" style="margin-right: 10px; width: 160px"><i class="fa fa-cloud" aria-hidden="true"></i> Phenository</button>Browse, recommend, and clone annotations</p>
+    <br />
+    <p style="cursor: pointer; display: inline-block;" (click)="gotoMyAnnotations()"><button class="btn btn-secondary" style="margin-right: 10px; width: 160px"><i class="fa fa-fw fa-folder" aria-hidden="true"></i> My annotations</button>Create an annotation for any disease</p>
   </div>
 
     <div class="row" *ngIf="profLevel && dashboard">

@@ -1,5 +1,29 @@
 <div class="container-fluid">
 
+    <div bsModal #lgModal="bs-modal" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <br />
+          <div class="modal-header">
+            <h4 class="modal-title">Share this invite code: {{inviteCode}}</h4>
+          </div>
+          <div class="modal-body">
+            This link automatically fills in the invite code during registration.
+            <br />
+            Click on the address to copy it to the clipboard.
+            <form role="form" style="margin-top: 10px;">
+              <fieldset class="form-group">
+                <input class="form-control" [(ngModel)]="'http://app.phenotate.org/signup/' + inviteCode" onfocus="this.select();document.execCommand('copy');" (click)="inviteLinkCopied = true" readonly>
+              </fieldset>
+              <button class="btn btn-primary" (click)="lgModal.hide();">Close</button>
+              <button class="btn btn-danger" (click)="lgModal.hide();removeInviteCode(inviteCodeID)">Remove</button>
+              <span *ngIf="inviteLinkCopied" style="margin-left: 10px;"><i class="fa fa-check" aria-hidden="true"></i> Copied to clipboard</span>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Page Heading -->
     <div class="row">
         <div class="col-lg-12">
@@ -29,15 +53,14 @@
                     <th>Invite code</th>
                     <th>Date created</th>
                     <th>Redeemed by</th>
-                    <th></th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let inviteCode of inviteCodes">
-                    <td [ngStyle]="{'text-decoration': (inviteCode.redeemedByName) ? 'line-through' : 'none', 'font-weight': (inviteCode.redeemedByName) ? 'normal' : 'bold'}">{{inviteCode.inviteCode}}</td>
+                    <td *ngIf="inviteCode.redeemedByName" style="text-decoration: line-through">{{inviteCode.inviteCode}}</td>
+                    <td *ngIf="!inviteCode.redeemedByName" style="font-weight: bold"><a style="cursor: pointer" (click)="lgModal.show(); assignInviteCode(inviteCode.inviteCode, inviteCode.inviteCodeID)">{{inviteCode.inviteCode}}</a></td>
                     <td>{{inviteCode.dateCreated}}</td>
                     <td>{{inviteCode.redeemedByName}}<span *ngIf="inviteCode.redeemedByEmail"> &lt;{{inviteCode.redeemedByEmail}}&gt;</span></td>
-                    <td><a style="color: red; cursor: pointer" title="Remove" (click)="removeInviteCode(inviteCode.inviteCodeID)" *ngIf="!inviteCode.redeemedByName"><i class="fa fa-trash-o"></i></a></td>
                 </tr>
               </tbody>
             </table>

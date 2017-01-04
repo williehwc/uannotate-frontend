@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {Router, ROUTER_DIRECTIVES } from '@angular/router';
+import {Router, ROUTER_DIRECTIVES, RouteSegment } from '@angular/router';
 import {Http} from '@angular/http';
 import {Cookie} from 'ng2-cookies/ng2-cookies';
 import globals = require('../../../globals');
@@ -23,6 +23,11 @@ export class SignupComponent {
 	errorInvalidCode: boolean;
 	inviteJoinCode: string;
 	constructor( private _router: Router, private _http: Http) {}
+	routerOnActivate(curr: RouteSegment) {
+  	if (curr.getParam('invite')) {
+    	this.inviteJoinCode = curr.getParam('invite');
+    }
+  }
 	gotoLogin() {
 		this._router.navigate(['/']);
 	}
