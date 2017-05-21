@@ -36,6 +36,7 @@ export class InProgressComponent implements OnInit {
   applyAllOnsetFrom: string = '-1';
   applyAllOnsetToVar: string = '-1';
   applyAllOnsetRange: boolean = false;
+  unsureOnly: boolean = false;
 
   @ViewChild('browser') public browser:ModalDirective;
 
@@ -814,8 +815,12 @@ export class InProgressComponent implements OnInit {
   gotoComparator() {
     this._router.navigate(['/dashboard', '/comparator']);
   }
-  lookUpDisease(diseaseName: string) {
-    window.open(globals.omimURL + diseaseName.substr(0, diseaseName.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
+  lookUpDisease(diseaseDB: string, diseaseName: string) {
+    if (diseaseDB === 'omim') {
+      window.open(globals.omimURL + diseaseName.substr(0, diseaseName.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
+    } else if (diseaseDB === 'ordo') {
+      window.open(globals.ordoURL + diseaseName.substr(0, diseaseName.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
+    }
   }
   copyToClipboard(string: string) {
     window.prompt('Copy to clipboard: Ctrl+C or Cmd+C', string);
@@ -999,6 +1004,8 @@ export class InProgressComponent implements OnInit {
       }
     };
     for (let i = 0; i < this.annotation.phenotypes.length; i++) {
+      if (this.annotation.phenotypes[i].onset !== '-1' && this.unsureOnly)
+        continue;
   		this.annotation.phenotypes[i].specificOnset = specificHPO;
   		let body = JSON.stringify({
     		'token': localStorage.getItem('uaToken'),

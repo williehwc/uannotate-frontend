@@ -18,6 +18,7 @@ export class MyAnnotationsComponent implements OnInit {
   following: boolean;
   diseaseSelected: boolean = false;
   newAnnotationDisease: string;
+  newAnnotationDiseaseDB: string = 'ordo';
   typeAheadBox: string;
   alerts: Array<Object> = [];
   constructor( private _router: Router, private _http: Http) {
@@ -72,7 +73,7 @@ export class MyAnnotationsComponent implements OnInit {
       source: {
         diseases: {
           ajax: {
-            url: globals.backendURL + '/solr/omim/' + '{{query}}',
+            url: globals.backendURL + '/solr/ordo/{{query}}',
             path: 'matches'
           }
         }
@@ -80,11 +81,39 @@ export class MyAnnotationsComponent implements OnInit {
       callback: {
         onClickAfter: function (node: any, a: any, item: any, event: any) {
           scope.newAnnotationDisease = item.display;
+          scope.newAnnotationDiseaseDB = 'ordo';
           localStorage.setItem('uaMyAnnotationsDisease', item.display);
+          localStorage.setItem('uaMyAnnotationsDiseaseDB', scope.newAnnotationDiseaseDB);
           scope.selectDisease();
         }
       }
     });
+    jQuery('.js-typeahead-omim').typeahead({
+      dynamic: true,
+      cancelButton: false,
+      filter: false,
+      source: {
+        diseases: {
+          ajax: {
+            url: globals.backendURL + '/solr/omim/{{query}}',
+            path: 'matches'
+          }
+        }
+      },
+      callback: {
+        onClickAfter: function (node: any, a: any, item: any, event: any) {
+          scope.newAnnotationDisease = item.display;
+          scope.newAnnotationDiseaseDB = 'omim';
+          localStorage.setItem('uaMyAnnotationsDisease', item.display);
+          localStorage.setItem('uaMyAnnotationsDiseaseDB', scope.newAnnotationDiseaseDB);
+          scope.selectDisease();
+        }
+      }
+    });
+    if (localStorage.getItem('uaMyAnnotationsDiseaseDB') !== null) {
+      this.newAnnotationDiseaseDB = localStorage.getItem('uaMyAnnotationsDiseaseDB');
+      this.setDB(this.newAnnotationDiseaseDB);
+    }
     // Restore right panel (list of annotations pertaining to selected disease)
     if (localStorage.getItem('uaMyAnnotationsDisease') !== null) {
       this.newAnnotationDisease = localStorage.getItem('uaMyAnnotationsDisease');
@@ -110,8 +139,13 @@ export class MyAnnotationsComponent implements OnInit {
     localStorage.removeItem('uaMyAnnotationsDisease');
   }
   lookUpDisease() {
-    window.open(globals.omimURL + this.newAnnotationDisease.substr(0,
+    if (this.newAnnotationDiseaseDB === 'omim') {
+      window.open(globals.omimURL + this.newAnnotationDisease.substr(0,
         this.newAnnotationDisease.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
+    } else if (this.newAnnotationDiseaseDB === 'ordo') {
+      window.open(globals.ordoURL + this.newAnnotationDisease.substr(0,
+        this.newAnnotationDisease.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
+    }
   }
   listDiseaseAnnotations() {
     let gotAnnotations = function (data:any) {
@@ -137,7 +171,7 @@ export class MyAnnotationsComponent implements OnInit {
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
       'dbDisease': this.newAnnotationDisease.substr(0, this.newAnnotationDisease.indexOf(' ')).replace(/[^0-9]/g, ''),
-      'vocabulary': 'omim' // ORPHA TODO
+      'vocabulary': this.newAnnotationDiseaseDB
     });
     this._http.post(globals.backendURL + '/restricted/phenository/prof/annotations', body, globals.options)
       .map(res => res.json())
@@ -169,7 +203,7 @@ export class MyAnnotationsComponent implements OnInit {
       let body = JSON.stringify({
         'token': localStorage.getItem('uaToken'),
         'diseaseName': diseaseName,
-        'vocabulary': 'omim' //ORPHA TODO
+        'vocabulary': this.newAnnotationDiseaseDB
       });
       this._http.post(globals.backendURL + '/restricted/annotations/prof/new-annotation', body, globals.options)
         .map(res => res.json())
@@ -189,7 +223,7 @@ export class MyAnnotationsComponent implements OnInit {
       'token': localStorage.getItem('uaToken'),
       'dbDisease': this.newAnnotationDisease.substr(0,
         this.newAnnotationDisease.indexOf(' ')).replace(/[^0-9]/g, ''),
-      'vocabulary': 'omim'
+      'vocabulary': this.newAnnotationDiseaseDB
     });
     this._http.post(globals.backendURL + '/restricted/phenository/prof/following', body, globals.options)
       .map(res => res.json())
@@ -208,7 +242,7 @@ export class MyAnnotationsComponent implements OnInit {
       'token': localStorage.getItem('uaToken'),
       'dbDisease': this.newAnnotationDisease.substr(0,
         this.newAnnotationDisease.indexOf(' ')).replace(/[^0-9]/g, ''),
-      'vocabulary': 'omim',
+      'vocabulary': this.newAnnotationDiseaseDB,
       'follow': !this.following
     });
     this._http.post(globals.backendURL + '/restricted/phenository/prof/follow', body, globals.options)
@@ -218,5 +252,17 @@ export class MyAnnotationsComponent implements OnInit {
         err => console.log(err),
         () => console.log('Got following')
       );
+  }
+  setDB(db:string) {
+    this.newAnnotationDiseaseDB = db;
+    localStorage.setItem('uaMyAnnotationsDiseaseDB', this.newAnnotationDiseaseDB);
+    if (this.newAnnotationDiseaseDB === 'ordo') {
+      jQuery('#omim-form').hide();
+      jQuery('#ordo-form').show();
+    }
+    if (this.newAnnotationDiseaseDB === 'omim') {
+      jQuery('#omim-form').show();
+      jQuery('#ordo-form').hide();
+    }
   }
 }

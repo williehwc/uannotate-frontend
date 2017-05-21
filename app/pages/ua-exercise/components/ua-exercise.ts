@@ -26,6 +26,7 @@ export class ExerciseComponent implements OnInit {
   dateEnd: Date = null;
   showNumbers: boolean = false;
   dragging: boolean = false;
+  diseaseDB: string = 'ordo';
   routerOnActivate(curr: RouteSegment) {
     let scope = this;
     this.curr = curr;
@@ -65,7 +66,6 @@ export class ExerciseComponent implements OnInit {
   }
   ngOnInit():any {
     let scope = this;
-    //ORPHA TODO
     jQuery('.js-typeahead').typeahead({
       dynamic: true,
       cancelButton: false,
@@ -73,14 +73,32 @@ export class ExerciseComponent implements OnInit {
       source: {
         diseases: {
           ajax: {
-            url: globals.backendURL + '/solr/omim/' + '{{query}}',
+            url: globals.backendURL + '/solr/ordo/{{query}}',
             path: 'matches'
           }
         }
       },
       callback: {
         onClickAfter: function (node: any, a: any, item: any, event: any) {
-          scope.addProblem(item.display);
+          scope.addProblem(item.display, 'ordo');
+        }
+      }
+    });
+    jQuery('.js-typeahead-omim').typeahead({
+      dynamic: true,
+      cancelButton: false,
+      filter: false,
+      source: {
+        diseases: {
+          ajax: {
+            url: globals.backendURL + '/solr/omim/{{query}}',
+            path: 'matches'
+          }
+        }
+      },
+      callback: {
+        onClickAfter: function (node: any, a: any, item: any, event: any) {
+          scope.addProblem(item.display, 'omim');
         }
       }
     });
@@ -102,7 +120,7 @@ export class ExerciseComponent implements OnInit {
       }
     });
   }
-  addProblem(diseaseName: string) {
+  addProblem(diseaseName: string, diseaseDB: string) {
     let scope = this;
     let finishAddProblem = function(data: any) {
       scope.exercise.problems.push(data);
@@ -113,7 +131,7 @@ export class ExerciseComponent implements OnInit {
       'token': localStorage.getItem('uaToken'),
       'exerciseID': parseInt(this.exercise.exerciseID),
       'diseaseName': diseaseName,
-      'vocabulary': 'omim' //ORPHO TODO
+      'vocabulary': diseaseDB
     });
     this._http.post(globals.backendURL + '/restricted/exercise/prof/problem/add', body, globals.options)
       .map(res => res.json())
@@ -214,8 +232,12 @@ export class ExerciseComponent implements OnInit {
     localStorage.setItem('uaPhenositoryDiseaseDB', diseaseDB);
     this._router.navigate(['/dashboard', '/phenository']);
   }
-  lookUpDisease(diseaseName: string) {
-    window.open(globals.omimURL + diseaseName.substr(0, diseaseName.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
+  lookUpDisease(diseaseDB: string, diseaseName: string) {
+    if (diseaseDB === 'omim') {
+      window.open(globals.omimURL + diseaseName.substr(0, diseaseName.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
+    } else if (diseaseDB === 'ordo') {
+      window.open(globals.ordoURL + diseaseName.substr(0, diseaseName.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
+    }
   }
   removeProblem(problemID: number) {
     let scope = this;
@@ -389,7 +411,7 @@ export class ExerciseComponent implements OnInit {
         () => console.log('End now')
       );
   }
-  createAnnotation(diseaseName: string) {
+  createAnnotation(diseaseName: string, diseaseDB:string) {
     let scope = this;
     this.alerts = [];
     let finishCreateAnnotation = function (data:any) {
@@ -407,7 +429,7 @@ export class ExerciseComponent implements OnInit {
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
       'diseaseName': diseaseName,
-      'vocabulary': 'omim' //ORPHA TODO
+      'vocabulary': diseaseDB //ORPHA TODO
     });
     this._http.post(globals.backendURL + '/restricted/annotations/prof/new-annotation', body, globals.options)
       .map(res => res.json())
@@ -463,5 +485,15 @@ export class ExerciseComponent implements OnInit {
       }
     }
   }
-
+  setDB(db:string) {
+    this.diseaseDB = db;
+    if (this.diseaseDB === 'ordo') {
+      jQuery('#omim-form').hide();
+      jQuery('#ordo-form').show();
+    }
+    if (this.diseaseDB === 'omim') {
+      jQuery('#omim-form').show();
+      jQuery('#ordo-form').hide();
+    }
+  }
 }

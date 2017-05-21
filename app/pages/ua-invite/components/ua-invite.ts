@@ -54,6 +54,7 @@ export class InviteComponent {
       scope.lgModal.show();
     };
     this.alerts = [];
+    this.inviteLinkCopied = false;
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken')
     });
@@ -90,5 +91,6 @@ export class InviteComponent {
   assignInviteCode(inviteCode: string, inviteCodeID: number) {
     this.inviteCode = inviteCode;
     this.inviteCodeID = inviteCodeID;
+    this.inviteLinkCopied = false;
   }
 }

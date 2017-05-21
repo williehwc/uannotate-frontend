@@ -25,7 +25,7 @@ export class PhenositoryComponent {
   diseaseOfTheDay: string;
   diseaseName: string = null;
   diseaseOfTheDayDB: string = 'omim';
-  diseaseNameDB: string = 'omim'; // ORPHA TODO
+  diseaseNameDB: string;
   noDiseaseOfTheDay: boolean = false;
   alerts: Array<Object> = [];
   constructor( private _router: Router, private _http: Http) {
@@ -126,12 +126,14 @@ export class PhenositoryComponent {
   listDiseaseAnnotations() {
     let gotAnnotations = function (data:any) {
       let tableBody = '';
+      let adminIcon = ' <i class="fa fa-shield" title="Phenotate administrator"></i>';
       for (let i = 0; i < data.annotations.length; i++) {
         tableBody += '<tr style="cursor: pointer" onclick="localStorage.setItem(\'uaAnnotationTemp\',\'' +
           data.annotations[i].annotationID + '\')">';
         tableBody += '<td>' + data.annotations[i].annotationID + '</td>';
         tableBody += '<td>' + ((data.annotations[i].cloneOf) ? data.annotations[i].cloneOf : '–' ) + '</td>';
-        tableBody += '<td>' + data.annotations[i].author + '</td>';
+        tableBody += '<td>' + data.annotations[i].author;
+        tableBody += ((data.annotations[i].authorAdmin) ? adminIcon : '' ) + '</td>';
         tableBody += '<td>' + data.annotations[i].numClones + '</td>';
         tableBody += '<td>' + data.annotations[i].numLikes + '</td>';
         tableBody += '<td>' + data.annotations[i].date + '</td>';
@@ -159,8 +161,13 @@ export class PhenositoryComponent {
       );
   }
   lookUpDisease() {
-    window.open(globals.omimURL + this.diseaseName.substr(0,
+    if (this.diseaseNameDB === 'omim') {
+      window.open(globals.omimURL + this.diseaseName.substr(0,
         this.diseaseName.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
+    } else if (this.diseaseNameDB === 'ordo') {
+      window.open(globals.ordoURL + this.diseaseName.substr(0,
+        this.diseaseName.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
+    }
   }
   createAnnotation() {
     let scope = this;

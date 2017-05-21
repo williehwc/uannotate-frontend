@@ -1,7 +1,7 @@
 <div class="container-fluid">
 
   <div class="hover-box" style="display: none">
-    Let go of the mouse button to reposition.
+    Release to reposition.
   </div>
 
   <!-- Page Heading -->
@@ -53,7 +53,7 @@
                   <button type="button" class="btn btn-sm btn-danger" style="float:right;margin-left:5px;height:25px;padding-top:1px;" (click)="removeProblem(problem.problemID)" title="Remove" *ngIf="!dateStart || dateStart > dateNow">
                     <i class="fa fa-times"></i>
                   </button>
-                  <button type="button" class="btn btn-sm btn-info" style="float:right;margin-left:5px;height:25px;padding-top:1px;" (click)="lookUpDisease(problem.diseaseName)" title="Look up">
+                  <button type="button" class="btn btn-sm btn-info" style="float:right;margin-left:5px;height:25px;padding-top:1px;" (click)="lookUpDisease(problem.diseaseDB, problem.diseaseName)" title="Look up">
                     <i class="fa fa-book"></i>
                   </button>
                   <button type="button" class="btn btn-sm btn-secondary" style="float:right;height:25px;padding-top:1px;" (click)="gotoPhenository(problem.diseaseDB, problem.diseaseName)" title="View in Phenository">
@@ -63,7 +63,7 @@
                   <span *ngIf="problem.numAnnotations === 0" style="color:rgb(217, 83, 79);font-size: small">
                     <br />
                     This disease has no published annotations.
-                    <a (click)="createAnnotation(problem.diseaseName)" style="cursor: pointer" *ngIf="problem.numMyAnnotations === 0">Create annotation</a>
+                    <a (click)="createAnnotation(problem.diseaseName, problem.diseaseDB)" style="cursor: pointer" *ngIf="problem.numMyAnnotations === 0">Create annotation</a>
                     <!--<a (click)="createAnnotation(problem.diseaseName)" style="cursor: pointer" *ngIf="problem.numMyAnnotations > 0" [routerLink]="['/dashboard', '/my-annotations']">My annotations</a>-->
                   </span>
                 </li>
@@ -74,7 +74,7 @@
               <div class="card card-block" id="add-disease">
                 <h4>Add a disease</h4>
                 <p>Enter disease name or ID:</p>
-                <form role="form">
+                <form role="form" id="ordo-form">
                   <fieldset class="form-group">
                     <div class="typeahead__container">
                       <div class="typeahead__field">
@@ -85,7 +85,26 @@
                     </div>
                   </fieldset>
                 </form>
-                <p style="opacity: 0.5"><em>No symbols, please.</em></p>
+                <form role="form" id="omim-form" style="display:none">
+                  <fieldset class="form-group">
+                    <div class="typeahead__container">
+                      <div class="typeahead__field">
+                        <span class="typeahead__query">
+                            <input class="js-typeahead-omim" autocomplete="off" [(ngModel)]="typeAheadBox" [disabled]="!(!dateStart || dateStart > dateNow)">
+                        </span>
+                      </div>
+                    </div>
+                  </fieldset>
+                </form>
+                <div class="btn-group" _ngcontent-pyb-9="" *ngIf="diseaseDB == 'omim'">
+                  <label class="btn btn-secondary ng-untouched ng-pristine ng-valid" btnradio="Left" _ngcontent-pyb-9="" (click)="setDB('ordo')">ORDO (Orphanet)</label>
+                  <label class="btn btn-secondary ng-untouched ng-pristine ng-valid active" btnradio="Right" _ngcontent-pyb-9="">OMIM</label>
+                </div>
+                <div class="btn-group" _ngcontent-pyb-9="" *ngIf="diseaseDB == 'ordo'">
+                  <label class="btn btn-secondary ng-untouched ng-pristine ng-valid active" btnradio="Left" _ngcontent-pyb-9="">ORDO (Orphanet)</label>
+                  <label class="btn btn-secondary ng-untouched ng-pristine ng-valid" btnradio="Right" _ngcontent-pyb-9="" (click)="setDB('omim')">OMIM</label>
+                </div>
+                <p style="opacity: 0.5"><em>Please don't enter symbols.</em></p>
               </div>
               <!--<div class="card card-block" *ngIf="!(!dateStart || dateStart > dateNow)">
                 You cannot add, move, or remove diseases after the exercise has started.

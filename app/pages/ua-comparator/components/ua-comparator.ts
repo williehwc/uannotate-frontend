@@ -201,8 +201,12 @@ export class ComparatorComponent {
     localStorage.setItem('uaPhenositoryDiseaseDB', diseaseDB);
     this._router.navigate(['/dashboard', '/phenository']);
   }
-  lookUpDisease(diseaseName: string) {
-    window.open(globals.omimURL + diseaseName.substr(0, diseaseName.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
+  lookUpDisease(diseaseDB: string, diseaseName: string) {
+    if (diseaseDB === 'omim') {
+      window.open(globals.omimURL + diseaseName.substr(0, diseaseName.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
+    } else if (diseaseDB === 'ordo') {
+      window.open(globals.ordoURL + diseaseName.substr(0, diseaseName.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
+    }
   }
   gotoMyClasses() {
     this._router.navigate(['/dashboard', '/exercise', this.comparison.exerciseID]);

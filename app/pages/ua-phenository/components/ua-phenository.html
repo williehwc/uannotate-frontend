@@ -34,7 +34,7 @@
         </button>
       </div>
 
-      <div class="table-responsive">
+      <div class="table-responsive" *ngIf="total > 0">
         <table id="tableDiseases" class="table table-hover table-sm">
           <thead class="thead-inverse">
             <tr>
@@ -56,7 +56,7 @@
         </table>
       </div>
 
-      <pager class="ng-untouched ng-pristine ng-valid" _ngcontent-pyb-9="">
+      <pager class="ng-untouched ng-pristine ng-valid" _ngcontent-pyb-9="" *ngIf="total > 0">
         <ul class="pager">
           <li>
             <a (click)="gotoFirst()" style="cursor: pointer">
@@ -81,6 +81,8 @@
           </li>
         </ul>
       </pager>
+      
+      <strong *ngIf="total == 0">Nothing to show</strong>
 
     </div>
 
@@ -93,7 +95,7 @@
           {{diseaseName}}
         </div>
         <div class="card-block" *ngIf="diseaseName === null && noDiseaseOfTheDay">
-          Sorry, there is no Disease of the Day for today. Please check back tomorrow!
+          Please select a disease on the left.
         </div>
         <div class="card-block" *ngIf="diseaseName !== null">
           <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true">
@@ -102,7 +104,7 @@
           <button class="btn btn-info" (click)="lookUpDisease()">
             <i class="fa fa-book" aria-hidden="true"></i> Look up
           </button>
-          <button class="btn btn-primary" (click)="createAnnotation()">Start from OMIM/Ordo</button>
+          <button class="btn btn-primary" (click)="createAnnotation()">Start from {{diseaseNameDB.toUpperCase()}}</button>
           <button class="btn btn-secondary" (click)="toggleFollow()" *ngIf="!following">
             <i class="fa fa-eye" aria-hidden="true"></i> Watch
           </button>

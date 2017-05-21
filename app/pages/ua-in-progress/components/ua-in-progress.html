@@ -231,13 +231,18 @@
       </h2>
       <ol class="breadcrumb" *ngIf="annotation != null">
         <li class="inactive" *ngIf="annotation.status == 1 || annotation.status == -1">
-          <i class="fa fa-info-circle"></i> Created on {{annotation.dateCreated}} by {{annotation.author.userName}} &lt;{{annotation.author.userEmail}}&gt;
+          <i class="fa fa-info-circle"></i> Created on {{annotation.dateCreated}} by {{annotation.author.userName}}
+          <span *ngIf="annotation.author.userAdmin"><i class="fa fa-shield" title="Phenotate administrator"></i></span>
+          <span *ngIf="!annotation.author.userAdmin">&lt;{{annotation.author.userEmail}}&gt;</span>
         </li>
         <li class="inactive" *ngIf="annotation.status == 2">
-          <i class="fa fa-info-circle"></i> Published on {{annotation.datePublished}} by {{annotation.author.userName}} &lt;{{annotation.author.userEmail}}&gt;
+          <i class="fa fa-info-circle"></i> Published on {{annotation.datePublished}} by {{annotation.author.userName}}
+          <span *ngIf="annotation.author.userAdmin"><i class="fa fa-shield" title="Phenotate administrator"></i></span>
+          <span *ngIf="!annotation.author.userAdmin">&lt;{{annotation.author.userEmail}}&gt;</span>
         </li>
         <li class="inactive" *ngIf="annotation.status == -2">
-          <i class="fa fa-info-circle"></i> Submitted on {{annotation.datePublished}} by {{annotation.author.userName}} &lt;{{annotation.author.userEmail}}&gt;
+          <i class="fa fa-info-circle"></i> Submitted on {{annotation.datePublished}} by {{annotation.author.userName}}
+          &lt;{{annotation.author.userEmail}}&gt;
         </li>
         <li class="active" *ngIf="annotation.status > 0 && annotation.cloneOf === null">
           Based on {{annotation.disease.diseaseDB.toUpperCase()}}
@@ -263,7 +268,7 @@
         <button class="btn btn-secondary" (click)="gotoPhenository(annotation.disease.diseaseDB, annotation.disease.diseaseName)" *ngIf="!studentLevel && profLevel" style="color:#0275d8" title="View in Phenository">
           <i class="fa fa-cloud"></i>
         </button>
-        <button class="btn btn-info" (click)="lookUpDisease(annotation.disease.diseaseName)" *ngIf="profLevel" style="margin-right: 10px" title="Look up">
+        <button class="btn btn-info" (click)="lookUpDisease(annotation.disease.diseaseDB, annotation.disease.diseaseName)" *ngIf="profLevel" style="margin-right: 10px" title="Look up">
           <i class="fa fa-book"></i>
         </button>
         <button class="btn btn-info" *ngIf="!studentLevel && profLevel && annotation.communityTopicID && annotation.status == 2" title="Phenotate Community" (click)="gotoDiscussion(annotation.communityTopicID)" title="Go to discussion">
@@ -382,9 +387,10 @@
                 </div>
                 <i class="fa fa-exclamation-circle" aria-hidden="true" *ngIf="phenotype.citations.length == 0 && markUncitedPhenotypes && annotation.status != 2 && annotation.status != -2" style="float: right;margin-top: 3px; margin-right: 10px" title="No citations"></i>
                 <div class="ok" (click)="setObserved(phenotype.phenotypeID, (phenotype.observed == 1))" title="This phenotype was imported. Click (or edit the phenotype) to confirm that it is correct." *ngIf="phenotype.notOK == 1 && annotation.cloneOf == null"></div>
-                <div class="ok" (click)="setObserved(phenotype.phenotypeID, (phenotype.observed == 1))" title="This phenotype was cloned. Click (or edit the phenotype) to confirm that it is correct." *ngIf="phenotype.notOK == 1 && annotation.cloneOf != null"></div>                <h6 title="{{phenotype.phenotypeDefinition}}" style="cursor:help" *ngIf="phenotype.observed == 1 && studentLevel">{{phenotype.phenotypeName}}</h6>
+                <div class="ok" (click)="setObserved(phenotype.phenotypeID, (phenotype.observed == 1))" title="This phenotype was cloned. Click (or edit the phenotype) to confirm that it is correct." *ngIf="phenotype.notOK == 1 && annotation.cloneOf != null"></div>
                 <pre *ngIf="phenotype.observed == 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + roundToPercent(phenotype.frequency) + '.png)', 'margin-top' : '-1px'}">{{onsetAbbreviation(phenotype.onset, phenotype.onsetTo)}}</pre>
                 <pre *ngIf="phenotype.observed == 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + roundToPercent(phenotype.frequencyTo) + '.png)', 'opacity' : (roundToPercent(phenotype.frequencyTo) === -1) ? '0' : '0.5', 'margin-top' : '-1px'}" title="Frequency: {{frequencyDescription(phenotype.frequency, phenotype.frequencyTo)}}&#013;Onset: {{onsetDescription(phenotype.onset, phenotype.onsetTo)}}">{{onsetAbbreviation(phenotype.onset, phenotype.onsetTo)}}</pre>
+                <h6 title="{{phenotype.phenotypeDefinition}}" style="cursor:help; margin-top:3px; margin-left: 85px" *ngIf="phenotype.observed == 1 && studentLevel">{{phenotype.phenotypeName}}</h6>
                 <h6 title="{{phenotype.hpo}} {{phenotype.phenotypeDefinition}}" style="cursor:help; margin-top:3px; margin-left: 85px" *ngIf="phenotype.observed == 1 && profLevel">{{phenotype.phenotypeName}}</h6>
                 <h6 title="{{phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through; margin-top:3px; margin-left: 85px" *ngIf="phenotype.observed == 0 && studentLevel">{{phenotype.phenotypeName}}</h6>
                 <h6 title="{{phenotype.hpo}} {{phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through; margin-top:3px; margin-left: 85px" *ngIf="phenotype.observed == 0 && profLevel">{{phenotype.phenotypeName}}</h6>
@@ -532,6 +538,8 @@
           <br />
 
           <p>Choose an onset to apply it to all phenotypes currently listed. Note that the onset you choose now will not be automatically applied to new phenotypes you add later.</p>
+          
+          <p><input type="checkbox" [(ngModel)]="unsureOnly" id="unsure-only" /> <label for="unsure-only">Apply only to "onset unsure"</label></p>
 
           <h4 *ngIf="suggestedOnsets.length > 0">{{annotation.disease.diseaseDB.toUpperCase()}} suggestions</h4>
 

@@ -26,6 +26,7 @@ export class AccountComponent {
   phenotateEmail: string = 'support-phenotate.org'.replace('-', '@');
   classes: Array<Object> = [];
   inviteCode: string;
+  passwordReset: boolean = false;
   constructor(private _http: Http) {
     let scope = this;
     let gotLevelAndEmail = function (data: any) {
@@ -39,6 +40,14 @@ export class AccountComponent {
           scope.emailFollow = false;
         if (data.emailLike === 0)
           scope.emailLike = false;
+      }
+      if (data.passwordReset) {
+        scope.alerts.push({
+          type: 'warning',
+          msg: 'Please set a new password now.',
+          closable: true
+        });
+        scope.passwordReset = true;
       }
     };
     let gotClasses = function (data: any) {
@@ -77,6 +86,7 @@ export class AccountComponent {
           msg: 'Password changed',
           closable: true
         });
+        scope.passwordReset = false;
       } else {
         scope.alerts.push({
           type: 'danger',
@@ -86,7 +96,8 @@ export class AccountComponent {
       }
     };
     this.alerts = [];
-    if (!(this.password && this.newPassword && this.confirmNewPassword)) {
+    if ((!(this.password && this.newPassword && this.confirmNewPassword) && !this.passwordReset) ||
+    (!(this.newPassword && this.confirmNewPassword) && this.passwordReset)) {
       scope.alerts.push({
         type: 'danger',
         msg: 'All fields are required',

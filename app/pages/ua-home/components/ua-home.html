@@ -105,7 +105,7 @@
             <tr *ngFor="let annotation of dashboard.latestAnnotations">
               <td><a style="cursor: pointer" (click)="gotoAnnotation(annotation.annotationID)">{{annotation.annotationID}}</a></td>
               <td><a style="cursor: pointer" (click)="gotoPhenository(annotation.diseaseDB, annotation.diseaseName)">{{annotation.diseaseName}}</a></td>
-              <td>{{annotation.authorName}}</td>
+              <td>{{annotation.authorName}}<span *ngIf="annotation.authorAdmin"> <i class="fa fa-shield" title="Phenotate administrator"></i></span></td>
             </tr>
             </tbody>
           </table>
@@ -126,7 +126,7 @@
             <tr *ngFor="let annotation of dashboard.watchedAnnotations">
               <td><a style="cursor: pointer" (click)="gotoAnnotation(annotation.annotationID)">{{annotation.annotationID}}</a></td>
               <td><a style="cursor: pointer" (click)="gotoPhenository(annotation.diseaseDB, annotation.diseaseName)">{{annotation.diseaseName}}</a></td>
-              <td>{{annotation.authorName}}</td>
+              <td>{{annotation.authorName}}<span *ngIf="annotation.authorAdmin"> <i class="fa fa-shield" title="Phenotate administrator"></i></span></td>
             </tr>
             </tbody>
           </table>
@@ -150,7 +150,7 @@
             <tr *ngFor="let annotation of dashboard.cloneAnnotations">
               <td><a style="cursor: pointer" (click)="gotoAnnotation(annotation.annotationID)">{{annotation.annotationID}}</a></td>
               <td><a style="cursor: pointer" (click)="gotoPhenository(annotation.diseaseDB, annotation.diseaseName)">{{annotation.diseaseName}}</a></td>
-              <td>{{annotation.authorName}}</td>
+              <td>{{annotation.authorName}}<span *ngIf="annotation.authorAdmin"> <i class="fa fa-shield" title="Phenotate administrator"></i></span></td>
             </tr>
             </tbody>
           </table>

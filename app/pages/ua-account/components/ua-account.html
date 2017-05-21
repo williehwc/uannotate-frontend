@@ -27,7 +27,7 @@
             <!-- Change Password -->
             <h4>Change password</h4>
             <form role="form">
-                <fieldset class="form-group">
+                <fieldset class="form-group" *ngIf="!passwordReset">
                     <label>Old password</label>
                     <input [(ngModel)]="password" class="form-control" type="password">
                 </fieldset>

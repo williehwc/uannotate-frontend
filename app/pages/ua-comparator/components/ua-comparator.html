@@ -151,7 +151,7 @@
       <button class="btn btn-secondary" style="color:#0275d8;" (click)="gotoPhenository(comparison.diseaseDB, comparison.diseaseName)">
         <i class="fa fa-cloud" aria-hidden="true"></i> View in Phenository
       </button>
-      <button class="btn btn-info" (click)="lookUpDisease(comparison.diseaseName)">
+      <button class="btn btn-info" (click)="lookUpDisease(comparison.diseaseDB, comparison.diseaseName)">
         <i class="fa fa-book" aria-hidden="true"></i> Look up
       </button>
       <button class="btn btn-secondary" (click)="gotoMyClasses()" *ngIf="comparison.exerciseID">

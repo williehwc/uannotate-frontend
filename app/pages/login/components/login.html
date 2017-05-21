@@ -1,9 +1,36 @@
 <div class="login-page">
+  
+  <div bsModal #lgModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" style="color: black">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Forgot password</h4>
+        </div>
+        <div class="modal-body">
+          <p>
+            If you've entered a valid email address, you should receive an email with a one-time use password. If you don't receive anything, try…
+          </p>
+          <p>
+            …checking your spam folder
+            <br />
+            …ensuring that you have entered the email address you are using for Phenotate
+            <br />
+            …emailing us at <a href="mailto:{{phenotateEmail}}">{{phenotateEmail}}</a>
+          </p>
+          <p>
+            Please be advised that all password reset requests are logged to detect abuse.
+          </p>
+          <button class="btn btn-primary" (click)="lgModal.hide();">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
 	<div class="row">
 		<div class="col-lg-4 col-lg-offset-4">
         	<img src="assets/img/SB-admin.png" width="150px" class="user-avatar" />
 			<h1>Phenotate</h1>
-			<h5>FOR TESTING USE</h5>
+			<h5>Version 1.5.0</h5>
 			<form role="form">
 				<div class="form-content">
 					<div class="form-group">
@@ -13,16 +40,18 @@
 					<div class="form-group">
 						<input type="password" [(ngModel)]="password" (keyup.enter)="gotoDashboard()" class="form-control input-underline input-lg" id="" placeholder="Password">
 					</div>
+					<h7 *ngIf="errorForgotPassword"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <em>Email address is required</em></h7>
 					<h7 *ngIf="errorBlank"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <em>All fields are required</em></h7>
           <h7 *ngIf="errorWrongCredentials"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <em>Incorrect email and/or password</em></h7>
 				</div>
-				<a class="btn rounded-btn" (click)="gotoDashboard()"> Log in </a>
+				<a class="btn rounded-btn" (click)="gotoDashboard()">Log in</a>
 				&nbsp;
-				<a type="submit" class="btn rounded-btn" (click)="gotoSignup()">Registration</a>
+				<a type="submit" class="btn rounded-btn" (click)="gotoSignup()">Registration</a><br /><a class="btn rounded-btn" (click)="forgotPassword()" style="margin-top: 10px;">Forgot password</a>
 			</form>
       <br />
       <br />
-      <p><strong>Note</strong>: Logging into Phenotate will also log you into Phenotate Community. If you are using a public computer, please be aware that logging out of Phenotate does not automatically log you out of Phenotate Community.</p>
+      <p><strong>EU residents</strong>: Cookies are used beyond this point to provide a personalized experience on our website. By logging in or registering, you agree to our use of cookies.</p>
+      <p><strong>Notice</strong>: Logging into Phenotate will also log you into Phenotate Community. If you're using a public computer, please be aware that logging out of Phenotate does not automatically log you out of Phenotate Community.</p>
 		</div>
 	</div>
 </div>

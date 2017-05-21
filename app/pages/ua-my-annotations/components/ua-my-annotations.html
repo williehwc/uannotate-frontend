@@ -42,7 +42,7 @@
       <div class="card card-block">
         <h4>New annotation</h4>
         <p>Enter disease name or ID:</p>
-        <form role="form">
+        <form role="form" id="ordo-form">
           <fieldset class="form-group">
             <div class="typeahead__container">
               <div class="typeahead__field">
@@ -53,7 +53,26 @@
             </div>
           </fieldset>
         </form>
-        <p style="opacity: 0.5"><em>No symbols, please.</em></p>
+        <form role="form" id="omim-form" style="display:none">
+          <fieldset class="form-group">
+            <div class="typeahead__container">
+              <div class="typeahead__field">
+                <span class="typeahead__query">
+                    <input class="js-typeahead-omim" autocomplete="off" [(ngModel)]="typeAheadBox">
+                </span>
+              </div>
+            </div>
+          </fieldset>
+        </form>
+        <div class="btn-group" _ngcontent-pyb-9="" *ngIf="newAnnotationDiseaseDB == 'omim'">
+          <label class="btn btn-secondary ng-untouched ng-pristine ng-valid" btnradio="Left" _ngcontent-pyb-9="" (click)="setDB('ordo')">ORDO (Orphanet)</label>
+          <label class="btn btn-secondary ng-untouched ng-pristine ng-valid active" btnradio="Right" _ngcontent-pyb-9="">OMIM</label>
+        </div>
+        <div class="btn-group" _ngcontent-pyb-9="" *ngIf="newAnnotationDiseaseDB == 'ordo'">
+          <label class="btn btn-secondary ng-untouched ng-pristine ng-valid active" btnradio="Left" _ngcontent-pyb-9="">ORDO (Orphanet)</label>
+          <label class="btn btn-secondary ng-untouched ng-pristine ng-valid" btnradio="Right" _ngcontent-pyb-9="" (click)="setDB('omim')">OMIM</label>
+        </div>
+        <p style="opacity: 0.5"><em>Please don't enter symbols.</em></p>
       </div>
     </div>
 
@@ -72,7 +91,7 @@
           <button *ngIf="diseaseSelected" class="btn btn-info" (click)="lookUpDisease()">
             <i class="fa fa-book" aria-hidden="true"></i> Look up
           </button>
-          <button *ngIf="diseaseSelected" class="btn btn-primary" (click)="createAnnotation()">Start from OMIM/Ordo</button>
+          <button *ngIf="diseaseSelected" class="btn btn-primary" (click)="createAnnotation()">Start from {{newAnnotationDiseaseDB.toUpperCase()}}</button>
           <button class="btn btn-secondary" (click)="toggleFollow()" *ngIf="!following">
             <i class="fa fa-eye" aria-hidden="true"></i> Watch
           </button>
