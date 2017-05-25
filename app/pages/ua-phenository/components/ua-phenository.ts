@@ -25,7 +25,7 @@ export class PhenositoryComponent {
   diseaseOfTheDay: string;
   diseaseName: string = null;
   diseaseOfTheDayDB: string = 'omim';
-  diseaseNameDB: string;
+  diseaseNameDB: string = 'omim';
   noDiseaseOfTheDay: boolean = false;
   alerts: Array<Object> = [];
   constructor( private _router: Router, private _http: Http) {
