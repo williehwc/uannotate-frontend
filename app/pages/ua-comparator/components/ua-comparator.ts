@@ -77,6 +77,11 @@ export class ComparatorComponent {
   gotoComparison(annotationID: number, compareToAnnotationID: number) {
     let scope = this;
     this.alerts = [];
+    this.alerts.push({
+      type: 'info',
+      msg: 'Loading comparison…',
+      closable: true
+    });
     let loadedName = function(data: any) {
       for (let x = 0; x < data.rows.length; x++) {
         let datum = data.rows[x];
@@ -146,11 +151,15 @@ export class ComparatorComponent {
       scope.calculateScore();
     };
     let initializeComparison = function (data:any) {
+      console.log(data);
+      scope.alerts = [];
       scope.comparison = data;
       localStorage.setItem('uaAnnotation', '' + data.annotationID);
       localStorage.setItem('uaCompareTo', '' + data.compareToAnnotationID);
-      if (data.systems.length === 0)
-        return scope.gotoComparison(localStorage.getItem('uaAnnotation'), localStorage.getItem('uaCompareTo'));
+      if (data.systems.length === 0) {
+        //return scope.gotoComparison(localStorage.getItem('uaAnnotation'), localStorage.getItem('uaCompareTo'));
+        return;
+      }
       let phenotypeNames: Array<string> = [];
       for (let s = 0; s < data.systems.length; s++) {
         for (let i = 0; i < data.systems[s].phenotypes.length; i++) {
@@ -176,6 +185,14 @@ export class ComparatorComponent {
           () => console.log('Got names')
         );
     };
+    let cannotInitializeComparison = function () {
+      scope.alerts = [];
+      scope.alerts.push({
+        type: 'danger',
+        msg: 'Comparator is not available for this annotation',
+        closable: true
+      });
+    };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
       'annotationID': annotationID,
@@ -185,11 +202,7 @@ export class ComparatorComponent {
       .map(res => res.json())
       .subscribe(
         data => initializeComparison(data),
-        err => this.alerts.push({
-          type: 'danger',
-          msg: 'Comparator is not available for this annotation',
-          closable: true
-        }),
+        err => cannotInitializeComparison(),
         () => console.log('Got full comparison')
       );
   }

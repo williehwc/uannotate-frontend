@@ -105,7 +105,7 @@ export class InProgressComponent implements OnInit {
         return false;
       },
       invalid: function (el: any, handle: any) {
-        return scope.annotation.status === 2 || scope.annotation.status === -2;
+        return scope.annotation.status === 3 || scope.annotation.status === 2 || scope.annotation.status === -2;
       },
       copy: true
     });
@@ -229,7 +229,7 @@ export class InProgressComponent implements OnInit {
       } else {
         scope.annotation.phenotypes.push(data.phenotypes[data.phenotypes.length - 1]);
       }
-      if (data.status !== 2 && data.status !== -2) {
+      if (data.status !== 3 && data.status !== 2 && data.status !== -2) {
         jQuery('.add-bar').show();
       }
       // Look up phenotype names
@@ -298,7 +298,7 @@ export class InProgressComponent implements OnInit {
             }
           }
         }
-        if (scope.annotation.status === 2 || scope.annotation.status === -2) {
+        if (scope.annotation.status === 3 || scope.annotation.status === 2 || scope.annotation.status === -2) {
           scope.annotation.phenotypes.sort(function(a: any, b: any) {
             return (a.phenotypeName < b.phenotypeName) ? -1 : 1;
           });
@@ -964,6 +964,34 @@ export class InProgressComponent implements OnInit {
         data => finishClone(data),
         err => console.log(err),
         () => console.log('Cloned')
+      );
+  }
+  createAnnotation() {
+    let scope = this;
+    this.alerts = [];
+    let finishCreateAnnotation = function (data:any) {
+      if (data.success) {
+        scope.jumpToAnnotation(data.annotationID);
+      } else {
+        scope.alerts.push({
+          type: 'danger',
+          msg: 'Invalid disease',
+          closable: true
+        });
+      }
+    };
+    // Create new annotation
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'diseaseName': this.annotation.disease.diseaseName,
+      'vocabulary': this.annotation.disease.diseaseDB
+    });
+    this._http.post(globals.backendURL + '/restricted/annotations/prof/new-annotation', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishCreateAnnotation(data),
+        err => console.log(err),
+        () => console.log('Created annotation')
       );
   }
   submitExercise(exerciseID: number) {

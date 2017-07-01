@@ -1,7 +1,7 @@
 import {Component, HostListener} from '@angular/core';
 import {Router, ROUTER_DIRECTIVES } from '@angular/router';
 declare var jQuery: any;
-import {AlertComponent} from 'ng2-bootstrap/ng2-bootstrap';
+import {DROPDOWN_DIRECTIVES, AlertComponent} from 'ng2-bootstrap/ng2-bootstrap';
 import {Http} from '@angular/http';
 import globals = require('../../../globals');
 import 'rxjs/Rx';
@@ -10,7 +10,7 @@ import 'rxjs/Rx';
   moduleId: module.id,
 	selector: 'ua-phenository',
 	templateUrl: 'ua-phenository.html',
-  directives: [[AlertComponent, ROUTER_DIRECTIVES]]
+  directives: [[AlertComponent, ROUTER_DIRECTIVES, DROPDOWN_DIRECTIVES]]
 })
 
 
@@ -169,7 +169,7 @@ export class PhenositoryComponent {
         this.diseaseName.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
     }
   }
-  createAnnotation() {
+  createAnnotation(startFromScratch: boolean, publishTemporarily: boolean) {
     let scope = this;
     this.alerts = [];
     let diseaseName = this.diseaseName;
@@ -191,7 +191,9 @@ export class PhenositoryComponent {
       let body = JSON.stringify({
         'token': localStorage.getItem('uaToken'),
         'diseaseName': diseaseName,
-        'vocabulary': this.diseaseNameDB
+        'vocabulary': this.diseaseNameDB,
+        'startFromScratch': startFromScratch,
+        'publishTemporarily': publishTemporarily
       });
       this._http.post(globals.backendURL + '/restricted/annotations/prof/new-annotation', body, globals.options)
         .map(res => res.json())

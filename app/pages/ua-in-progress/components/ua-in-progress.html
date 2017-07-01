@@ -128,7 +128,7 @@
         <div class="modal-body">
           <strong>Pace of progression</strong>
           <br />
-          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.progression" (change)="setDetail('progression', $event.target.value)" [disabled]="annotation.status === 2 || annotation.status === -2">
+          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.progression" (change)="setDetail('progression', $event.target.value)" [disabled]="annotation.status === 3 || annotation.status === 2 || annotation.status === -2">
             <option value="-1">N/A</option>
             <option value="HP:0003680">Nonprogressive</option>
             <option value="HP:0003677">Slow progression</option>
@@ -139,7 +139,7 @@
           <br />
           <strong>Severity</strong>
           <br />
-          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.severity" (change)="setDetail('severity', $event.target.value)" [disabled]="annotation.status === 2 || annotation.status === -2">
+          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.severity" (change)="setDetail('severity', $event.target.value)" [disabled]="annotation.status === 3 || annotation.status === 2 || annotation.status === -2">
             <option value="-1">N/A</option>
             <option value="HP:0012827" title="Having a minor degree of severity that is considered to be on the boundary between the normal and the abnormal ranges. For quantitative traits, a deviation of that is less than two standard deviations from the appropriate population mean.">Borderline</option>
             <option value="HP:0012825" title="Having a relatively minor degree of severity. For quantitative traits, a deviation of between two and three standard deviations from the appropriate population mean.">Mild</option>
@@ -150,7 +150,7 @@
           <br />
           <strong>Temporal pattern</strong>
           <br />
-          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.temporalPattern" (change)="setDetail('temporal_pattern', $event.target.value)" [disabled]="annotation.status === 2 || annotation.status === -2">
+          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.temporalPattern" (change)="setDetail('temporal_pattern', $event.target.value)" [disabled]="annotation.status === 3 || annotation.status === 2 || annotation.status === -2">
             <option value="-1">N/A</option>
             <option value="HP:0003587" title="Gradual, very slow onset of disease manifestations.">Insidious onset</option>
             <option value="HP:0011010" title="Slow, creeping onset, slow progress and long continuance of disease manifestations.">Chronic</option>
@@ -160,7 +160,7 @@
           <br />
           <strong>Spatial pattern</strong>
           <br />
-          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.spatialPattern" (change)="setDetail('spatial_pattern', $event.target.value)" [disabled]="annotation.status === 2 || annotation.status === -2">
+          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.spatialPattern" (change)="setDetail('spatial_pattern', $event.target.value)" [disabled]="annotation.status === 3 || annotation.status === 2 || annotation.status === -2">
             <option value="-1">N/A</option>
             <option value="HP:0012837" title="Affecting all regions without specificity of distribution.">Generalized</option>
             <option value="HP:0012838" title="Being confined or restricted to a particular location.">Localized</option>
@@ -171,7 +171,7 @@
           <br />
           <strong>Laterality</strong>
           <br />
-          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.laterality"  (change)="setDetail('laterality', $event.target.value)" [disabled]="annotation.status === 2 || annotation.status === -2">
+          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.laterality"  (change)="setDetail('laterality', $event.target.value)" [disabled]="annotation.status === 3 || annotation.status === 2 || annotation.status === -2">
             <option value="-1">N/A</option>
             <option value="HP:0012832" title="Being present on both sides of the body.">Bilateral</option>
             <option value="HP:0012833" title="Being present on only the left or only the right side of the body.">Unilateral</option>
@@ -181,7 +181,7 @@
           <br />
           <strong>Specific age of onset</strong>
           <br />
-          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.specificOnset" (change)="setDetail('specific_onset', $event.target.value)" [disabled]="annotation.status === 2 || annotation.status === -2">
+          <select style="width: 250px; margin-bottom: 10px" [(ngModel)]="detailedPhenotype.specificOnset" (change)="setDetail('specific_onset', $event.target.value)" [disabled]="annotation.status === 3 || annotation.status === 2 || annotation.status === -2">
             <option value="-1">N/A</option>
             <option *ngIf="detailedPhenotype.onset == 'HP:0030674' || detailedPhenotype.onsetTo == 'HP:0030674'" value="HP:0011460" title="Onset of disease at up to 8 weeks of gestation.">Embryonal onset</option>
             <option *ngIf="detailedPhenotype.onset == 'HP:0030674' || detailedPhenotype.onsetTo == 'HP:0030674'" value="HP:0011461" title="Onset prior to birth but after 8 weeks of gestation.">Fetal onset</option>
@@ -226,8 +226,8 @@
           <i class="fa fa-times-circle-o" title="Close" style="font-size: 20px; vertical-align: 4px;"></i>
         </a>
       </h2>
-      <h2 class="page-header" *ngIf="annotation != null && annotation.status == 2">
-        <span style="background: black;color: white;">&nbsp;{{annotation.annotationID}}&nbsp;</span> {{annotation.disease.diseaseName}}
+      <h2 class="page-header" *ngIf="annotation != null && (annotation.status == 2 || annotation.status == 3)">
+        <span style="background: black;color: white;" *ngIf="annotation.status == 2">&nbsp;{{annotation.annotationID}}&nbsp;</span> {{annotation.disease.diseaseName}}
       </h2>
       <ol class="breadcrumb" *ngIf="annotation != null">
         <li class="inactive" *ngIf="annotation.status == 1 || annotation.status == -1">
@@ -245,7 +245,7 @@
           &lt;{{annotation.author.userEmail}}&gt;
         </li>
         <li class="active" *ngIf="annotation.status > 0 && annotation.cloneOf === null">
-          Based on {{annotation.disease.diseaseDB.toUpperCase()}}
+          <span *ngIf="annotation.status != 3">Based on </span>{{annotation.disease.diseaseDB.toUpperCase()}}<span *ngIf="annotation.status == 3"> annotation (unmodified)</span>
         </li>
         <li class="active" *ngIf="annotation.status > 0 && annotation.cloneOf !== null" (click)="jumpToAnnotation(annotation.cloneOf)" style="cursor: pointer">
           <i class="fa fa-code-fork" aria-hidden="true"></i>
@@ -277,11 +277,14 @@
         <button class="btn btn-info" *ngIf="!studentLevel && profLevel && !annotation.communityTopicID && annotation.status == 2" title="Phenotate Community" (click)="lgModal.show()" title="Start discussion">
           <i class="fa fa-comments"></i>
         </button>
-        <button class="btn btn-secondary" (click)="share.show(); shareAnnotation()" *ngIf="!studentLevel && profLevel && annotation.status == 2" style="margin-right: 10px">
+        <button class="btn btn-secondary" (click)="share.show(); shareAnnotation()" *ngIf="!studentLevel && profLevel && (annotation.status == 2 || annotation.status == 3)" style="margin-right: 10px">
           <i class="fa fa-share-alt" aria-hidden="true"></i> Share
         </button>
         <button class="btn btn-secondary" (click)="cloneAnnotation()" *ngIf="!studentLevel && profLevel && annotation.status == 2">
           <i class="fa fa-clone" aria-hidden="true"></i> Clone
+        </button>
+        <button class="btn btn-primary" (click)="createAnnotation()" *ngIf="!studentLevel && profLevel && annotation.status == 3">
+          New annotation from {{annotation.disease.diseaseDB.toUpperCase()}}
         </button>
         <button class="btn btn-secondary" (click)="likeAnnotation(true)"  *ngIf="!studentLevel && profLevel && annotation.status == 2 && !annotation.liked">
           <i class="fa fa-thumbs-o-up" aria-hidden="true"></i> Recommend ({{annotation.likes}})
@@ -343,8 +346,12 @@
 
           <img *ngIf="annotation.phenotypes.length > 0 && loading" src="/assets/img/loading.gif"/>
 
-          <p *ngIf="annotation.phenotypes.length == 0">
+          <p *ngIf="annotation.phenotypes.length == 0 && (annotation.status == 1 || annotation.status == -1)">
             <strong style="color: #FF9800">Add a phenotype using the bottom bar.</strong>
+          </p>
+          
+          <p *ngIf="annotation.phenotypes.length == 0 && !(annotation.status == 1 || annotation.status == -1)">
+            <strong>No phenotypes</strong>
           </p>
 
           <div *ngFor="let systemName of systemNames" id="system-{{idFormat(systemName)}}">
@@ -357,7 +364,7 @@
               </thead>
             </table>
 
-            <div class="card card-block card-header" *ngIf="annotation.status == 2 || annotation.status == -2" style="border-radius: 0.25rem">
+            <div class="card card-block card-header" *ngIf="annotation.status == 3 || annotation.status == 2 || annotation.status == -2" style="border-radius: 0.25rem">
               <strong>
                 {{systemName}}
               </strong>
@@ -365,7 +372,7 @@
 
             <div *ngFor="let phenotype of annotation.phenotypes" class="phenotypes" id="phenotype-{{phenotype.phenotypeID}}">
 
-              <div style="white-space: nowrap;height: 30px" *ngIf="phenotype.systemName === systemName && (annotation.status === 2 || annotation.status === -2)">
+              <div style="white-space: nowrap;height: 30px" *ngIf="phenotype.systemName === systemName && (annotation.status === 3 || annotation.status === 2 || annotation.status === -2)">
                 <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + roundToPercent(phenotype.frequency) + '.png)'}">{{onsetAbbreviation(phenotype.onset, phenotype.onsetTo)}}</pre>
                 <pre *ngIf="phenotype.observed === 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + roundToPercent(phenotype.frequencyTo) + '.png)', 'opacity' : (roundToPercent(phenotype.frequencyTo) === -1) ? '0' : '0.5'}" title="Frequency: {{frequencyDescription(phenotype.frequency, phenotype.frequencyTo)}}&#013;Onset: {{onsetDescription(phenotype.onset, phenotype.onsetTo)}}">{{onsetAbbreviation(phenotype.onset, phenotype.onsetTo)}}</pre>
                 <span title="{{(profLevel) ? phenotype.hpo + ' ' + phenotype.phenotypeDefinition : phenotype.phenotypeDefinition}}" style="cursor:help; margin-left:85px" *ngIf="phenotype.observed == 1 && phenotype.specificOnset == -1 && phenotype.progression == -1 && phenotype.severity == -1 && phenotype.temporalPattern == -1 && phenotype.spatialPattern == -1 && phenotype.laterality == -1">{{phenotype.phenotypeName}}</span>
@@ -385,7 +392,7 @@
                   <label title="Observed" class="btn btn-sm btn-secondary ng-untouched ng-pristine ng-valid" btnradio="Left" _ngcontent-pyb-9="" (click)="setObserved(phenotype.phenotypeID, true)">Y</label>
                   <label title="Not observed" class="btn btn-sm btn-secondary ng-untouched ng-pristine ng-valid active" btnradio="Right" _ngcontent-pyb-9="" (click)="setObserved(phenotype.phenotypeID, false)"><span style="color:#d9534f">N</span></label>
                 </div>
-                <i class="fa fa-exclamation-circle" aria-hidden="true" *ngIf="phenotype.citations.length == 0 && markUncitedPhenotypes && annotation.status != 2 && annotation.status != -2" style="float: right;margin-top: 3px; margin-right: 10px" title="No citations"></i>
+                <i class="fa fa-exclamation-circle" aria-hidden="true" *ngIf="phenotype.citations.length == 0 && markUncitedPhenotypes && annotation.status != 3 && annotation.status != 2 && annotation.status != -2" style="float: right;margin-top: 3px; margin-right: 10px" title="No citations"></i>
                 <div class="ok" (click)="setObserved(phenotype.phenotypeID, (phenotype.observed == 1))" title="This phenotype was imported. Click (or edit the phenotype) to confirm that it is correct." *ngIf="phenotype.notOK == 1 && annotation.cloneOf == null"></div>
                 <div class="ok" (click)="setObserved(phenotype.phenotypeID, (phenotype.observed == 1))" title="This phenotype was cloned. Click (or edit the phenotype) to confirm that it is correct." *ngIf="phenotype.notOK == 1 && annotation.cloneOf != null"></div>
                 <pre *ngIf="phenotype.observed == 1" class="frequency-onset" [ngStyle]="{'background-image': 'url(/assets/img/' + roundToPercent(phenotype.frequency) + '.png)', 'margin-top' : '-1px'}">{{onsetAbbreviation(phenotype.onset, phenotype.onsetTo)}}</pre>
@@ -455,17 +462,17 @@
                 <div class="row">
                   <div class="col-lg-12">
                     <div *ngFor="let citation of phenotype.citations">
-                      <div style="float:left" class="paper" *ngIf="annotation.status == 2 || annotation.status == -2">
+                      <div style="float:left" class="paper" *ngIf="annotation.status == 3 || annotation.status == 2 || annotation.status == -2">
                         {{citation.number}}
                       </div>
-                      <div style="float:left" class="paper paper-remove" (click)="removeCitation(phenotype.phenotypeID, citation.refID)" *ngIf="!(annotation.status == 2 || annotation.status == -2)">
+                      <div style="float:left" class="paper paper-remove" (click)="removeCitation(phenotype.phenotypeID, citation.refID)" *ngIf="!(annotation.status == 3 || annotation.status == 2 || annotation.status == -2)">
                         {{citation.number}}
                       </div>
                     </div>
-                    <div style="float:left; cursor: pointer" class="paper" (click)="addCitation(phenotype.phenotypeID)" *ngIf="!(annotation.status == 2 || annotation.status == -2)" title="Add a citation (you can also drag and drop references using a mouse)">
+                    <div style="float:left; cursor: pointer" class="paper" (click)="addCitation(phenotype.phenotypeID)" *ngIf="!(annotation.status == 3 || annotation.status == 2 || annotation.status == -2)" title="Add a citation (you can also drag and drop references using a mouse)">
                       <i class="fa fa-plus"></i>
                     </div>
-                    <button type="button" class="btn btn-sm btn-danger" _ngcontent-ihs-13="" style="float:right;" (click)="removePhenotype(phenotype.phenotypeID)" *ngIf="!(annotation.status == 2 || annotation.status == -2)">
+                    <button type="button" class="btn btn-sm btn-danger" _ngcontent-ihs-13="" style="float:right;" (click)="removePhenotype(phenotype.phenotypeID)" *ngIf="!(annotation.status == 3 || annotation.status == 2 || annotation.status == -2)">
                       Remove
                     </button>
                     <button class="btn btn-sm btn-secondary" (click)="openBrowser(phenotype);browser.show()" style="float:right; margin-right: 5px">
@@ -487,7 +494,7 @@
 
     </div>
 
-    <div class="col-lg-4">
+    <div class="col-lg-4" *ngIf="annotation.status != 3">
       <tabset>
         <tab>
           <template tabHeading>
@@ -521,7 +528,7 @@
                   </a>
                 </p>
                 <i style="opacity: 0.5">PMID: {{ref.pmid}}</i>
-                <button type="button" class="btn btn-sm btn-danger" _ngcontent-ihs-13="" style="float:right;" (click)="removeRef(ref.refID)" *ngIf="annotation.status != 2 && annotation.status != -2">
+                <button type="button" class="btn btn-sm btn-danger" _ngcontent-ihs-13="" style="float:right;" (click)="removeRef(ref.refID)" *ngIf="annotation.status != 3 && annotation.status != 2 && annotation.status != -2">
                   Remove
                 </button>
               </div>
@@ -599,7 +606,7 @@
           </select>
 
         </tab>
-        <tab *ngIf="profLevel && annotation.status == 2">
+        <tab *ngIf="profLevel && (annotation.status == 2 || annotation.status == 3)">
           <template tabHeading>
             <i class="fa fa-clone" title="Clones"></i> ({{annotation.clones.length}})
           </template>

@@ -88,10 +88,21 @@
           <button *ngIf="diseaseSelected" class="btn btn-danger" (click)="clearDisease()">
             <i class="fa fa-arrow-left" aria-hidden="true"></i>
           </button>
+          <div *ngIf="diseaseSelected" dropdown keyboardNav="true" style="display: inline">
+            <button dropdownToggle id="simple-dropdown" class="btn btn-primary dropdown-toggle">
+              New
+            </button>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="simple-btn-keyboard-nav">
+              <li role="menuitem"><a class="dropdown-item" (click)="createAnnotation(false, false)" style="cursor: pointer">From {{newAnnotationDiseaseDB.toUpperCase()}}</a></li>
+              <li role="menuitem"><a class="dropdown-item" (click)="createAnnotation(true, false)" style="cursor: pointer">From scratch</a></li>
+            </ul>
+          </div>
           <button *ngIf="diseaseSelected" class="btn btn-info" (click)="lookUpDisease()">
             <i class="fa fa-book" aria-hidden="true"></i> Look up
           </button>
-          <button *ngIf="diseaseSelected" class="btn btn-primary" (click)="createAnnotation()">Start from {{newAnnotationDiseaseDB.toUpperCase()}}</button>
+          <button class="btn btn-secondary" (click)="createAnnotation(false, true)">
+            View {{newAnnotationDiseaseDB.toUpperCase()}} annotation
+          </button>
           <button class="btn btn-secondary" (click)="toggleFollow()" *ngIf="!following">
             <i class="fa fa-eye" aria-hidden="true"></i> Watch
           </button>

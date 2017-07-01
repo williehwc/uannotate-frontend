@@ -1,7 +1,7 @@
 import {Component, HostListener, OnInit} from '@angular/core';
 import {Router, ROUTER_DIRECTIVES } from '@angular/router';
 declare var jQuery: any;
-import {AlertComponent} from 'ng2-bootstrap/ng2-bootstrap';
+import {DROPDOWN_DIRECTIVES, AlertComponent} from 'ng2-bootstrap/ng2-bootstrap';
 import {Http} from '@angular/http';
 import globals = require('../../../globals');
 import 'rxjs/Rx';
@@ -10,7 +10,7 @@ import 'rxjs/Rx';
   moduleId: module.id,
 	selector: 'ua-my-annotations',
 	templateUrl: 'ua-my-annotations.html',
-  directives: [[AlertComponent, ROUTER_DIRECTIVES]]
+  directives: [[AlertComponent, ROUTER_DIRECTIVES, DROPDOWN_DIRECTIVES]]
 })
 
 
@@ -181,7 +181,7 @@ export class MyAnnotationsComponent implements OnInit {
         () => console.log('Created annotation')
       );
   }
-  createAnnotation() {
+  createAnnotation(startFromScratch: boolean, publishTemporarily: boolean) {
     let scope = this;
     this.alerts = [];
     let diseaseName = this.newAnnotationDisease;
@@ -203,7 +203,9 @@ export class MyAnnotationsComponent implements OnInit {
       let body = JSON.stringify({
         'token': localStorage.getItem('uaToken'),
         'diseaseName': diseaseName,
-        'vocabulary': this.newAnnotationDiseaseDB
+        'vocabulary': this.newAnnotationDiseaseDB,
+        'startFromScratch': startFromScratch,
+        'publishTemporarily': publishTemporarily
       });
       this._http.post(globals.backendURL + '/restricted/annotations/prof/new-annotation', body, globals.options)
         .map(res => res.json())

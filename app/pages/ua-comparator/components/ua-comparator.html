@@ -213,8 +213,11 @@
 
   <div class="row" *ngIf="comparison">
     <div class="col-lg-6">
-      <span *ngIf="comparison.status > 0 && profLevel" style="margin-right: 10px">
+      <span *ngIf="(comparison.status == 1 || comparison.status == 2) && profLevel" style="margin-right: 10px">
         Annotation {{comparison.annotationID}}
+      </span>
+      <span *ngIf="comparison.status == 3 && profLevel" style="margin-right: 10px">
+        {{comparison.diseaseDB.toUpperCase()}} annotation
       </span>
       <div dropdown keyboardNav="true" *ngIf="comparison.status <= 0 && profLevel" style="display: inline">
         <a href class="btn btn-secondary dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false" dropdownToggle>
@@ -238,13 +241,15 @@
     <div class="col-lg-6" *ngIf="comparison.released || profLevel">
       <div dropdown keyboardNav="true" style="display: inline" *ngIf="profLevel">
         <a href class="btn btn-secondary dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false" dropdownToggle>
-          <i *ngIf="comparison.annotationID !== comparison.compareToAnnotationID">Annotation {{comparison.compareToAnnotationID}}</i>
+          <i *ngIf="comparison.annotationID !== comparison.compareToAnnotationID && comparison.compareToNumLikes != -1">Annotation {{comparison.compareToAnnotationID}}</i>
+          <i *ngIf="comparison.annotationID !== comparison.compareToAnnotationID && comparison.compareToNumLikes == -1">{{comparison.diseaseDB.toUpperCase()}} annotation</i>
           <i *ngIf="comparison.annotationID === comparison.compareToAnnotationID">No standard</i>
         </a>
         <ul class="dropdown-menu" role="menu" aria-labelledby="simple-btn-keyboard-nav">
           <li role="menuitem" *ngFor="let annotation of comparison.annotations">
             <a class="dropdown-item" style="cursor:pointer" (click)="gotoComparison(comparison.annotationID, annotation.annotationID)">
-              <i>Annotation {{annotation.annotationID}} (<i class="fa fa-thumbs-up" aria-hidden="true"></i> {{annotation.numLikes}})</i>
+              <i *ngIf="!(annotation.numLikes == -1)">Annotation {{annotation.annotationID}} (<i class="fa fa-thumbs-up" aria-hidden="true"></i> {{annotation.numLikes}})</i>
+              <i *ngIf="annotation.numLikes == -1">{{comparison.diseaseDB.toUpperCase()}} annotation</i>
             </a>
           </li>
           <li role="menuitem" *ngIf="comparison.status <= 0">
@@ -285,12 +290,13 @@
         <strong>
           {{system.systemName}}
         </strong>
-        <span *ngIf="comparison.status === -2">
+        <span>
           <button class="btn btn-sm btn-secondary" style="margin-top: -3.5px; margin-left: 10px; float: right" *ngIf="profLevel && comparison.status === -2" title="Edit system comment" (click)="lgModal.show();editSystemComment(system)">
             <i class="fa fa-comment"></i>
           </button>
           <input type="range" name="{{system.systemHPO}}" min="0" max="100" style="float: right; margin-left: 10px;  margin-top: 4.5px" value="{{system.systemScore * 100}}" *ngIf="profLevel && comparison.status === -2" (mouseup)="setSystemScoreEvent($event)" />
           <span style="float: right">{{round(system.systemScore * 100)}}%</span>
+          <span style="float: right" *ngIf="comparison.status !== -2">Similarity:&nbsp;</span>
           <div class="ok" (click)="setSystemScore(system.systemHPO, system.systemScore)" title="This system score was automatically calculated. Click (or edit the system score) to confirm that it is correct." *ngIf="!system.systemScoreSet && comparison.status <= 0"></div>
         </span>
       </div>
