@@ -40,6 +40,8 @@ export class ExerciseComponent implements OnInit {
       scope.exercise.dateEnd = scope.dateEnd;
       if (scope.dateStart && scope.dateStart <= scope.dateNow)
         scope.showNumbers = true;
+      for (let i = 0; i < scope.exercise.submissions.length; i++)
+        scope.exercise.submissions[i].dateSubmittedFormatted = new Date(scope.exercise.submissions[i].dateSubmitted);
     };
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
@@ -495,5 +497,25 @@ export class ExerciseComponent implements OnInit {
       jQuery('#omim-form').show();
       jQuery('#ordo-form').hide();
     }
+  }
+  sortSubmissions(mode: number) {
+    let scope = this;
+    let finishSortSubmissions = function(data: any) {
+      scope.exercise = data;
+      for (let i = 0; i < scope.exercise.submissions.length; i++)
+        scope.exercise.submissions[i].dateSubmittedFormatted = new Date(scope.exercise.submissions[i].dateSubmitted);
+    };
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'exerciseID': this.exercise.exerciseID,
+      'sortMode': mode
+    });
+    this._http.post(globals.backendURL + '/restricted/exercise/prof/view', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishSortSubmissions(data),
+        err => console.log(err),
+        () => console.log('Sorted submissions')
+      );
   }
 }

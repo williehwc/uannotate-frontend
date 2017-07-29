@@ -50,6 +50,7 @@ export class LoginComponent {
       localStorage.removeItem('uaPhenositoryFilter');
       localStorage.removeItem('uaPhenositoryOffset');
       localStorage.removeItem('uaPhenositoryFollowing');
+      localStorage.removeItem('uaSuggestAnnotationForComparison');
       Cookie.set('token', data.cookie, 30, '/', globals.domainName);
       if (data.resetKeyUsed) {
         scope._router.navigate(['/dashboard', '/account']);

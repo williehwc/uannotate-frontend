@@ -44,8 +44,8 @@
           <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true">
             {{ alert?.msg }}
           </alert>
-          <p>Users with invite codes can get instant access to professor/researcher accounts. Here, you can generate up to 10 invite codes to send to your colleagues. Please email us at <a href="mailto:{{phenotateEmail}}">{{phenotateEmail}}</a> if you need more.</p>
-          <p><strong>Please do not manipulate Phenository recommendations by creating and using multiple professor/researcher accounts. All offending accounts will be disabled.</strong></p>
+          <p>Users with invite codes can get instant access to expert accounts (for researchers and course instructors). Here, you can generate up to 10 invite codes to send to your colleagues. Please email us at <a href="mailto:{{phenotateEmail}}">{{phenotateEmail}}</a> if you need more.</p>
+          <p><strong>Please do not manipulate Phenository recommendations by creating and using multiple expert accounts. All offending accounts will be disabled.</strong></p>
           <div class="table-responsive" *ngIf="inviteCodes.length > 0">
             <table class="table table-hover table-sm">
               <thead class="thead-inverse">

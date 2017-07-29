@@ -27,6 +27,7 @@ export class PhenositoryComponent {
   diseaseOfTheDayDB: string = 'omim';
   diseaseNameDB: string = 'omim';
   noDiseaseOfTheDay: boolean = false;
+  prefillAvailable: boolean = true;
   alerts: Array<Object> = [];
   constructor( private _router: Router, private _http: Http) {
     let scope = this;
@@ -47,6 +48,7 @@ export class PhenositoryComponent {
       }
       scope.checkFollowing();
       scope.listDiseaseAnnotations();
+      scope.newAnnotationPrecheck();
     };
     this._http.get(globals.backendURL + '/solr/omim/' + ((now.getFullYear() - 2000) * dayOfTheYear), globals.options) //ORPHA TODO
       .map(res => res.json())
@@ -123,17 +125,39 @@ export class PhenositoryComponent {
     localStorage.setItem('uaPhenositoryDiseaseDB', setDiseaseNameDB);
     this._router.navigate(['/dashboard', '/phenository-reload']);
   }
+  newAnnotationPrecheck() {
+    let scope = this;
+    let finishPrecheck = function (data:any) {
+      scope.prefillAvailable = data.prefillAvailable;
+    };
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'diseaseName': this.diseaseName.substr(0, this.diseaseName.indexOf(' ')).replace(/[^0-9]/g, ''),
+      'vocabulary': this.diseaseNameDB
+    });
+    this._http.post(globals.backendURL + '/restricted/annotations/new-annotation-precheck', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishPrecheck(data),
+        err => console.log(err),
+        () => console.log('Created annotation')
+      );
+  }
   listDiseaseAnnotations() {
     let gotAnnotations = function (data:any) {
       let tableBody = '';
-      let adminIcon = ' <i class="fa fa-shield" title="Phenotate administrator"></i>';
       for (let i = 0; i < data.annotations.length; i++) {
         tableBody += '<tr style="cursor: pointer" onclick="localStorage.setItem(\'uaAnnotationTemp\',\'' +
           data.annotations[i].annotationID + '\')">';
         tableBody += '<td>' + data.annotations[i].annotationID + '</td>';
         tableBody += '<td>' + ((data.annotations[i].cloneOf) ? data.annotations[i].cloneOf : '–' ) + '</td>';
         tableBody += '<td>' + data.annotations[i].author;
-        tableBody += ((data.annotations[i].authorAdmin) ? adminIcon : '' ) + '</td>';
+        if (data.annotations[i].authorAdmin) {
+          tableBody += ' <i class="fa fa-shield" title="Phenotate administrator"></i>';
+        } else if (data.annotations[i].authorProf) {
+          tableBody += ' <i class="fa fa-user-md" title="Expert annotator"></i>';
+        }
+        tableBody += '</td>';
         tableBody += '<td>' + data.annotations[i].numClones + '</td>';
         tableBody += '<td>' + data.annotations[i].numLikes + '</td>';
         tableBody += '<td>' + data.annotations[i].date + '</td>';

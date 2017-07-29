@@ -23,14 +23,20 @@
 					<div class="form-group">
 						<input type="text" [(ngModel)]="inviteJoinCode" class="form-control input-underline input-lg" id="" placeholder="Invite/join code (optional)">
 					</div>
+					<p>By creating an account, you indicate that you have read and agreed to the <a style="color:white;text-decoration:underline;" href="https://docs.google.com/document/d/e/2PACX-1vTMLgJm2d4vCi_qrrnAfd44DIR7bygr3a07h8EeP4eC16N0BfMVUVXSOq0jtVhQoqoKYX1TFX0GKhFQ/pub" target="_blank">Consent, Disclaimer, and Privacy Policy</a>.</p>
 					<h7 *ngIf="errorBlank"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <em>All fields are required</em></h7>
 					<h7 *ngIf="errorPasswordMatch"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <em>Passwords don't match</em></h7>
 					<h7 *ngIf="errorEmailTaken"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <em>Please use another email address</em></h7>
 					<h7 *ngIf="errorInvalidCode"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <em>Invalid join/access code</em></h7>
 				</div>
-				<a type="submit" class="btn rounded-btn" (click)="gotoDashboard()"> Register </a>&nbsp;
-				<a type="submit" class="btn rounded-btn" (click)="gotoLogin()"> Login page </a>
+				<a type="submit" class="btn rounded-btn" (click)="gotoDashboard()"><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Register</a>&nbsp;
+				<a type="submit" class="btn rounded-btn" (click)="gotoLogin()">Login page</a>
 			</form>
+			<br />
+      <br />
+      <p><strong>Safari users</strong>: You will not be able to log into Phenotate with Private Browsing enabled.</p>
+      <p><strong>EU residents</strong>: Cookies are used beyond this point to provide a personalized experience on our website. By logging in or registering, you agree to our use of cookies.</p>
+      <p><strong>Notice</strong>: Logging into Phenotate will also log you into Phenotate Community. If you're using a public computer, please be aware that logging out of Phenotate does not automatically log you out of Phenotate Community (you will have to log out manually).</p>
 		</div>
 	</div>
 </div>

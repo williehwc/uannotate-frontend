@@ -49,7 +49,7 @@
             <!-- Account type -->
             <h4>Account type</h4>
             <p>Your account type is <strong>{{levelString}}</strong>.</p>
-            <p *ngIf="upgradeAccount && classes.length == 0">If you have an invite code, enter it here to get access to professor/researcher features, including the Phenository.</p>
+            <p *ngIf="upgradeAccount && classes.length == 0">If you have an invite code, enter it here to get access to expert (instructor/researcher) features, including the Phenository.</p>
             <form role="form" *ngIf="upgradeAccount && classes.length == 0">
               <fieldset class="form-group">
                 <input [(ngModel)]="inviteCode" class="form-control" placeholder="Invite code">
@@ -58,7 +58,7 @@
               <br />
               <br />
             </form>
-            <p *ngIf="upgradeAccount"><span *ngIf="classes.length == 0">Don't have an invite code? </span>Please email us at <a href="mailto:{{phenotateEmail}}">{{phenotateEmail}}</a> to upgrade your account to professor/researcher.</p>
+            <p *ngIf="upgradeAccount"><span *ngIf="classes.length == 0">Don't have an invite code? </span>Please email us at <a href="mailto:{{phenotateEmail}}">{{phenotateEmail}}</a> to upgrade your account to expert (for researchers and course instructors).</p>
 
             <button type="submit" class="btn btn-secondary" (click)="showEmailPrefs = true; savedEmailPrefs = false" *ngIf="!upgradeAccount && !showEmailPrefs">Email preferences</button>
             <span *ngIf="savedEmailPrefs" style="margin-left: 10px;"><i class="fa fa-check" aria-hidden="true"></i> Saved</span>
@@ -69,10 +69,10 @@
 
               <!-- Email preferences -->
               <h4>Email preferences</h4>
-              <p *ngIf="emailFollow">You receive an email whenever another professor/researcher publishes an annotation of a disease that you are watching. <a style="cursor: pointer" (click)="updateEmailPrefs(0, null)">Change</a></p>
-              <p *ngIf="!emailFollow">You <strong>don't</strong> receive an email whenever another professor/researcher publishes an annotation of a disease that you are watching. <a style="cursor: pointer" (click)="updateEmailPrefs(1, null)">Change</a></p>
-              <p *ngIf="emailLike">You receive an email whenever another professor/researcher publishes an annotation of a disease that has an annotation you recommend. <a style="cursor: pointer" (click)="updateEmailPrefs(null, 0)">Change</a></p>
-              <p *ngIf="!emailLike">You <strong>don't</strong> receive an email whenever another professor/researcher publishes an annotation of a disease that has an annotation you recommend. <a style="cursor: pointer" (click)="updateEmailPrefs(null, 1)">Change</a></p>
+              <p *ngIf="emailFollow">You receive an email whenever another user publishes an annotation of a disease that you are watching. <a style="cursor: pointer" (click)="updateEmailPrefs(0, null)">Change</a></p>
+              <p *ngIf="!emailFollow">You <strong>don't</strong> receive an email whenever another user publishes an annotation of a disease that you are watching. <a style="cursor: pointer" (click)="updateEmailPrefs(1, null)">Change</a></p>
+              <p *ngIf="emailLike">You receive an email whenever another user publishes an annotation of a disease that has an annotation you recommend. <a style="cursor: pointer" (click)="updateEmailPrefs(null, 0)">Change</a></p>
+              <p *ngIf="!emailLike">You <strong>don't</strong> receive an email whenever another user publishes an annotation of a disease that has an annotation you recommend. <a style="cursor: pointer" (click)="updateEmailPrefs(null, 1)">Change</a></p>
 
             </div>
 

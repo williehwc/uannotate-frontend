@@ -6,14 +6,8 @@
         <a [routerLink]="['/dashboard', '/home']" class="list-group-item">
             <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-dashboard"></i></span> Dashboard
         </a>
-        <a [routerLink]="['/dashboard', '/in-progress']" class="list-group-item" (dblclick)="gotoAnnotationID()" title="Double-click to jump to an annotation ID." *ngIf="profLevel">
-            <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-pencil"></i></span> Annotator
-        </a>
-        <a [routerLink]="['/dashboard', '/in-progress']" class="list-group-item" (dblclick)="gotoAnnotationID()" *ngIf="studentLevel">
-          <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-pencil"></i></span> Annotator
-        </a>
-        <a [routerLink]="['/dashboard', '/comparator']" class="list-group-item">
-          <span style="display: inline-block;width: 20px;"><i class="fa fa-columns"></i></span> Comparator
+        <a *ngIf="studentLevel" [routerLink]="['/dashboard', '/my-annotations-student']" class="list-group-item">
+          <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-folder"></i></span> My annotations
         </a>
         <a *ngIf="profLevel" [routerLink]="['/dashboard', '/my-annotations']" class="list-group-item">
           <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-folder"></i></span> My annotations
@@ -53,6 +47,16 @@
         </a>
         <a *ngIf="profLevel" [routerLink]="['/dashboard', '/help-prof']" class="list-group-item">
           <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-question"></i></span> Help
+        </a>
+        <br />
+        <a [routerLink]="['/dashboard', '/in-progress']" class="list-group-item" (dblclick)="gotoAnnotationID()" title="Double-click to jump to an annotation ID." *ngIf="profLevel">
+            <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-pencil"></i></span> Annotator
+        </a>
+        <a [routerLink]="['/dashboard', '/in-progress']" class="list-group-item" (dblclick)="gotoAnnotationID()" *ngIf="studentLevel">
+          <span style="display: inline-block;width: 20px;"><i class="fa fa-fw fa-pencil"></i></span> Annotator
+        </a>
+        <a [routerLink]="['/dashboard', '/comparator']" class="list-group-item">
+          <span style="display: inline-block;width: 20px;"><i class="fa fa-columns"></i></span> Comparator
         </a>
     </ul>
 </nav>

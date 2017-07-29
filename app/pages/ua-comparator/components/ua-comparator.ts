@@ -151,6 +151,10 @@ export class ComparatorComponent {
       scope.calculateScore();
     };
     let initializeComparison = function (data:any) {
+      if (data.tryAgainLater) {
+        scope.gotoComparison(annotationID, compareToAnnotationID);
+        return;
+      }
       console.log(data);
       scope.alerts = [];
       scope.comparison = data;
@@ -185,8 +189,9 @@ export class ComparatorComponent {
           () => console.log('Got names')
         );
     };
-    let cannotInitializeComparison = function () {
+    let cannotInitializeComparison = function (err:any) {
       scope.alerts = [];
+      console.log(err);
       scope.alerts.push({
         type: 'danger',
         msg: 'Comparator is not available for this annotation',
@@ -196,17 +201,21 @@ export class ComparatorComponent {
     let body = JSON.stringify({
       'token': localStorage.getItem('uaToken'),
       'annotationID': annotationID,
-      'compareToAnnotationID': compareToAnnotationID
+      'compareToAnnotationID': compareToAnnotationID,
+      'suggestAnnotationID': localStorage.getItem('uaSuggestAnnotationForComparison')
     });
     this._http.post(globals.backendURL + '/restricted/annotation/compare', body, globals.options)
       .map(res => res.json())
       .subscribe(
         data => initializeComparison(data),
-        err => cannotInitializeComparison(),
+        err => cannotInitializeComparison(err),
         () => console.log('Got full comparison')
       );
+    localStorage.removeItem('uaSuggestAnnotationForComparison');
   }
-  goToAnnotator(annotationID: number) {
+  goToAnnotator(annotationID: number, storeAnnotationIDAsSuggestion: boolean) {
+    if (storeAnnotationIDAsSuggestion)
+      localStorage.setItem('uaSuggestAnnotationForComparison', this.comparison.annotationID);
     this._router.navigate(['/dashboard', '/in-progress', annotationID]);
   }
   gotoPhenository(diseaseDB: string, diseaseName: string) {

@@ -106,7 +106,7 @@
               New
             </button>
             <ul class="dropdown-menu" role="menu" aria-labelledby="simple-btn-keyboard-nav">
-              <li role="menuitem"><a class="dropdown-item" (click)="createAnnotation(false, false)" style="cursor: pointer">From {{diseaseNameDB.toUpperCase()}}</a></li>
+              <li role="menuitem"><a class="dropdown-item" (click)="createAnnotation(false, false)" style="cursor: pointer" *ngIf="prefillAvailable">From {{diseaseNameDB.toUpperCase()}}</a></li>
               <li role="menuitem"><a class="dropdown-item" (click)="createAnnotation(true, false)" style="cursor: pointer">From scratch</a></li>
             </ul>
           </div>

@@ -1,0 +1,61 @@
+<div class="container-fluid">
+
+  <!-- Page Heading -->
+  <div class="row">
+    <div class="col-lg-12">
+      <h2 class="page-header">
+        My annotations
+      </h2>
+      <ol class="breadcrumb">
+        <li class="active">
+          <i class="fa fa-info-circle"></i> Here are the annotations you are working on or have submitted for points and PhenoCash.
+        </li>
+      </ol>
+    </div>
+  </div>
+  
+  <div class="row">
+    
+    <div class="col-lg-8">
+      <div class="table-responsive">
+        <table id="table-my-annotations" class="table table-hover table-sm">
+          <thead class="thead-default">
+          <tr>
+            <th>
+              ID
+            </th>
+            <th>
+              Disease
+            </th>
+            <th>
+              Reward
+            </th>
+            <th>
+              Date created
+            </th>
+          </tr>
+          </thead>
+          <tbody id="table-body-my-annotations">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card card-block">
+        <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true">
+          {{ alert?.msg }}
+        </alert>
+        <p>You're using {{numInProgressAnnotations}} out of {{numAnnotationSlots}} annotation slots.</p>
+        <button class="btn btn-primary" (click)="addAnnotationSlot()" [disabled]="costInPhenocashToAddAnnotationSlot > phenocashBalance">
+          Get one more ({{costInPhenocashToAddAnnotationSlot}} PhenoCash)
+        </button>
+        <br />
+        <br />
+        <p style="opacity: 0.5"><em>You have {{phenocashBalance}} PhenoCash.</em></p>
+      </div>
+    </div>
+    
+  </div>
+  
+</div>

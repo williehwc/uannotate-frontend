@@ -61,7 +61,7 @@ export class SidebarComponent {
       } else {
         scope.studentLevel = false;
         scope.profLevel = true;
-        let profColor = '#607D8B';
+        let profColor = '#0272A6';
         jQuery('.topnav').css('background-color', profColor);
         jQuery('#toggle-sidebar').css('background-color', profColor);
       }

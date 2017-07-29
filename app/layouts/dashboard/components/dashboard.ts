@@ -17,6 +17,8 @@ import {AccountComponent} from '../../../pages/ua-account/components/ua-account'
 import {PhenositoryReloadComponent} from '../../../pages/ua-phenository-reload/components/ua-phenository-reload';
 import {SubmitComponent} from '../../../pages/ua-submit/components/ua-submit';
 import {InviteComponent} from '../../../pages/ua-invite/components/ua-invite';
+import {MyAnnotationsStudentComponent} from '../../../pages/ua-my-annotations-student/components/ua-my-annotations-student';
+import {ResultComponent} from '../../../pages/ua-result/components/ua-result';
 
 import {TopNavComponent} from '../../../shared/topnav/topnav';
 import {SidebarComponent} from '../../../shared/sidebar/sidebar';
@@ -47,7 +49,9 @@ import {SidebarComponent} from '../../../shared/sidebar/sidebar';
   { path: '/account', component: AccountComponent},
   { path: '/phenository-reload', component: PhenositoryReloadComponent},
   { path: '/submit/:id', component: SubmitComponent},
-  { path: '/invite', component: InviteComponent}
+  { path: '/invite', component: InviteComponent},
+  { path: '/my-annotations-student', component: MyAnnotationsStudentComponent},
+  { path: '/result/:id', component: ResultComponent}
 ])
 
 export class DashboardComponent { }

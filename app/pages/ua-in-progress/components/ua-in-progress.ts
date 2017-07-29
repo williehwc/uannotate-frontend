@@ -867,18 +867,27 @@ export class InProgressComponent implements OnInit {
         return;
       }
     }
-    if (!confirm('Publish this annotation to the Phenository? You will not be able to change it afterwards.'))
-      return;
+    if (this.profLevel) {
+      if (!confirm('Publish this annotation to the Phenository? You will not be able to change it afterwards.'))
+        return;
+    } else {
+      if (!confirm('Submit this annotation now? You will not be able to change it afterwards.'))
+        return;
+    }
     let finishPublish = function (data: any) {
       if (data.success) {
-        scope.gotoAnnotation(scope.annotation.annotationID,
-          document.documentElement.scrollTop || document.body.scrollTop, false, false);
-        scope.loading = true;
-        scope.alerts.push({
-          type: 'success',
-          msg: 'Annotation published! By publishing this annotation, you recommend it for this disease.',
-          closable: true
-        });
+        if (scope.profLevel) {
+          scope.gotoAnnotation(scope.annotation.annotationID,
+            document.documentElement.scrollTop || document.body.scrollTop, false, false);
+          scope.loading = true;
+          scope.alerts.push({
+            type: 'success',
+            msg: 'Annotation published! By publishing this annotation, you recommend it for this disease.',
+            closable: true
+          });
+        } else {
+          scope._router.navigate(['/dashboard', '/result', scope.annotation.annotationID]);
+        }
       } else if (data.exactDuplicate) {
         scope.alerts.push({
           type: 'danger',
@@ -895,7 +904,7 @@ export class InProgressComponent implements OnInit {
       } else if (data.refs.length > 0) {
         scope.alerts.push({
           type: 'danger',
-          msg: 'Please assign or remove unused reference(s): ' + data.refs.toString(),
+          msg: 'Please assign or remove unused reference(s): ' + data.refs.join(', '),
           closable: true
         });
       } else {
@@ -910,13 +919,23 @@ export class InProgressComponent implements OnInit {
       'token': localStorage.getItem('uaToken'),
       'annotationID': this.annotation.annotationID
     });
-    this._http.post(globals.backendURL + '/restricted/annotation/edit/prof/publish', body, globals.options)
-      .map(res => res.json())
-      .subscribe(
-        data => finishPublish(data),
-        err => console.log(err),
-        () => console.log('Published (or not)')
-      );
+    if (this.profLevel) {
+      this._http.post(globals.backendURL + '/restricted/annotation/edit/prof/publish', body, globals.options)
+        .map(res => res.json())
+        .subscribe(
+          data => finishPublish(data),
+          err => console.log(err),
+          () => console.log('Published (or not)')
+        );
+    } else {
+      this._http.post(globals.backendURL + '/restricted/annotation/edit/student/publish', body, globals.options)
+        .map(res => res.json())
+        .subscribe(
+          data => finishPublish(data),
+          err => console.log(err),
+          () => console.log('Submitted (or not)')
+        );
+    }
   }
   likeAnnotation(like: boolean) {
     let scope = this;
@@ -958,11 +977,16 @@ export class InProgressComponent implements OnInit {
       'token': localStorage.getItem('uaToken'),
       'annotationID': this.annotation.annotationID,
     });
-    this._http.post(globals.backendURL + '/restricted/annotation/prof/clone', body, globals.options)
+    this._http.post(globals.backendURL + '/restricted/annotation/clone', body, globals.options)
       .map(res => res.json())
       .subscribe(
         data => finishClone(data),
-        err => console.log(err),
+        err => scope.alerts.push({
+          type: 'danger',
+          msg: 'Can\'t clone. Possible reasons: no more annotation slots, ' +
+            'already working on an annotation of this disease, or reached annotation limit for this disease',
+          closable: true
+        }),
         () => console.log('Cloned')
       );
   }

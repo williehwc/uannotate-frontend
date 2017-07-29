@@ -218,7 +218,7 @@
         Annotator
       </h2>
       <h2 class="page-header" *ngIf="annotation != null && annotation.status == 1">
-        <span style="background: black;color: white;"><i class="fa fa-fw fa-pencil"></i></span> {{annotation.disease.diseaseName}}
+        <span style="background: black;color: white;"><i class="fa fa-fw fa-pencil"></i></span> {{annotation.disease.diseaseName}} <i class="fa fa-male" *ngIf="annotation.nOfOne" title="This annotation describes one particular patient."></i>
       </h2>
       <h2 class="page-header" id="exercise-header" *ngIf="annotation != null && annotation.status <= 0">
         {{annotation.exerciseName}}
@@ -227,29 +227,34 @@
         </a>
       </h2>
       <h2 class="page-header" *ngIf="annotation != null && (annotation.status == 2 || annotation.status == 3)">
-        <span style="background: black;color: white;" *ngIf="annotation.status == 2">&nbsp;{{annotation.annotationID}}&nbsp;</span> {{annotation.disease.diseaseName}}
+        <span style="background: black;color: white;" *ngIf="annotation.status == 2">&nbsp;{{annotation.annotationID}}&nbsp;</span> {{annotation.disease.diseaseName}} <i class="fa fa-male" *ngIf="annotation.nOfOne" title="This annotation describes one particular patient."></i>
       </h2>
       <ol class="breadcrumb" *ngIf="annotation != null">
         <li class="inactive" *ngIf="annotation.status == 1 || annotation.status == -1">
           <i class="fa fa-info-circle"></i> Created on {{annotation.dateCreated}} by {{annotation.author.userName}}
           <span *ngIf="annotation.author.userAdmin"><i class="fa fa-shield" title="Phenotate administrator"></i></span>
+          <span *ngIf="annotation.author.userProf && !annotation.author.userAdmin"><i class="fa fa-hand-o-up" title="Expert annotator"></i></span>
           <span *ngIf="!annotation.author.userAdmin">&lt;{{annotation.author.userEmail}}&gt;</span>
         </li>
         <li class="inactive" *ngIf="annotation.status == 2">
           <i class="fa fa-info-circle"></i> Published on {{annotation.datePublished}} by {{annotation.author.userName}}
           <span *ngIf="annotation.author.userAdmin"><i class="fa fa-shield" title="Phenotate administrator"></i></span>
+          <span *ngIf="annotation.author.userProf && !annotation.author.userAdmin"><i class="fa fa-user-md" title="Expert annotator"></i></span>
           <span *ngIf="!annotation.author.userAdmin">&lt;{{annotation.author.userEmail}}&gt;</span>
         </li>
         <li class="inactive" *ngIf="annotation.status == -2">
           <i class="fa fa-info-circle"></i> Submitted on {{annotation.datePublished}} by {{annotation.author.userName}}
           &lt;{{annotation.author.userEmail}}&gt;
         </li>
-        <li class="active" *ngIf="annotation.status > 0 && annotation.cloneOf === null">
+        <li class="active" *ngIf="profLevel && annotation.status > 0 && annotation.cloneOf === null">
           <span *ngIf="annotation.status != 3">Based on </span>{{annotation.disease.diseaseDB.toUpperCase()}}<span *ngIf="annotation.status == 3"> annotation (unmodified)</span>
         </li>
-        <li class="active" *ngIf="annotation.status > 0 && annotation.cloneOf !== null" (click)="jumpToAnnotation(annotation.cloneOf)" style="cursor: pointer">
+        <li class="active" *ngIf="profLevel && annotation.status > 0 && annotation.cloneOf !== null" (click)="jumpToAnnotation(annotation.cloneOf)" style="cursor: pointer">
           <i class="fa fa-code-fork" aria-hidden="true"></i>
           Based on annotation {{annotation.cloneOf}}
+        </li>
+        <li class="active" *ngIf="studentLevel && annotation.status > 0 && (annotation.rewardInPoints || annotation.rewardInPhenocash)">
+          Reward: {{annotation.rewardInPoints}} pts + {{annotation.rewardInPhenocash}} <i class="fa fa-money" aria-hidden="true"></i>
         </li>
       </ol>
       <alert *ngFor="let alert of alerts;let i = index" [type]="alert.type" dismissible="true">
@@ -257,7 +262,8 @@
       </alert>
       <div *ngIf="annotation != null">
         <button class="btn btn-primary" (click)="publishAnnotation()" *ngIf="annotation.status == 1" [disabled]="annotation.phenotypes.length == 0">
-          <i class="fa fa-cloud-upload" aria-hidden="true"></i> Publish
+          <span *ngIf="profLevel"><i class="fa fa-cloud-upload" aria-hidden="true"></i> Publish</span>
+          <span *ngIf="studentLevel">Submit</span>
         </button>
         <button class="btn btn-danger" (click)="deleteAnnotation()" *ngIf="annotation.status == 1">
           Delete
@@ -282,6 +288,9 @@
         </button>
         <button class="btn btn-secondary" (click)="cloneAnnotation()" *ngIf="!studentLevel && profLevel && annotation.status == 2">
           <i class="fa fa-clone" aria-hidden="true"></i> Clone
+        </button>
+        <button class="btn btn-primary" (click)="cloneAnnotation()" *ngIf="studentLevel && !profLevel && annotation.status == 2">
+          <i class="fa fa-clone" aria-hidden="true"></i> Clone and improve
         </button>
         <button class="btn btn-primary" (click)="createAnnotation()" *ngIf="!studentLevel && profLevel && annotation.status == 3">
           New annotation from {{annotation.disease.diseaseDB.toUpperCase()}}
@@ -402,7 +411,8 @@
                 <h6 title="{{phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through; margin-top:3px; margin-left: 85px" *ngIf="phenotype.observed == 0 && studentLevel">{{phenotype.phenotypeName}}</h6>
                 <h6 title="{{phenotype.hpo}} {{phenotype.phenotypeDefinition}}" style="cursor:help; color:#d9534f; text-decoration: line-through; margin-top:3px; margin-left: 85px" *ngIf="phenotype.observed == 0 && profLevel">{{phenotype.phenotypeName}}</h6>
                 <div class="row" style="margin-top: 22px" *ngIf="phenotype.observed == 1">
-                  <div [class]="(phenotype.frequency != -1 && phenotype.frequency != 1) ? 'col-lg-3' : 'col-lg-6'">
+                  <div class="col-lg-6" *ngIf="annotation.nOfOne"></div>
+                  <div [class]="(phenotype.frequency != -1 && phenotype.frequency != 1) ? 'col-lg-3' : 'col-lg-6'" *ngIf="!annotation.nOfOne">
                     <select class="form-control" [(ngModel)]="phenotype.frequency" (change)="setFrequency(phenotype.phenotypeID, $event.target.value, phenotype.frequencyTo)" style="color:black">
                       <option value="-1">Frequency unsure</option>
                       <option value="0.01">Very rare (1%)</option>
@@ -417,7 +427,7 @@
                       <option value="0">Other…</option>
                     </select>
                   </div>
-                  <div class="col-lg-3" *ngIf="phenotype.frequency != -1 && phenotype.frequency != 1">
+                  <div class="col-lg-3" *ngIf="phenotype.frequency != -1 && phenotype.frequency != 1" *ngIf="!annotation.nOfOne">
                     <select class="form-control" [(ngModel)]="phenotype.frequencyTo" (change)="setFrequency(phenotype.phenotypeID, phenotype.frequency, $event.target.value)" style="color:black">
                       <option value="-1">No range</option>
                       <option *ngIf="phenotype.frequency < 0.05" value="0.05">to rare (5%)</option>

@@ -232,14 +232,14 @@
         </ul>
       </div>
       <span *ngIf="studentLevel" style="margin-right: 10px">
-        Response
+        Your annotation
       </span>
-      <button class="btn btn-secondary" title="Open in Annotator" (click)="goToAnnotator(comparison.annotationID)">
+      <button class="btn btn-secondary" title="Open in Annotator" (click)="goToAnnotator(comparison.annotationID, false)">
         <i class="fa fa-fw fa-pencil"></i>
       </button>
     </div>
-    <div class="col-lg-6" *ngIf="comparison.released || profLevel">
-      <div dropdown keyboardNav="true" style="display: inline" *ngIf="profLevel">
+    <div class="col-lg-6" *ngIf="comparison.released || profLevel || comparison.status > 0">
+      <div dropdown keyboardNav="true" style="display: inline" *ngIf="profLevel || comparison.status > 0">
         <a href class="btn btn-secondary dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false" dropdownToggle>
           <i *ngIf="comparison.annotationID !== comparison.compareToAnnotationID && comparison.compareToNumLikes != -1">Annotation {{comparison.compareToAnnotationID}}</i>
           <i *ngIf="comparison.annotationID !== comparison.compareToAnnotationID && comparison.compareToNumLikes == -1">{{comparison.diseaseDB.toUpperCase()}} annotation</i>
@@ -259,10 +259,10 @@
           </li>
         </ul>
       </div>
-      <span *ngIf="comparison.annotationID !== comparison.compareToAnnotationID && studentLevel" style="margin-right: 10px">
+      <span *ngIf="comparison.annotationID !== comparison.compareToAnnotationID && studentLevel && comparison.status < 0" style="margin-right: 10px">
         <i>Standard</i>
       </span>
-      <button class="btn btn-secondary" title="Open in Annotator" (click)="goToAnnotator(comparison.compareToAnnotationID)" *ngIf="comparison.annotationID !== comparison.compareToAnnotationID">
+      <button class="btn btn-secondary" title="Open in Annotator" (click)="goToAnnotator(comparison.compareToAnnotationID, true)" *ngIf="comparison.annotationID !== comparison.compareToAnnotationID">
         <i class="fa fa-fw fa-pencil"></i>
       </button>
     </div>
@@ -275,15 +275,25 @@
 
   <div *ngIf="comparison && comparison.annotationID === comparison.compareToAnnotationID && studentLevel && comparison.released">
     <br />
-    <strong>Your professor or teaching assistant has not released a standard to which you can compare your annotation. Please contact him/her if you have questions about your score.</strong>
+    <strong>Your instructor or teaching assistant has not released a standard to which you can compare your annotation. Please contact him/her if you have questions about your score.</strong>
   </div>
 
-  <div *ngIf="comparison && studentLevel && !comparison.released">
+  <div *ngIf="comparison && comparison.annotationID === comparison.compareToAnnotationID && studentLevel && comparison.status === 2">
+    <br />
+    <strong>There are currently no annotations to compare to.</strong>
+  </div>
+  
+  <div *ngIf="comparison && comparison.annotationID === comparison.compareToAnnotationID && studentLevel && !comparison.released && comparison.status === 1">
+    <br />
+    <strong>You can't compare your annotation while you are working on it, unless you have already submitted an annotation for this disease.</strong>
+  </div>
+  
+  <div *ngIf="comparison && studentLevel && !comparison.released && comparison.status < 1">
     <br />
     <strong>There are currently no annotations to compare to.</strong>
   </div>
 
-  <div class="row" *ngIf="comparison && ((comparison.annotationID !== comparison.compareToAnnotationID && profLevel) || (((comparison.released && comparison.standard) || profLevel) && comparison.status === -2))">
+  <div class="row" *ngIf="comparison && ((comparison.annotationID !== comparison.compareToAnnotationID && (profLevel || comparison.status > 0)) || (((comparison.released && comparison.standard) || profLevel) && comparison.status === -2))">
     <div class="col-lg-12" *ngFor="let system of comparison.systems">
       <br />
       <div class="card card-block card-header">

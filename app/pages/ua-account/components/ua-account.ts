@@ -31,10 +31,10 @@ export class AccountComponent {
     let scope = this;
     let gotLevelAndEmail = function (data: any) {
       if (data.level === 0) {
-        scope.levelString = 'student';
+        scope.levelString = 'general/student';
         scope.upgradeAccount = true;
       } else {
-        scope.levelString = 'professor/researcher';
+        scope.levelString = 'expert';
         scope.upgradeAccount = false;
         if (data.emailFollow === 0)
           scope.emailFollow = false;

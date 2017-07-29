@@ -20,6 +20,7 @@ export class MyAnnotationsComponent implements OnInit {
   newAnnotationDisease: string;
   newAnnotationDiseaseDB: string = 'ordo';
   typeAheadBox: string;
+  prefillAvailable: boolean = true;
   alerts: Array<Object> = [];
   constructor( private _router: Router, private _http: Http) {
     let gotMyAnnotations = function (data: any) {
@@ -54,7 +55,6 @@ export class MyAnnotationsComponent implements OnInit {
         err => console.log(err),
         () => console.log('Got my annotations')
       );
-
   }
   @HostListener('document:click') onMouseEnter() {
     if (localStorage.getItem('uaAnnotationTemp')) {
@@ -130,6 +130,7 @@ export class MyAnnotationsComponent implements OnInit {
     this.diseaseSelected = true;
     this.checkFollowing();
     this.listDiseaseAnnotations();
+    this.newAnnotationPrecheck();
   }
   clearDisease() {
     jQuery('.col-lg-5').attr('class', 'col-lg-8');
@@ -146,6 +147,24 @@ export class MyAnnotationsComponent implements OnInit {
       window.open(globals.ordoURL + this.newAnnotationDisease.substr(0,
         this.newAnnotationDisease.indexOf(' ')).replace(/[^0-9]/g, ''), '_blank');
     }
+  }
+  newAnnotationPrecheck() {
+    let scope = this;
+    let finishPrecheck = function (data:any) {
+      scope.prefillAvailable = data.prefillAvailable;
+    };
+    let body = JSON.stringify({
+      'token': localStorage.getItem('uaToken'),
+      'diseaseName': this.newAnnotationDisease.substr(0, this.newAnnotationDisease.indexOf(' ')).replace(/[^0-9]/g, ''),
+      'vocabulary': this.newAnnotationDiseaseDB
+    });
+    this._http.post(globals.backendURL + '/restricted/annotations/new-annotation-precheck', body, globals.options)
+      .map(res => res.json())
+      .subscribe(
+        data => finishPrecheck(data),
+        err => console.log(err),
+        () => console.log('Created annotation')
+      );
   }
   listDiseaseAnnotations() {
     let gotAnnotations = function (data:any) {

@@ -177,7 +177,32 @@
           <br />
           <strong *ngIf="exercise.submissions.length === 0">No submissions yet</strong>
           <span *ngIf="exercise.submissions.length > 0">
-            <button class="btn btn-secondary" (click)="selectAll()">
+            <div dropdown keyboardNav="true" *ngIf="otherExercises && exercise && exercise.problems.length > 0" style="display:inline">
+              <a href class="btn btn-secondary dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false" dropdownToggle>
+                Sort
+              </a>
+              <ul class="dropdown-menu" role="menu" aria-labelledby="simple-btn-keyboard-nav">
+                <li role="menuitem">
+                  <a class="dropdown-item" style="cursor:pointer" (click)="sortSubmissions(1)">Date submitted (latest to earliest)</a>
+                </li>
+                <li role="menuitem">
+                  <a class="dropdown-item" style="cursor:pointer" (click)="sortSubmissions(2)">Date submitted (earliest to latest)</a>
+                </li>
+                <li role="menuitem">
+                  <a class="dropdown-item" style="cursor:pointer" (click)="sortSubmissions(3)">Raw score (highest to lowest)</a>
+                </li>
+                <li role="menuitem">
+                  <a class="dropdown-item" style="cursor:pointer" (click)="sortSubmissions(4)">Raw score (lowest to highest)</a>
+                </li>
+                <li role="menuitem">
+                  <a class="dropdown-item" style="cursor:pointer" (click)="sortSubmissions(5)">Released (most to least)</a>
+                </li>
+                <li role="menuitem">
+                  <a class="dropdown-item" style="cursor:pointer" (click)="sortSubmissions(6)">Released (least to most)</a>
+                </li>
+              </ul>
+            </div>
+            <button class="btn btn-secondary" (click)="selectAll()" style="margin-left:10px;">
               <i class="fa fa-check-square-o" aria-hidden="true"></i> All
             </button>
             <button class="btn btn-primary" (click)="releaseAll(true)">
@@ -197,6 +222,7 @@
                 <th>Student</th>
                 <th>Score</th>
                 <th>Released</th>
+                <th>Date submitted</th>
               </tr>
               </thead>
               <tbody>
@@ -205,6 +231,7 @@
                 <td><a style="cursor: pointer" (click)="gotoComparator(submission.annotationID)">{{submission.studentName}}</a></td>
                 <td><span *ngIf="submission.possibleScore > 0">{{submission.sumScore}} / {{submission.possibleScore}} ({{submission.percentScore}}%)</span></td>
                 <td>{{submission.numReleased}} / {{submission.numAnnotations}}</td>
+                <td>{{submission.dateSubmittedFormatted}}</td>
               </tr>
               </tbody>
             </table>

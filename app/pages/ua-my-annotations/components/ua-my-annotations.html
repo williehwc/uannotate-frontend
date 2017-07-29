@@ -64,6 +64,7 @@
             </div>
           </fieldset>
         </form>
+        <p>Search in which catalog?</p>
         <div class="btn-group" _ngcontent-pyb-9="" *ngIf="newAnnotationDiseaseDB == 'omim'">
           <label class="btn btn-secondary ng-untouched ng-pristine ng-valid" btnradio="Left" _ngcontent-pyb-9="" (click)="setDB('ordo')">ORDO (Orphanet)</label>
           <label class="btn btn-secondary ng-untouched ng-pristine ng-valid active" btnradio="Right" _ngcontent-pyb-9="">OMIM</label>
@@ -72,6 +73,8 @@
           <label class="btn btn-secondary ng-untouched ng-pristine ng-valid active" btnradio="Left" _ngcontent-pyb-9="">ORDO (Orphanet)</label>
           <label class="btn btn-secondary ng-untouched ng-pristine ng-valid" btnradio="Right" _ngcontent-pyb-9="" (click)="setDB('omim')">OMIM</label>
         </div>
+        <br />
+        <br />
         <p style="opacity: 0.5"><em>Please don't enter symbols.</em></p>
       </div>
     </div>
@@ -93,7 +96,7 @@
               New
             </button>
             <ul class="dropdown-menu" role="menu" aria-labelledby="simple-btn-keyboard-nav">
-              <li role="menuitem"><a class="dropdown-item" (click)="createAnnotation(false, false)" style="cursor: pointer">From {{newAnnotationDiseaseDB.toUpperCase()}}</a></li>
+              <li role="menuitem"><a class="dropdown-item" (click)="createAnnotation(false, false)" style="cursor: pointer" *ngIf="prefillAvailable">From {{newAnnotationDiseaseDB.toUpperCase()}}</a></li>
               <li role="menuitem"><a class="dropdown-item" (click)="createAnnotation(true, false)" style="cursor: pointer">From scratch</a></li>
             </ul>
           </div>
