@@ -110,14 +110,15 @@ export class InProgressComponent implements OnInit {
       copy: true
     });
     dragulaService.drag.subscribe((value: any) => {
+      let message = 'Let go of the mouse button over a phenotype<br />(except Safari: use <i class="fa fa-plus"></i> button instead).';
       jQuery('.ref').css('cursor', 'grabbing');
-      jQuery('.hover-box').text('Let go of the mouse button over a phenotype (except Safari).');
-      jQuery('.hover-box').show();
+      jQuery('#general-hover-box').html(message);
+      jQuery('#general-hover-box').show();
       this.dragging = true;
     });
     dragulaService.dragend.subscribe((value: any) => {
       jQuery('.ref').css('cursor', 'grab');
-      jQuery('.hover-box').hide();
+      jQuery('#general-hover-box').hide();
       this.dragging = false;
     });
     dragulaService.drop.subscribe((value: any) => {
@@ -163,6 +164,13 @@ export class InProgressComponent implements OnInit {
           () => console.log('Finish add citation')
         );
     });
+  }
+  showCitationHoverBox() {
+    if (this.annotation.status === 1 || this.annotation.status === -1)
+      jQuery('#citation-hover-box').show();
+  }
+  hideCitationHoverBox() {
+    jQuery('#citation-hover-box').hide();
   }
   addCitation(phenotypeID: number) {
     let refNo = prompt('Reference number:');
@@ -211,6 +219,7 @@ export class InProgressComponent implements OnInit {
       for (let i = 0; i < scope.annotation.phenotypes.length; i++) {
         if (String(scope.annotation.phenotypes[i].phenotypeID) === datum.phenotypeID) {
           scope.annotation.phenotypes[i].citations = datum.citations;
+          scope.annotation.phenotypes[i].citationsLoaded = true;
           for (let j = 0; j < scope.annotation.phenotypes[i].citations.length; j++) {
             for (let k = 0; k < scope.annotation.refs.length; k++) {
               if (scope.annotation.refs[k].refID === scope.annotation.phenotypes[i].citations[j].refID) {
@@ -465,7 +474,7 @@ export class InProgressComponent implements OnInit {
         },
         onClickAfter: function (node: any, a: any, item: any, event: any) {
           jQuery('.js-typeahead').val('');
-          jQuery('.hover-box').hide();
+          jQuery('#general-hover-box').hide();
           scope.alerts = [];
           if (scope.addingBrowser) {
             scope.browser.show();
@@ -478,8 +487,8 @@ export class InProgressComponent implements OnInit {
           }
         },
         onMouseEnter: function (node: any, a: any, item: any, event: any) {
-          jQuery('.hover-box').text('Loading definition…');
-          jQuery('.hover-box').show();
+          jQuery('#general-hover-box').text('Loading definition…');
+          jQuery('#general-hover-box').show();
           let loadedDefinition = function(data: any) {
             if (data.name === display) {
 			  let definition = '';
@@ -501,7 +510,7 @@ export class InProgressComponent implements OnInit {
 			  if (data.comment) {
     		  definition += ' [' + data.comment + ']';
   		  }
-			  jQuery('.hover-box').html(definition);
+			  jQuery('#general-hover-box').html(definition);
             }
           };
           let body = JSON.stringify({
@@ -517,7 +526,7 @@ export class InProgressComponent implements OnInit {
             );
         },
         onMouseLeave: function (node: any, a: any, item: any, event: any) {
-          jQuery('.hover-box').hide();
+          jQuery('#general-hover-box').hide();
         }
       }
     });
@@ -539,7 +548,7 @@ export class InProgressComponent implements OnInit {
       callback: {
         onClickAfter: function (node: any, a: any, item: any, event: any) {
           jQuery('.js-typeahead-ref').val('');
-          jQuery('.hover-box').hide();
+          jQuery('#general-hover-box').hide();
           scope.alerts = [];
           let addedRef = function(data: any) {
             scope.annotation.refs.push({
@@ -568,11 +577,11 @@ export class InProgressComponent implements OnInit {
             );
         },
         onMouseEnter: function (node: any, a: any, item: any, event: any) {
-          jQuery('.hover-box').text('Loading metadata…');
-          jQuery('.hover-box').show();
+          jQuery('#general-hover-box').text('Loading metadata…');
+          jQuery('#general-hover-box').show();
           let loadedMetadata = function(data: any) {
             if (data.pmid === display) {
-              jQuery('.hover-box').html('<strong>' + data.author + ' (' + data.year + ')</strong><br />' + data.title);
+              jQuery('#general-hover-box').html('<strong>' + data.author + ' (' + data.year + ')</strong><br />' + data.title);
             }
           };
           let body = JSON.stringify({
@@ -588,7 +597,7 @@ export class InProgressComponent implements OnInit {
             );
         },
         onMouseLeave: function (node: any, a: any, item: any, event: any) {
-          jQuery('.hover-box').hide();
+          jQuery('#general-hover-box').hide();
         }
       }
     });
@@ -1416,5 +1425,72 @@ export class InProgressComponent implements OnInit {
   }
   idFormat(s: string) {
     return s.replace(/\s+/g, '-').toLowerCase();
+  }
+  downloadAnnotation(format: string) {
+    let delimiter = '';
+    if (format === 'csv') {
+      delimiter = ',';
+    } else if (format === 'tab-separated-values') {
+      delimiter = '\t';
+    }
+    let fullyLoaded = true;
+    let acknowledgement = false;
+    // Loading check: phenotypeName, systemName, citations
+    for (let i = 0; i < this.annotation.phenotypes.length; i++) {
+      if (this.annotation.phenotypes[i].display) {
+        if (!this.annotation.phenotypes[i].citationsLoaded ||
+          this.annotation.phenotypes[i].phenotypeName === 'Loading…' ||
+          !this.annotation.phenotypes[i].systemName) {
+          fullyLoaded = false;
+          break;
+        }
+      }
+    }
+    if (!fullyLoaded)
+      acknowledgement = confirm('This annotation is not fully loaded. Continue anyway?');
+    if (fullyLoaded || acknowledgement) {
+      // Only supports CSV for now
+      var content = '';
+      if (this.profLevel)
+        content += 'HPO ID' + delimiter;
+      content += 'Name' + delimiter;
+      content += 'Observed' + delimiter;
+      content += 'Frequency' + delimiter;
+      content += 'Onset' + delimiter;
+      content += 'System HPO ID' + delimiter;
+      content += 'System Name' + delimiter;
+      content += 'Reference PMID(s)\n';
+      for (let i = 0; i < this.annotation.phenotypes.length; i++) {
+        if (this.annotation.phenotypes[i].display) {
+          if (this.profLevel)
+            content += this.annotation.phenotypes[i].hpo + delimiter;
+          content += this.annotation.phenotypes[i].phenotypeName + delimiter;
+          if (this.annotation.phenotypes[i].observed) {
+            content += 'Y' + delimiter;
+          } else {
+            content += 'N' + delimiter;
+          }
+          content += this.frequencyDescription(this.annotation.phenotypes[i].frequency,
+            this.annotation.phenotypes[i].frequencyTo) + delimiter;
+          content += this.onsetDescription(this.annotation.phenotypes[i].onset, this.annotation.phenotypes[i].onsetTo) + delimiter;
+          content += this.annotation.phenotypes[i].systemHPO + delimiter;
+          content += this.annotation.phenotypes[i].systemName + delimiter;
+          for (let j = 0; j < this.annotation.phenotypes[i].citations.length; j++) {
+            for (let k = 0; k < this.annotation.refs.length; k++) {
+              if (this.annotation.phenotypes[i].citations[j].refID === this.annotation.refs[k].refID) {
+                content += this.annotation.refs[k].pmid;
+                if (j < this.annotation.phenotypes[i].citations.length - 1) {
+                  content += ';';
+                }
+              }
+            }
+          }
+          content += '\n';
+        }
+      }
+      var blob = new Blob([content], { type: 'text/' + format });
+      var url= window.URL.createObjectURL(blob);
+      window.open(url);
+    }
   }
 }

@@ -19,8 +19,12 @@
     </form>
   </div>
 
-  <div class="hover-box" style="display: none">
+  <div class="hover-box" id="general-hover-box" style="display: none; z-index: 99999">
     Loading…
+  </div>
+  
+  <div class="hover-box" id="citation-hover-box" style="display: none">
+    To cite, drag and drop reference to phenotype<br />(except Safari: use <i class="fa fa-plus"></i> button instead).
   </div>
 
   <div bsModal #lgModal="bs-modal" class="modal fade" tabindex="-1" role="dialog">
@@ -261,6 +265,28 @@
         {{ alert?.msg }}
       </alert>
       <div *ngIf="annotation != null">
+        <div dropdown keyboardNav="true" *ngIf="annotation.status != 1 && annotation.status != -1 && !loading" style="display: inline" title="Download">
+          <a href class="btn btn-secondary dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false" dropdownToggle>
+            <i class="fa fa-download" aria-hidden="true"></i>
+          </a>
+          <ul class="dropdown-menu" role="menu" aria-labelledby="simple-btn-keyboard-nav">
+            <li role="menuitem">
+              <a class="dropdown-item" style="cursor:pointer" (click)="downloadAnnotation('csv')">
+                Download as CSV
+              </a>
+            </li>
+            <li role="menuitem">
+              <a class="dropdown-item" style="cursor:pointer" (click)="downloadAnnotation('tab-separated-values')">
+                Download as TSV
+              </a>
+            </li>
+            <li role="menuitem">
+              <a class="dropdown-item" style="opacity:0.5; pointer-events:none">
+                Note: please allow pop-ups
+              </a>
+            </li>
+          </ul>
+        </div>
         <button class="btn btn-primary" (click)="publishAnnotation()" *ngIf="annotation.status == 1" [disabled]="annotation.phenotypes.length == 0">
           <span *ngIf="profLevel"><i class="fa fa-cloud-upload" aria-hidden="true"></i> Publish</span>
           <span *ngIf="studentLevel">Submit</span>
@@ -522,7 +548,7 @@
             <strong *ngIf="annotation.status == 1">You don't have to cite every phenotype, but we suggest that you do.</strong>
           </p>
 
-          <div *ngFor="let ref of annotation.refs;let i = index" [dragula]="'refs'" class="refs">
+          <div *ngFor="let ref of annotation.refs;let i = index" [dragula]="'refs'" class="refs" (mouseenter)="showCitationHoverBox()" (mouseleave)="hideCitationHoverBox()">
 
             <div class="card ref" id="c-{{ref.refID}}">
               <div class="card-header card-default">

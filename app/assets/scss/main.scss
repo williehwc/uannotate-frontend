@@ -210,8 +210,9 @@ body {
 }
 
 .hover-box {
+  font-size: small;
   padding: 10px;
-  background-color: rgba(50,50,50,0.9);
+  background-color: rgba(50,50,50,1);
   position: fixed;
   width: 300px;
   border-radius: 5px;
