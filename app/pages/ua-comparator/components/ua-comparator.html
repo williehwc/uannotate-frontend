@@ -248,7 +248,7 @@
         <ul class="dropdown-menu" role="menu" aria-labelledby="simple-btn-keyboard-nav">
           <li role="menuitem" *ngFor="let annotation of comparison.annotations">
             <a class="dropdown-item" style="cursor:pointer" (click)="gotoComparison(comparison.annotationID, annotation.annotationID)">
-              <i *ngIf="!(annotation.numLikes == -1)">Annotation {{annotation.annotationID}} (<i class="fa fa-thumbs-up" aria-hidden="true"></i> {{annotation.numLikes}})</i>
+              <i *ngIf="!(annotation.numLikes == -1)">Annotation {{annotation.annotationID}} (<i class="fa fa-thumbs-up" aria-hidden="true"></i> {{annotation.numLikes}}) <i class="fa fa-shield" *ngIf="annotation.authorAdmin" title="Phenotate administrator"></i><i class="fa fa-user-md" *ngIf="annotation.authorProf && !annotation.authorAdmin" title="Expert annotator"></i></i>
               <i *ngIf="annotation.numLikes == -1">{{comparison.diseaseDB.toUpperCase()}} annotation</i>
             </a>
           </li>
